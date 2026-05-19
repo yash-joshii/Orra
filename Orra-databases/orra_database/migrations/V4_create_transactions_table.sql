@@ -12,4 +12,6 @@ CREATE TABLE transactions (
     payment_gateway_ref VARCHAR(255),
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+    //hello
 );
