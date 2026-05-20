@@ -27,3 +27,7 @@ NULL, 'Bangalore, India',
 ('Priya Mehta', 'priya@gmail.com', '9112233445', 'hashed_pass',
 NULL, 'Pune, India',
 'owner', 'PAN', 'LMNOP4321K', NULL, TRUE);
+
+('Sanjana Mehta', 'priya@gmail.com', '9112233445', 'hashed_pass',
+NULL, 'Pune, India',
+'owner', 'PAN', 'LMNOP4321K', NULL, TRUE);
