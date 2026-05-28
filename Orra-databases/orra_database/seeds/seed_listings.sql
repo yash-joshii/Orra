@@ -14,4 +14,7 @@ INSERT INTO listings (
 60000, 1200, 7000, 92, 'Pune'),
 
 (1, 'IMEI852369741', 'Drone', 'DJI Mini 3 Pro', 'DJI', 'Mini 3 Pro',
-85000, 2000, 12000, 88, 'Mumbai');
+85000, 2000, 12000, 88, 'Mumbai'),
+
+(10, 'IMEI852369741', 'Jadooo', 'DJI Mini 3 Pro', 'DJI', 'Mini 3 Pro',
+85000, 2000, 12000, 88, 'PUNE');
