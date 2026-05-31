@@ -13,13 +13,14 @@ public class UserController {
     private final UserService service;
     public UserController(UserService service) { this.service = service; }
 
-    @GetMapping
+    @GetMapping("/admin/getDetails")
     public ResponseEntity<List<User>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
 
-    @PostMapping("/createUser")
+    @PostMapping("/public/createUser")
     public ResponseEntity<String> create(@RequestBody UserDetails user) {
         return ResponseEntity.ok(service.create(user));
     }
 }
+

@@ -1,9 +1,9 @@
-POST http://localhost:8081/api/users/createUser
+POST http://localhost:8081/api/users/public/createUser
 Content-Type: application/json
 
 {
   "name": "Sanjana A",
-  "email": "sanjanaajar07@gmail.com",
+  "email": "sanjanaar079@gmail.com",
   "phone": "9876543210",
   "password": "Test@1234",
   "profilePic": "https://exampl.com/profile.jpg",

@@ -5,6 +5,8 @@ import com.orra.Orrabackend.enums.user_role_enum;
 import com.orra.Orrabackend.Entity.User;
 import com.orra.Orrabackend.model.UserDetails;
 import com.orra.Orrabackend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +17,8 @@ import java.util.List;
 public class UserService {
     private final UserRepository repo;
     public UserService(UserRepository repo) { this.repo = repo; }
-
+@Autowired
+public PasswordEncoder passwordEncoder;
     public List<User> getAll() {
         return repo.findAll(); }
     public String create(UserDetails userDetailRequest) {
@@ -25,7 +28,7 @@ public class UserService {
         user.setEmail(userDetailRequest.getEmail());
         user.setPhone(userDetailRequest.getPhone());
         user.setPassword(userDetailRequest.getPassword());
-        user.setPassword(userDetailRequest.getPassword());
+        user.setPassword(passwordEncoder.encode(userDetailRequest.getPassword()));
         user.setProfilePic(userDetailRequest.getProfilePic());
         user.setAddress(userDetailRequest.getAddress());
 
