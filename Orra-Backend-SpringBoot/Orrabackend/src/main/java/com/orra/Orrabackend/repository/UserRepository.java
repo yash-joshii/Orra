@@ -1,6 +1,6 @@
 // UserRepository.java
 package com.orra.Orrabackend.repository;
-import com.orra.Orrabackend.model.User;
+import com.orra.Orrabackend.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

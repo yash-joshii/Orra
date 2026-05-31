@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/signin")
 public class SignInController {
 
-    @Autowired
-    public SignInService signInService;
+//    @Autowired
+//    public SignInService signInService;
 
-    @PostMapping
+   /* @PostMapping
     public SignInResponseDTO SignIn(@RequestBody SignInRequestDTO dto){
         return signInService.SignIn(dto);
-    }
+    }*/
 
 }

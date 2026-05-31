@@ -1,6 +1,7 @@
 // UserController.java
 package com.orra.Orrabackend.controller;
-import com.orra.Orrabackend.model.User;
+import com.orra.Orrabackend.Entity.User;
+import com.orra.Orrabackend.model.UserDetails;
 import com.orra.Orrabackend.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +18,8 @@ public class UserController {
         return ResponseEntity.ok(service.getAll());
     }
 
-    @PostMapping
-    public ResponseEntity<User> create(@RequestBody User user) {
+    @PostMapping("/createUser")
+    public ResponseEntity<String> create(@RequestBody UserDetails user) {
         return ResponseEntity.ok(service.create(user));
     }
 }

@@ -1,0 +1,13 @@
+POST http://localhost:8081/api/users/createUser
+Content-Type: application/json
+
+{
+  "name": "Sanjana A",
+  "email": "sanjanaajar07@gmail.com",
+  "phone": "9876543210",
+  "password": "Test@1234",
+  "profilePic": "https://exampl.com/profile.jpg",
+  "address": "Sopan baag Panchwati Pashan- 411014",
+  "aadhaarNumber": "1234-5678-9012",
+  "verified": false
+}
