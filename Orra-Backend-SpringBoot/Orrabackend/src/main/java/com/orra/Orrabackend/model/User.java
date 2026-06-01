@@ -1,10 +1,10 @@
 package com.orra.Orrabackend.model;
-
+import com.orra.Orrabackend.enums.UserIdProof;
+import com.orra.Orrabackend.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
 import jakarta.persistence.Entity;
-import lombok.Data;
-import org.springframework.stereotype.Indexed;
+
 
 //MODEL Layer — Maps to Supabase Tables
 
@@ -25,8 +25,11 @@ public class User {
 //    private String profilePic;
 
     private String address;
-    private String role;  // "renter", "purchaser", "both"
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private UserRole role;
 
-//    @Column(name = "id_proof")
-//    private String idProof;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "id_proof")
+    private UserIdProof idProof;
 }
