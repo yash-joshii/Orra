@@ -1,6 +1,5 @@
 //package com.orra.Orrabackend.model;
 //
-//import com.orra.Orrabackend.enums.BookingStatus;
 //import jakarta.persistence.*;
 //import lombok.Data;
 //import java.time.LocalDateTime;
@@ -21,7 +20,7 @@
 //    private Long renterId;
 //
 //    @Column(name = "owner_id")
-//    private String ownerId;
+//    private Long ownerId;
 //
 //    @Column(name = "start_datetime")
 //    private LocalDateTime startDatetime;
@@ -35,6 +34,5 @@
 //    @Column(name = "deposit_amount")
 //    private Double depositAmount;
 //
-//    @Enumerated(EnumType.STRING)   // ← tells Hibernate to store as text not number
-//    private BookingStatus status; // pending/confirmed/active/completed/disputed/cancelled
+//    private String status; // pending/confirmed/active/completed/disputed/cancelled
 //}

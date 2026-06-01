@@ -1,7 +1,5 @@
 //package com.orra.Orrabackend.model;
 //
-//import com.orra.Orrabackend.enums.TransactionStatus;
-//import com.orra.Orrabackend.enums.TransactionType;
 //import jakarta.persistence.*;
 //import lombok.Data;
 //import java.time.LocalDate;
@@ -19,12 +17,8 @@
 //    private Long bookingId;
 //
 //    private Double amount;
-//
-//    @Enumerated(EnumType.STRING)   // ← tells Hibernate to store as text not number
-//    private TransactionType type;
-//
-//    @Enumerated(EnumType.STRING)   // ← tells Hibernate to store as text not number
-//    private TransactionStatus status;
+//    private String type;
+//    private String status;
 //
 //    @Column(name = "payment_gateway_ref")
 //    private String paymentGatewayRef;
