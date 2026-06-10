@@ -1,24 +1,45 @@
-//// BookingController.java
-//package com.orra.Orrabackend.controller;
-//import com.orra.Orrabackend.model.Bookings;
-//import com.orra.Orrabackend.service.BookingService;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//import java.util.List;
-//
-//@RestController
-//@RequestMapping("/api/bookings")
-//public class BookingController {
-//    private final BookingService service;
-//    public BookingController(BookingService service) { this.service = service; }
-//
-//    @GetMapping
-//    public ResponseEntity<List<Bookings>> getAll() {
-//        return ResponseEntity.ok(service.getAll());
-//    }
-//
-//    @PostMapping
-//    public ResponseEntity<Bookings> create(@RequestBody Bookings booking) {
-//        return ResponseEntity.ok(service.create(booking));
-//    }
-//}
+package com.orra.Orrabackend.controller;
+
+
+
+import com.orra.Orrabackend.dto.BookingRequestDTO;
+import com.orra.Orrabackend.model.Booking;
+import com.orra.Orrabackend.service.BookingService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+
+@RestController
+@RequestMapping("/api/bookings")
+public class BookingController {
+
+
+    private final BookingService bookingService;
+
+
+
+    public BookingController(
+            BookingService bookingService
+    ){
+
+        this.bookingService = bookingService;
+
+    }
+
+
+
+    // CREATE BOOKING API
+
+    @PostMapping("/create")
+    public Booking createBooking(
+            @RequestBody BookingRequestDTO details
+    ){
+
+        return bookingService.createBooking(details);
+
+    }
+
+
+}
