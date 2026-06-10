@@ -85,9 +85,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-
-
-				 njjjj
 				<executions>
 					<execution>
 						<id>default-compile</id>
