@@ -5,11 +5,13 @@ import com.orra.Orrabackend.enums.UserIdProof;
 import com.orra.Orrabackend.enums.UserRole;
 import com.orra.Orrabackend.model.User;
 import com.orra.Orrabackend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
 public class UserService {
+    @Autowired
     private final UserRepository repo;
     public UserService(UserRepository repo) { this.repo = repo; }
 
