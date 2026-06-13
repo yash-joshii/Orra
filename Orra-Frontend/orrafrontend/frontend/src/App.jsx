@@ -1,12 +1,13 @@
 
 
 import './App.css'
+import Footer from './components/common/Footer'
 
 
 function App() {
 
 
-  return <h1>hello yash </h1>
+  return 
 }
 
 export default App
