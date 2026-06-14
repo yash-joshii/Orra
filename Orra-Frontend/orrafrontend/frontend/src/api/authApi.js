@@ -2,8 +2,9 @@ import axiosinstance from "./Axiosconfig"
 
 
 export const SignupUser = (data)=>{
-
-    return axiosinstance.post("/signup",data)
+   console.log(data);
+   
+    return axiosinstance.post("/api/users/signup",data)
 
 }
 

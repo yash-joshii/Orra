@@ -1,13 +1,18 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
-import { BrowserRouter } from 'react-router-dom'
-import AppRoutes from './routes/AppRoutes'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import App from "./App.jsx";
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes";
+import { Provider } from "react-redux";
+import { store } from "./redux/Store";
+import { Toaster } from "./components/ui/sonner";
 
-createRoot(document.getElementById('root')).render(
-    
-<BrowserRouter>
-<AppRoutes/>
-</BrowserRouter>
-)
+createRoot(document.getElementById("root")).render(
+  <Provider store={store}>
+    <BrowserRouter>
+      <AppRoutes />
+      <Toaster  richColors position="top-right"/>
+    </BrowserRouter>
+  </Provider>,
+);
