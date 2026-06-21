@@ -5,11 +5,10 @@ import { Outlet } from 'react-router-dom'
 
 const Mainlayout = () => {
   return (
-  <>
-  
-  <Navbar/> //fixed
-  <Outlet/> //body
-  <Footer/> //fixed
+  <>  
+    <Navbar/> 
+    <Outlet/> 
+    <Footer/> 
   </>
   )
 }

@@ -21,7 +21,7 @@ const Navbar =  () => {
             <a href="#" className="text-indigo-600">Home</a>
             <a href="#" className="hover:text-black">Browse Devices</a>
             <a href="#" className="hover:text-black">Categories</a>
-            <a href="#" className="hover:text-black">My Bookings</a>
+            <a href="/mybookings" className="hover:text-black">My Bookings</a>
             <a href="#" className="hover:text-black">Wishlist</a>
             <a href="#" className="hover:text-black">Dashboard</a>
           </nav>
