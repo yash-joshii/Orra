@@ -1,5 +1,7 @@
 import Navbar from "@/components/common/Navbar";
+import ProductCard from "@/components/common/ProductCard";
 import Mainlayout from "@/layout/Mainlayout";
+import BrowseDevices from "@/pages/BrowseDevices";
 import LandingPage from "@/pages/LandingPage";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
@@ -10,11 +12,12 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<Mainlayout />}>
-        <Route path="/" element={<LandingPage/>} />
-
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/browserdevices" element={<BrowseDevices />} />
       </Route>
-       <Route path="/signup" element={<Signup/>} />
-       <Route path="/login" element={<Login/>} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/product" element={<ProductCard />} />
     </Routes>
   );
 };
