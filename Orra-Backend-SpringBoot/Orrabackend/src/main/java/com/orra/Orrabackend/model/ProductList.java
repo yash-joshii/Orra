@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -58,5 +59,9 @@ public class ProductList {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-
+    @OneToMany(
+            mappedBy = "product",
+            cascade = CascadeType.ALL
+    )
+    private List<Productimage> images;
 }
