@@ -21,16 +21,24 @@ import {
 } from "lucide-react";
 
 const ProductCard = ({ data }) => {
+ console.log("images →", data.images);  // check this in browser
+
+  const imageUrl =
+    data.images && data.images.length > 0
+      ? data.images[0].imageBase64 ?? data.images[0]  // handles both cases
+      : "https://placehold.co/400x200?text=No+Image";
   return (
     <Card className="relative mx-auto w-[20%] min-h-min-[50vh] rounded-[25px] max-w-sm pt-0 shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-y-1 hover:shadow-xl hover:cursor-pointer">
-      <div className="absolute inset-0 z-30 aspect-video bg-black/35" />
+        <div className="relative">
+      <div className="absolute inset-0 z-10 aspect-video bg-black/35" />
+    
       <img
-        src={data.imageurl}
-        alt={data.title}
+        src={imageUrl}
         // src="https://i.pravatar.cc/500"
         // alt="Event cover"
-        className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale dark:brightness-40"
+        className="relative z-20 aspect-video w-full object-cover brightness-60 dark:brightness-40"
       />
+      </div>
       <CardHeader>
         <CardAction className="flex  w-[18vw] ">
           <Badge
@@ -45,7 +53,7 @@ const ProductCard = ({ data }) => {
         </CardAction>
       </CardHeader>
       <CardTitle>
-        <h3 className="ml-[7%] text-[16px] font-bold">{data.cardtitle}</h3>
+        <h3 className="ml-[7%] text-[16px] font-bold">{data.productName}</h3>
       </CardTitle>
       <CardContent className="flex flex-row items-start justify-start gap-2.75  ">
         <img
@@ -55,7 +63,7 @@ const ProductCard = ({ data }) => {
         />
         <div className="ownername">
           <span className="flex gap-[7px] text-[13px] text-gray-500 font-medium items-center">
-            {data.owner}
+            {data.owner.name}
             <CheckCircle2 className="w-3.5 h-3.5 !text-green-500" />
           </span>
         </div>
@@ -64,7 +72,7 @@ const ProductCard = ({ data }) => {
       <div className="flex items-start justify-between w-full max-w-[293px]">
         <div className="price  ml-[6%]">
           <span className=" flex justify-between text-[20px] font-bold">
-            {data.price}
+            {data.purchasePrice}
             <span className="text-[10px] text-gray-300 mt-[16%]"> /day</span>
           </span>
         </div>

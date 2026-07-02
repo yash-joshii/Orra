@@ -16,9 +16,9 @@ const AppRoutes = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/browserdevices" element={<BrowseDevices />} />
       </Route>
-       <Route path="/signup" element={<Signup/>} />
-       <Route path="/login" element={<Login/>} />
-       <Route path="/WhyChooseOrra" element={<WhyChooseOrra/>} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/product" element={<ProductCard />} />
     </Routes>
   );
 };

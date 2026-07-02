@@ -2,17 +2,21 @@
 package com.orra.Orrabackend.service;
 
 import com.orra.Orrabackend.model.ProductList;
+import com.orra.Orrabackend.model.Productimage;
+import com.orra.Orrabackend.repository.ProductListImageRepository;
 import com.orra.Orrabackend.repository.ProductListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductListService {
     @Autowired
     private ProductListRepository repo;
-
+    @Autowired
+    private ProductListImageRepository repoImage;
 
     public List<ProductList> getAll() {
         return repo.findAll();
@@ -65,5 +69,22 @@ public class ProductListService {
     public void delete(Long id) {
         repo.deleteById(id);
         repo.findById(id);
+    }
+
+    public ProductList Createwithimage(ProductList product, List<String> images) {
+        ProductList saved = repo.save(product);
+
+        if (images != null && !images.isEmpty()) {
+            List<Productimage> imagelist = images.stream().map(
+                    img -> {
+                        Productimage prodimg = new Productimage();
+                        prodimg.setImageBase64(img);
+                        prodimg.setProduct(saved);
+                        return prodimg;
+                    }
+            ).collect(Collectors.toList());
+                repoImage.saveAll(imagelist);;
+        }
+        return saved;
     }
 }

@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-
 @RestController
 @RequestMapping("/signin")
 public class SignInController {
@@ -21,5 +20,4 @@ public class SignInController {
     public SignInResponseDTO SignIn(@RequestBody SignInRequestDTO dto){
         return signInService.SignIn(dto);
     }
-
 }
