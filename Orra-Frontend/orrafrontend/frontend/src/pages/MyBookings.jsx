@@ -29,6 +29,7 @@ const Bookings = () => {
                 <Tabs defaultValue="overview">
                     <TabsList variant="line">
                         <TabsTrigger value="active&upcoming">Active & Upcoming</TabsTrigger>
+                        <TabsTrigger value="AwaitingOwner">Awaiting Owner</TabsTrigger>
                         <TabsTrigger value="completed">Completed</TabsTrigger>
                         <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
                     </TabsList>

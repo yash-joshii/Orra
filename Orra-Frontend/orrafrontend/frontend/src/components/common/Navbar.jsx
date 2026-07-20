@@ -43,7 +43,7 @@ const Navbar = () => {
             <a href="#" className="text-indigo-600">
               Home
             </a>
-            <a href="#" className="hover:text-black">
+            <a href="/browserdevices" className="hover:text-black">
               Browse Devices
             </a>
             <a href="#" className="hover:text-black">

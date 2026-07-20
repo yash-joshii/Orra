@@ -3,6 +3,7 @@ package com.orra.Orrabackend.service;
 import com.orra.Orrabackend.dto.signup.SignupRequestDTO;
 import com.orra.Orrabackend.enums.UserIdProof;
 import com.orra.Orrabackend.enums.UserRole;
+import com.orra.Orrabackend.exception.UserNotFoundException;
 import com.orra.Orrabackend.model.User;
 import com.orra.Orrabackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +12,17 @@ import java.util.List;
 
 @Service
 public class UserService {
-    @Autowired
+//    @Autowired
     private final UserRepository repo;
     public UserService(UserRepository repo) { this.repo = repo; }
 
     public List<User> getAll() { return repo.findAll(); }
     public User create(User user) { return repo.save(user); }
+
+    public User getById(Long id){
+        return repo.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+    }
 
     public User signup(SignupRequestDTO dto){
         User user = new User();

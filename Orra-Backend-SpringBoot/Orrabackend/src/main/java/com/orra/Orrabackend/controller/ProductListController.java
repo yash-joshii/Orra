@@ -20,12 +20,12 @@ public class ProductListController {
     }
 
     @GetMapping("/product/{id}")
- public ResponseEntity<ProductList> getOne(@PathVariable Long id){
-        return new ResponseEntity<>(productListService.getOne(id),HttpStatus.OK);
-    }
-    @PostMapping("/createProduct")
-    public ResponseEntity<ProductList> create(@RequestBody ProductList productList) {
-        return new ResponseEntity<>(productListService.create(productList),HttpStatus.CREATED);
+     public ResponseEntity<ProductList> getOne(@PathVariable Long id){
+            return new ResponseEntity<>(productListService.getOne(id),HttpStatus.OK);
+        }
+        @PostMapping("/createProduct")
+        public ResponseEntity<ProductList> create(@RequestBody ProductList productList) {
+            return new ResponseEntity<>(productListService.create(productList),HttpStatus.CREATED);
     }
 
     @PatchMapping("/product/{id}")
