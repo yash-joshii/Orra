@@ -1,8 +1,15 @@
-import React from 'react'
+import React from "react";
+import WhyChooseOrra from "./WhyChooseOrra";
+import Landintro from "@/components/landingpagecomponents/Landintro";
+import ExploreCategory from "@/components/landingpagecomponents/ExploreCategory";
 
 const LandingPage = () => {
   return (
-    <div></div>
-  )
-}
-export default LandingPage
+    <>
+      <Landintro />
+      <ExploreCategory/>
+      <WhyChooseOrra />
+    </>
+  );
+};
+export default LandingPage;

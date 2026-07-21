@@ -19,7 +19,6 @@ const AppRoutes = () => {
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
       <Route path="/product" element={<ProductCard />} />
-       <Route path="/WhyChooseOrra" element={<WhyChooseOrra/>} />
     </Routes>
   );
 };

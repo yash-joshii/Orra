@@ -18,6 +18,16 @@ import {
   setProducts,
 } from "@/redux/slices/productslices";
 import { getAllProducts } from "@/api/listingApi";
+import FilterationSidebar from "@/components/common/FilterationSidebar";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const BrowseDevices = () => {
   const dispatch = useDispatch();
@@ -43,6 +53,39 @@ const BrowseDevices = () => {
       dispatch(setError(error.message));
     }
   };
+
+  const ITEMS_PER_PAGE = 6;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil((products?.length || 0) / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedProducts = products?.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE,
+  );
+
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
+        pages.push(i);
+      } else if (pages[pages.length - 1] !== "ellipsis") {
+        pages.push("ellipsis");
+      }
+    }
+    return pages;
+  };
+
   return (
     <div className="BrowseDevices-container w-full max-h-full">
       <div className="upper-section-browdev w-full p-8 pl-[8.5%] h-[40%] ">
@@ -73,12 +116,71 @@ const BrowseDevices = () => {
           </div>
         </div>
       </div>
-      <div className="lower-section-browdev bg-gray-200 pt-8 pb-8">
-        <div className="left-browdev"></div>
-        <div className="rightbrowdev">
-          {products?.map((item) => (
-            <ProductCard key={item.id} data={item} />
-          ))}
+      <div className="lower-section-browdev bg-gray-200 pt-8 pb-8 flex flex-row justify-center">
+        <div className="left-browdev w-[50%] pr-[2%]">
+          <FilterationSidebar />
+        </div>
+        <div className="rightbrowdev w-full min-h-full">
+          <div className="flex flex-wrap gap-[36px]">
+            {paginatedProducts?.map((item) => (
+              <ProductCard key={item.ProductId} data={item} />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <Pagination className="mt-10">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      goToPage(currentPage - 1);
+                    }}
+                    className={
+                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                    }
+                  />
+                </PaginationItem>
+
+                {getPageNumbers().map((page, idx) =>
+                  page === "ellipsis" ? (
+                    <PaginationItem key={`ellipsis-${idx}`}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  ) : (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        href="#"
+                        isActive={page === currentPage}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          goToPage(page);
+                        }}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ),
+                )}
+
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      goToPage(currentPage + 1);
+                    }}
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
         </div>
       </div>
     </div>
