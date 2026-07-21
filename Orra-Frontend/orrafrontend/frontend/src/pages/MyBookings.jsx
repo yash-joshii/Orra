@@ -157,4 +157,4 @@ const Bookings = () => {
     </>
 }
 
-export default Bookings
+export default MyBookings

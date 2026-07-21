@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { useState, useEffect, use } from 'react'
+import { useParams } from "react-router-dom";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,13 +18,50 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Calendar } from "@/components/ui/calendar"
+import { Field, FieldLabel } from "@/components/ui/field"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { getProductById } from "@/api/listingApi";
 import { Star, ShieldCheck, Lock, CheckCircle2, CalendarDays } from "lucide-react";
 import { Separator } from "@/components/ui/separator"
+import { setProducts } from '@/redux/slices/productslices';
 
 // shadcn components -> breadcrumbs, date, input, badge, avatar, tooltip, separator, calendar, popover
 
-const Booking = () => {
+const Bookings = () => {
+  
+  const [startOpen, setStartOpen] = useState(false);
+  const [endOpen, setEndOpen] = useState(false);
+
+  const [startDate, setStartDate] = useState();
+  const [endDate, setEndDate] = useState();
+  
+  const [product, setProduct] = useState(null);
+  const {id} = useParams();
+    useEffect(() => {
+        console.log("Product ID:", id);
+        fetchProduct(); 
+      }, [id]);
+
+    const fetchProduct = async () => {
+      try {
+        const response = await getProductById(id);
+        setProduct(response.data);
+      } catch(error){
+        console.error("Failed to fetch product:", error);
+      }
+    };
+
+    const rentalDays = startDate && endDate ? Math.ceil((endDate-startDate) / (1000*60*60*24)) : 0;
+    const totalRent = product ? rentalDays * product?.dailyRate : 0;  
+
+
   return (
+
     <div className="parent px-25 py-8 space-y-8">
       <Breadcrumb>
         <BreadcrumbList>
@@ -100,22 +139,73 @@ const Booking = () => {
 
               <div className="date flex flex-row gap-4">
                 <div className="w-1/2 space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Start Date</label>
-                  <div className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center text-slate-800 font-semibold text-sm">
-                    20-06-2026
-                  </div>
+                  <Field className="w-full">
+                    <FieldLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Start Date
+                    </FieldLabel>
+
+                    <Popover open={startOpen} onOpenChange={setStartOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full h-11 justify-between rounded-xl border-slate-200 bg-white font-semibold text-slate-800"
+                        >
+                          {startDate
+                            ? startDate.toLocaleDateString("en-GB")
+                            : "Select Date"}
+                        </Button>
+                      </PopoverTrigger>
+
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={startDate}
+                          onSelect={(date) => {
+                            setStartDate(date)
+                            setStartOpen(false)
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </Field>
+
                 </div>
 
                 <div className="w-1/2 space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">End Date</label>
-                  <div className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 flex items-center text-slate-800 font-semibold text-sm">
-                    23-06-2026
-                  </div>
+                  <Field className="w-full">
+                    <FieldLabel className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                      End Date
+                    </FieldLabel>
+
+                    <Popover open={endOpen} onOpenChange={setEndOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full h-11 justify-between rounded-xl border-slate-200 bg-white font-semibold text-slate-800"
+                        >
+                          {endDate
+                            ? endDate.toLocaleDateString("en-GB")
+                            : "Select Date"}
+                        </Button>
+                      </PopoverTrigger>
+
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={endDate}
+                          onSelect={(date) => {
+                            setEndDate(date)
+                            setEndOpen(false)
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </Field>
                 </div>
               </div>
 
               <div className="rental-days-left bg-indigo-50/60 rounded-xl p-3.5 border border-indigo-50">
-                <span className="text-sm font-semibold text-indigo-700">Total rental duration: 3 days</span>
+                <span className="text-sm font-semibold text-indigo-700">Total rental duration: {rentalDays} days</span>
               </div>
             </div>
 
@@ -140,8 +230,8 @@ const Booking = () => {
             <div className="space-y-3.5 pt-1">
 
               <div className="days-calculation flex justify-between items-center text-sm font-medium text-slate-500">
-                <span>$45 × 3 days</span>
-                <span className="font-semibold text-slate-800">$135.00</span>
+                <span>$ {product?.dailyRate || 0} × {rentalDays} days</span>
+                <span className="font-semibold text-slate-800">$ {totalRent}</span>
               </div>
 
               <div className="refund flex justify-between items-center text-sm font-medium text-slate-500">
@@ -213,8 +303,9 @@ const Booking = () => {
       </TooltipProvider>
 
     </div>
-  )
-}
+
+  );
+};
+export default Bookings;
 
 
-export default Booking

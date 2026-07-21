@@ -77,7 +77,7 @@ const BrowseDevices = () => {
         <div className="left-browdev"></div>
         <div className="rightbrowdev">
           {products?.map((item) => (
-            <ProductCard key={item.id} data={item} />
+            <ProductCard key={item.ProductId} data={item} />
           ))}
         </div>
       </div>
