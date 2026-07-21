@@ -29,4 +29,9 @@ public class UserController {
     public ResponseEntity<User> signup(@RequestBody SignupRequestDTO dto) {
         return ResponseEntity.ok(service.signup(dto));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getById(id));
+    }
 }

@@ -18,7 +18,6 @@ public class ProductList {
     @Column(name = "product_id")
     private Long productId;
 
-
     @ManyToOne
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private User owner;
@@ -31,12 +30,12 @@ public class ProductList {
     private Category category;
 
     private Integer days;
+
     @Column(name = "productName")
     private String productName;
 
     private String description;
     private String brand;
-
     private String model;
 
     @Column(name = "purchase_price")
