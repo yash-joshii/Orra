@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Eye,
   Calendar,
   CheckCircle2,
+  Heart,
   MapPinCheck,
   MapPinIcon,
   SeparatorVertical,
@@ -21,23 +23,36 @@ import {
 } from "lucide-react";
 
 const ProductCard = ({ data }) => {
- console.log("images →", data.images);  // check this in browser
-
+  console.log("images →", data.images);
+  const [liked, setLiked] = useState(false);
   const imageUrl =
     data.images && data.images.length > 0
-      ? data.images[0].imageBase64 ?? data.images[0]  // handles both cases
+      ? (data.images[0].imageBase64 ?? data.images[0])
       : "https://placehold.co/400x200?text=No+Image";
   return (
-    <Card className="relative mx-auto w-[20%] min-h-min-[50vh] rounded-[25px] max-w-sm pt-0 shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-y-1 hover:shadow-xl hover:cursor-pointer">
-        <div className="relative">
-      <div className="absolute inset-0 z-10 aspect-video bg-black/35" />
-    
-      <img
-        src={imageUrl}
-        // src="https://i.pravatar.cc/500"
-        // alt="Event cover"
-        className="relative z-20 aspect-video w-full object-cover brightness-60 dark:brightness-40"
-      />
+    <Card className="relative group w-[30%] h-[50%] rounded-[25px]  pt-0 shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-y-1 hover:shadow-xl hover:cursor-pointer">
+      <div className="relative ">
+        <div className="absolute inset-0 z-10 aspect-video bg-black/35" />
+
+        <img
+          src={imageUrl}
+          // src="https://i.pravatar.cc/500"
+          // alt="Event cover"
+          className="relative z-20 aspect-[4/3] w-full object-cover brightness-60 dark:brightness-40"
+        />
+        <div className="btn opacity-0 invisible group-hover:visible group-hover:opacity-100 transition duration-200  bg-white none absolute z-20 w-[29%] p-[2%] rounded-[19px] font-medium text-center bottom-[38%] left-[35%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)]  flex ">
+         <Eye className="w-2 h-2" />  Quick view
+        </div>
+        <div
+          onClick={() => setLiked(!liked)}
+          className="btn bg-white absolute z-20 w-[9%] p-[2.5%] rounded-full font-medium text-center top-[2%] right-[2%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)] cursor-pointer flex items-center justify-center"
+        >
+          <Heart
+            className={`w-5 h-5 transition ${
+              liked ? "fill-red-500 text-red-500" : "text-gray-600"
+            }`}
+          />
+        </div>
       </div>
       <CardHeader>
         <CardAction className="flex  w-[18vw] ">
