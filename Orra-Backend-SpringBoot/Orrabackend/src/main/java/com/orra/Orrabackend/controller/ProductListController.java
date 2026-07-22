@@ -27,8 +27,8 @@ public class ProductListController {
     }
 
     @GetMapping("/product/{id}")
-    public ResponseEntity<ProductList> getProductById(@PathVariable Long id) {
-        return new ResponseEntity<>(productlistservice.getProductById(id), HttpStatus.OK);
+    public ResponseEntity<ProductList> getOne(@PathVariable Long id) {
+        return new ResponseEntity<>(productlistservice.getOne(id), HttpStatus.OK);
     }
 
     @PostMapping("/createProduct")
