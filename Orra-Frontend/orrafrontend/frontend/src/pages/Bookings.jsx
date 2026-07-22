@@ -1,6 +1,7 @@
-import React, { useState, useEffect, use } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams } from "react-router-dom";
 
+//Shadcn Imports
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -25,10 +26,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { getProductById } from "@/api/listingApi";
 import { Star, ShieldCheck, Lock, CheckCircle2, CalendarDays } from "lucide-react";
 import { Separator } from "@/components/ui/separator"
-import { setProducts } from '@/redux/slices/productslices';
+
+
+//Redux Imports
+import { getProductById } from "@/api/listingApi";
+import { cancelBooking, createBooking, payForBooking } from '@/api/bookingApi';
+import { setLoading as setBookingLoading, setCurrentBooking } from '@/redux/slices/bookingSlice';
+import { setSelectedProducts, setLoading, setError } from '@/redux/slices/productslices';
+import { useSelector, useDispatch } from 'react-redux';
+
+
+// import { userInfo } from 'node:os';
 
 // shadcn components -> breadcrumbs, date, input, badge, avatar, tooltip, separator, calendar, popover
 
@@ -40,8 +50,15 @@ const Bookings = () => {
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
   
-  const [product, setProduct] = useState(null);
-  const {id} = useParams();
+  
+  const product = useSelector((state) => state.products.selectedProduct);
+  const user = useSelector((state) => state.auth.user);
+  const currentBooking = useSelector((state) => state.booking.currentBooking);
+  const dispatch = useDispatch();
+  
+  // const {id} = useParams();
+  // const {} = useParams();
+
     useEffect(() => {
         console.log("Product ID:", id);
         fetchProduct(); 
@@ -49,15 +66,65 @@ const Bookings = () => {
 
     const fetchProduct = async () => {
       try {
+        dispatch(setLoading(true));
         const response = await getProductById(id);
-        setProduct(response.data);
+        console.log("Product response : ", response.data);
+        dispatch(setLoading(false));
       } catch(error){
-        console.error("Failed to fetch product:", error);
+          dispatch(setError(error.message));
+          dispatch(setLoading(false));
       }
     };
 
+
+  const handleRequestBooking = async () => {
+    dispatch(setBookingLoading(true));
+    try{
+      const payload = {
+        listingId: product.id,
+        renterId: user.id,
+        startDateTime: startDate,
+        endDateTime: endDate,
+      };
+      const response = await createBooking(payload);
+      dispatch(setCurrentBooking(response.data));
+    } catch(err){
+      dispatch(setBookingError(err.message));
+    } finally{
+      dispatch(setBookingLoading(false));
+    }
+  };
+
+  const handlePayForBooking = async () => {
+    dispatch(setBookingLoading(true));
+    try{
+      const response = await payForBooking(currentBooking.bookingId);
+      dispatch(setCurrentBooking(response.data));
+    } catch (err){
+      dispatch(setBookingError(err.message));
+    } finally {
+      dispatch(setBookingLoading(false));
+    }
+  }
+
+
+  const handleCancelBooking = async () => {
+    dispatch(setBookingLoading(true));
+    try {
+      const response = await cancelBooking(currentBooking.bookingId, user.id);
+      dispatch(setCurrentBooking(response.data));
+    } catch (err){
+      dispatch(setBookingError(err.message));
+    } finally{
+      dispatch(setBookingLoading(false));
+    }
+  };
+
     const rentalDays = startDate && endDate ? Math.ceil((endDate-startDate) / (1000*60*60*24)) : 0;
     const totalRent = product ? rentalDays * product?.dailyRate : 0;  
+    const platformFee = totalRent * 0.10;
+    const estimatedTax = totalRent * 0.08;
+    const grandTotal = totalRent + platformFee + estimatedTax + (product?.securityDeposit || 0);
 
 
   return (
@@ -97,6 +164,7 @@ const Bookings = () => {
               <div className="image w-40 h-40 bg-slate-900 rounded-2xl overflow-hidden shrink-0">
                 <img
                   src="/public/camera-booking.avif"
+                  // src={data:image/jpeg;base64,${product?.images?.[0]} }
                   alt="Sony A7 IV"
                   className="w-full h-full object-cover"
                 />
@@ -105,14 +173,14 @@ const Bookings = () => {
               <div className="product-description flex flex-col justify-center space-y-2">
                 <div className="badge flex gap-2 items-center">
                   <Badge className="bg-indigo-50 text-indigo-600 hover:bg-indigo-50 font-semibold border-none rounded-md px-2 py-0.5 text-xs tracking-wide">
-                    CAMERAS
+                    {product.category}
                   </Badge>
                   <Badge variant="ghost" className="text-slate-600 flex items-center gap-1 text-xs font-medium px-1">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 fill-emerald-500 stroke-white" />
                     Instant Booking
                   </Badge>
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Sony A7 IV + 24-70mm Lens</h2>
+                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{product?.productName}</h2>
                 <p className="text-sm font-medium text-slate-600 flex items-center gap-1">
                   <Star className="w-4 h-4 fill-amber-400 stroke-amber-400" />
                   <span className="font-semibold text-slate-800">4.9</span>
@@ -123,7 +191,7 @@ const Bookings = () => {
                   <CheckCircle2 className="w-3.5 h-3.5 text-indigo-500 fill-indigo-500 stroke-white" />
                 </p>
                 <div className="pricing pt-1">
-                  <span className="text-3xl font-bold text-slate-900">$45</span>
+                  <span className="text-3xl font-bold text-slate-900">$ {product?.dailyRate}</span>
                   <span className="text-sm font-medium text-slate-400 ml-1.5">per day</span>
                 </div>
               </div>
@@ -231,7 +299,7 @@ const Bookings = () => {
 
               <div className="days-calculation flex justify-between items-center text-sm font-medium text-slate-500">
                 <span>$ {product?.dailyRate || 0} × {rentalDays} days</span>
-                <span className="font-semibold text-slate-800">$ {totalRent}</span>
+                <span className="font-semibold text-slate-800">$ {totalRent.toFixed(2)}</span>
               </div>
 
               <div className="refund flex justify-between items-center text-sm font-medium text-slate-500">
@@ -245,17 +313,17 @@ const Bookings = () => {
                     Fully refunded upon safe return of the gear.
                   </TooltipContent>
                 </Tooltip>
-                <span className="font-semibold text-slate-800">$500.00</span>
+                <span className="font-semibold text-slate-800">${(product?.securityDeposit || 0)}</span>
               </div>
 
               <div className="days-calculation flex justify-between items-center text-sm font-medium text-slate-500">
                 <span>Platform Fee (10%)</span>
-                <span className="font-semibold text-slate-800">$13.50</span>
+                <span className="font-semibold text-slate-800">${platformFee.toFixed(2)}</span>
               </div>
 
               <div className="days-calculation flex justify-between items-center text-sm font-medium text-slate-500">
                 <span>Estimated Tax (8%)</span>
-                <span className="font-semibold text-slate-800">$10.80</span>
+                <span className="font-semibold text-slate-800">${estimatedTax.toFixed(2)}</span>
               </div>
             </div>
 
@@ -264,21 +332,63 @@ const Bookings = () => {
             <div className="total-price-display flex justify-between items-end">
               <div className="total flex flex-col gap-0.5">
                 <span className="text-base font-bold text-slate-900">Total</span>
-                <span className="text-xs font-medium text-slate-400">Includes $500 deposit</span>
+                <span className="text-xs font-medium text-slate-400">Includes ${(product?.securityDeposit || 0)} deposit</span>
               </div>
               <div className="price-display text-3xl font-extrabold text-indigo-600 tracking-tight">
-                $659.30
+                ${grandTotal.toFixed(2)}
               </div>
             </div>
 
             {/* Action Buttons */}
             <div className="button flex flex-col gap-2.5 pt-2">
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1">
+              {/* <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1">
                 Confirm & Pay <span className="text-base font-normal">→</span>
               </Button>
               <Button variant="outline" className="w-full border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-800 font-semibold h-12 rounded-xl text-sm transition-colors">
                 Cancel
-              </Button>
+              </Button> */}
+
+              {!currentBooking || currentBooking.status === "REJECTED" ? (
+                <Button 
+                  onClick={handleRequestBooking}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"  
+                >
+                  Request to Book  
+                  <span className="text-base font-normal">→</span>
+                </Button>
+                ) : currentBooking.status === "PENDING" ? (
+                  <Button 
+                    disabled 
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"
+                  > 
+                    Waiting for Owner Approval
+                  </Button>
+                ) : currentBooking.status === "ACCEPTED" ? (
+                  <Button 
+                    onClick={handlePayForBooking}
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"
+                  >
+                    Pay ${grandTotal.toFixed(2)}
+                  </Button>
+                ) : currentBooking.status === "PAID" ? (
+                  <Button 
+                    disabled
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"
+                  >
+                    Booking Confirmed 
+                  </Button>
+                ): null}
+
+                {currentBooking && (currentBooking.status === "PENDING" || currentBooking.status === "ACCEPTED") &&(
+                  <Button 
+                    onClick={handleCancelBooking}
+                    variant="outline"
+                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"    
+                    >
+                      Cancel Request
+                    </Button>
+                )}
+
             </div>
 
             {/* Guarantee Badges */}

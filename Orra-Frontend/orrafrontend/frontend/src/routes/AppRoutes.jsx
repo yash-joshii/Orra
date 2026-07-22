@@ -9,6 +9,7 @@ import WhyChooseOrra from "@/pages/WhyChooseOrra";
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Bookings from "@/pages/Bookings";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const AppRoutes = () => {
   return (
@@ -16,7 +17,11 @@ const AppRoutes = () => {
       <Route element={<Mainlayout />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/browserdevices" element={<BrowseDevices />} />
-        <Route path="/booking/:id" element={<Bookings />} />
+        <Route path="/booking/:id" element={
+          <ProtectedRoute>
+            <Bookings />
+          </ProtectedRoute>
+          } />
       </Route>
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />

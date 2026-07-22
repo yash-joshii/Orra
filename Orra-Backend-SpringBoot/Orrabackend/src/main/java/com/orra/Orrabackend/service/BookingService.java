@@ -122,6 +122,20 @@ public class BookingService {
                 .collect((Collectors.toList()));
     }
 
+    public BookingResponseDTO cancelBooking(Long bookingId, Long renterId){
+        Booking booking = getBookingOrThrow(bookingId);
+
+        if(!booking.getRenter().getId().equals(renterId)){
+            throw new IllegalStateException("Only the renter who made this booking can cancel it");
+        }
+        if(booking.getStatus() != BookingStatus.PENDING && booking.getStatus() != BookingStatus.ACCEPTED){
+            throw new IllegalStateException("Booking cannot be cancelled from status: " + booking.getStatus());
+        }
+        booking.setStatus(BookingStatus.CANCELLED);
+        return toResponseDTO(bookingRepository.save(booking));
+    }
+
+
     //Orra Admin Panel
 //    public List<BookingResponseDTO> getAllBookingsAdmin(String statusFilter){
 //        List<Booking> bookings;

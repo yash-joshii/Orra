@@ -35,6 +35,12 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/{bookingId}/cancel")
+    public ResponseEntity<BookingResponseDTO> cancelBooking(@PathVariable Long bookingId, @RequestParam Long renterId){
+        BookingResponseDTO response = bookingService.cancelBooking(bookingId, renterId);
+        return ResponseEntity.ok(response);
+    }
+
     @PatchMapping("/{bookingId}/ship")
     public ResponseEntity<BookingResponseDTO> shipBooking(@PathVariable Long bookingId){
         BookingResponseDTO response = bookingService.shipBooking(bookingId);
@@ -68,7 +74,7 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/renter/{ownerId}")
+    @GetMapping("/owner/{ownerId}")
     public ResponseEntity<List<BookingResponseDTO>> getOwnerBookings(@PathVariable Long ownerId){
         List<BookingResponseDTO> response = bookingService.getOwnerBookings(ownerId);
         return ResponseEntity.ok(response);
