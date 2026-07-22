@@ -22,7 +22,7 @@ public class ProductListService {
         return repo.findAll();
     }
 
-    public ProductList getProductById(Long id) {
+    public ProductList getOne(Long id) {
         return repo.findById(id).orElse(null);
     }
 
