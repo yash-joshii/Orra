@@ -3,7 +3,9 @@ import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 import laptop from "../../assets/images/laptop.avif";
 import SearchBar from "../common/SearchBar";
+import { Navigate, useNavigate } from "react-router-dom";
 const Landintro = () => {
+  const navigate = useNavigate();
   return (
     <div className="landing-container w-full relative min-h-screen bg-white text-[#0F1424] flex  justify-center overflow-hidden font-sans ">
       <div className="leftside w-[84%] mt-[10%] mb-[12%]">
@@ -38,6 +40,9 @@ const Landintro = () => {
               <ArrowRight className="w-5 h-5 stroke-[2.5] mt-0.5" />
             </a>
             <a
+              onClick={() => navigate("/listingdevice")
+
+              }
               variant="outline"
               className="min-w-50 border-2 border-gray-300 p-[11px] rounded-lg text-center hover:bg-gray-100 hover:text-black hover:cursor-pointer"
             >

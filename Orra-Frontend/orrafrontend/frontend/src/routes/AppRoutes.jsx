@@ -5,7 +5,9 @@ import ProductSummary from "@/components/Productpagecomponent/ProductSummary";
 import Mainlayout from "@/layout/Mainlayout";
 import Booking from "@/pages/Bookings";
 import BrowseDevices from "@/pages/BrowseDevices";
+
 import LandingPage from "@/pages/LandingPage";
+import ListingDevice from "@/pages/ListingDevice";
 import Login from "@/pages/Login";
 import Productpage from "@/pages/Productpage";
 import Signup from "@/pages/Signup";
@@ -18,9 +20,11 @@ const AppRoutes = () => {
     <Routes>
       <Route element={<Mainlayout />}>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/browserdevices" element={<BrowseDevices />} />
-        <Route path="/booking" element={<Booking />} />
-        <Route path="/product/:id" element={<Productpage />} />
+        <Route path="/browserdevices" element={<BrowseDevices />} 
+         />
+         <Route path="/listingdevice" element={<ListingDevice/>} />
+          
+
       </Route>
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
