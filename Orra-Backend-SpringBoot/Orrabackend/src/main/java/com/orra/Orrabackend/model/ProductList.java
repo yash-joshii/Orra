@@ -1,8 +1,10 @@
 package com.orra.Orrabackend.model;
 
 import com.orra.Orrabackend.enums.Category;
+import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.Type;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -63,4 +65,9 @@ public class ProductList {
             cascade = CascadeType.ALL
     )
     private List<Productimage> images;
+
+
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb")
+    private List<String> productspec;
 }
