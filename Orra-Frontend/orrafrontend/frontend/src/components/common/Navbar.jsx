@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Search,
   Bell,
@@ -24,9 +24,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import logo from "../../assets/logo/orralogo.svg";
 
 const Navbar = () => {
-  
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+  }, []);
+
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Browse Devices", path: "/browserdevices" },
@@ -36,12 +45,16 @@ const Navbar = () => {
     { name: "Dashboard", path: "/dashboard" },
   ];
   return (
-    <header className="w-full border-b bg-white">
+    <header
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        scrolled ? "bg-white shadow-md" : "bg-white/30 backdrop-blur-md"
+      }`}
+    >
       <div className="flex items-center justify-center p-[2.2rem] h-16">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 flex items-center justify-center rounded-full bg-indigo-600 text-white font-bold">
-              O
+            <div className="w-9 h-9 flex items-center justify-center rounded-full bg-transparent text-white font-bold">
+              <img src={logo} className="text-#4F46E5" />
             </div>
             <span className="text-xl font-semibold">ORRA</span>
           </div>

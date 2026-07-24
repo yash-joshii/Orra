@@ -32,7 +32,7 @@ const Landintro = () => {
           <div className="flex ml-[18%] flex-col w-[48%] sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto mb-16">
             <a
               variant="primary"
-              className="min-w-[200px] bg-black text-white  rounded-[11px] hover:text-white text-center flex gap-[11px] p-[11px] pl-[27px] hover:bg-gradient-to-r from-[#5B63F6] via-[#4F46E5] to-[#06B6D4] hover:cursor-pointer"
+              className="min-w-[200px] bg-[#FAF0CA] text-black  rounded-[11px] hover:text-white text-center flex gap-[11px] p-[11px] pl-[27px] hover:bg-gradient-to-r from-[#5B63F6] via-[#4F46E5] to-[#06B6D4] hover:cursor-pointer"
             >
               Browse Devices{" "}
               <ArrowRight className="w-5 h-5 stroke-[2.5] mt-0.5" />
@@ -126,7 +126,7 @@ const Landintro = () => {
           </div>
 
           {/* Right Button (outside SearchBar) */}
-          <button className="px-8 py-3 rounded-[18px] bg-gradient-to-r from-[#5B63F6] to-[#4F46E5] text-white font-semibold">
+          <button className="px-8 py-3 rounded-[18px] bg-[#FAF0CA] text-black font-semibold">
             Search
           </button>
         </div>
