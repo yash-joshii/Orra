@@ -11,6 +11,7 @@ const Signup = () => {
   const [formData, setFormData] = React.useState({
     username: "",
     name: "",
+    phone: "",
     email: "",
     password: "",
   });
@@ -18,9 +19,19 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (
+      !formData.username.trim() ||
+      !formData.name.trim() ||
+      !formData.phone.trim() ||
+      !formData.email.trim() ||
+      !formData.password.trim()
+    ) {
+      toast.error("Please fill all fields");
+      return;
+    }
     console.log(formData);
     try {
-      const response = SignupUser(formData);
+      const response = await SignupUser(formData);
       console.log(response);
       toast.success("Signup Successful");
       navigate("/login");
@@ -73,94 +84,123 @@ const Signup = () => {
 
             <div className="user-details mt-[11px] ">
               <form onSubmit={handleSubmit}>
-              <div className="user-name-username w-[400px]">
-                <FieldGroup className="grid max-w-sm grid-cols-2 ">
-                  <Field>
-                    <FieldLabel htmlFor="User-name">Username</FieldLabel>
-                    <Input
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          username: e.target.value,
-                        })
-                      }
-                      id="user-name"
-                      placeholder="Enter your UserName"
-                      className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
+                <div className="user-name-username w-[400px]">
+                  <FieldGroup className="grid max-w-sm grid-cols-2 ">
+                    <Field>
+                      <FieldLabel htmlFor="User-name">Username</FieldLabel>
+                      <Input
+                        value={formData.username}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            username: e.target.value,
+                          })
+                        }
+                        id="user-name"
+                        placeholder="Enter your UserName"
+                        className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
                   bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
-                    />
-                  </Field>
+                      />
+                    </Field>
 
-                  <Field>
-                    <FieldLabel htmlFor="full-name">Full Name</FieldLabel>
-                    <Input
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          name: e.target.value,
-                        })
-                      }
-                      id="full-name"
-                      placeholder="Enter your Full Name"
-                      className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
+                    <Field>
+                      <FieldLabel htmlFor="full-name">Full Name</FieldLabel>
+                      <Input
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            name: e.target.value,
+                          })
+                        }
+                        id="full-name"
+                        placeholder="Enter your Full Name"
+                        className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
                   bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
-                    />
-                  </Field>
-                </FieldGroup>
-              </div>
-
-              <div className="user-email-password">
-                <Field className="mt-[30px]">
-                  <FieldLabel htmlFor="input-demo-disabled">Email</FieldLabel>
-                  <Input
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        email: e.target.value,
-                      })
-                    }
-                    id="input-demo-disabled"
-                    type="email"
-                    placeholder="Email"
-                    className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
-                  bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
-                  />
-                </Field>
-
-                <Field className="mt-[15px]">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <Input
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        password: e.target.value,
-                      })
-                    }
-                    id="password"
-                    placeholder="Enter your Password"
-                    className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
-                  bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
-                  />
-                </Field>
-              </div>
-
-              <div className="button-password-login">
-                <Button
-                  type="submit"
-                  className="mt-[20px] w-full h-[50px] rounded-[15px] bg-[#554cea] font-bold text-[16px]"
-                >
-                  Create Account
-                </Button>
-
-                <div className="text-login mt-[28px]">
-                  <span className="text-[15px]">
-                    Already have an account ?{" "}
-                    <a href="#" className=" text-[#554cea]">
-                      Log in
-                    </a>
-                  </span>
+                      />
+                    </Field>
+                  </FieldGroup>
                 </div>
-              </div>
+
+                <Field className="mt-[30px]">
+                  <FieldLabel htmlFor="phone">Phone Number</FieldLabel>
+
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    maxLength={10}
+                    placeholder="Enter your Phone Number"
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        phone: e.target.value,
+                      })
+                    }
+                    className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)]
+                     bg-gray-50 py-3 px-4 h-[50px] rounded-[17px]"
+                  />
+                </Field>
+
+                <div className="user-email-password">
+                  <Field className="mt-[30px]">
+                    <FieldLabel htmlFor="input-demo-disabled">Email</FieldLabel>
+                    <Input
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          email: e.target.value,
+                        })
+                      }
+                      id="input-demo-disabled"
+                      type="email"
+                      placeholder="Email"
+                      className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
+                  bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
+                    />
+                  </Field>
+
+                  <Field className="mt-[15px]">
+                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                    <Input
+                      value={formData.password}
+                      type="password"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          password: e.target.value,
+                        })
+                      }
+                      id="password"
+                      placeholder="Enter your Password"
+                      className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
+                  bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
+                    />
+                  </Field>
+                </div>
+
+                <div className="button-password-login">
+                  <Button
+                    type="submit"
+                    className="mt-[20px] w-full h-[50px] rounded-[15px] bg-[#554cea] font-bold text-[16px]"
+                  >
+                    Create Account
+                  </Button>
+
+                  <div className="text-login mt-[28px]">
+                    <span className="text-[15px]">
+                      Already have an account ?{" "}
+                      <button
+                        type="button"
+                        onClick={() => navigate("/login")}
+                        className="text-[#554cea] cursor-pointer"
+                      >
+                        Log in
+                      </button>
+                    </span>
+                  </div>
+                </div>
               </form>
             </div>
           </div>

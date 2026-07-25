@@ -1,10 +1,14 @@
+
 import { configureStore } from "@reduxjs/toolkit";
-import authreducer from "./slices/authslices";
-import productreducer from "./slices/productslices";
-//reponse to the action and update the state
+
+import authReducer from "./slices/authslices";
+import productReducer from "./slices/productslices";
+import userProfileReducer from "./slices/userprofileSlice";
+
 export const store = configureStore({
   reducer: {
-    auth: authreducer,
-    products: productreducer,
+    auth: authReducer,
+    products: productReducer,
+    userProfile: userProfileReducer,
   },
 });
