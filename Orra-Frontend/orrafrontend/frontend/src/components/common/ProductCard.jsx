@@ -21,8 +21,10 @@ import {
   Verified,
   VerifiedIcon,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ data }) => {
+  const navigate = useNavigate();
   console.log("images →", data.images);
   const [liked, setLiked] = useState(false);
   const imageUrl =
@@ -40,12 +42,18 @@ const ProductCard = ({ data }) => {
           // alt="Event cover"
           className="relative z-20 aspect-[4/3] w-full object-cover brightness-60 dark:brightness-40"
         />
-        <div className="btn opacity-0 invisible group-hover:visible group-hover:opacity-100 transition duration-200  bg-white none absolute z-20 w-[29%] p-[2%] rounded-[19px] font-medium text-center bottom-[38%] left-[35%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)]  flex ">
-         <Eye className="w-2 h-2" />  Quick view
+        <div
+          className="btn flex pl-[10px] gap-[4px] w-[40%]  opacity-0 invisible group-hover:visible group-hover:opacity-100 transition duration-200  bg-white none absolute z-20 p-[2%] rounded-[19px] font-[12px] text-center bottom-[38%] left-[35%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)]  "
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/product/${data.productId}`);
+          }}
+        >
+          <Eye className="w-4 h-4 text-center mt-[2px]" /> Quick view
         </div>
         <div
           onClick={() => setLiked(!liked)}
-          className="btn bg-white absolute z-20 w-[9%] p-[2.5%] rounded-full font-medium text-center top-[2%] right-[2%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)] cursor-pointer flex items-center justify-center"
+          className="btn bg-white absolute z-20 w-[9%] p-[1.5%] rounded-full font-medium text-center top-[2%] right-[2%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)] cursor-pointer flex items-center justify-center"
         >
           <Heart
             className={`w-5 h-5 transition ${
