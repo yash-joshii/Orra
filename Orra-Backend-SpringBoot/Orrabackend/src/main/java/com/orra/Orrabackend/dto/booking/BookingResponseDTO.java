@@ -1,5 +1,6 @@
 package com.orra.Orrabackend.dto.booking;
 
+import com.orra.Orrabackend.enums.BookingStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,8 +37,8 @@ public class BookingResponseDTO {
     private BigDecimal totalPrice;
     private BigDecimal depositAmount;
 
-    private String status;
-    private String displayStatus;
+    private BookingStatus status;
+    private BookingStatus displayStatus;
     private Instant createdAt;
 
 }

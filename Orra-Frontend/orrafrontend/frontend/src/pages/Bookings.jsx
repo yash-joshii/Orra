@@ -29,13 +29,13 @@ import {
 import { Star, ShieldCheck, Lock, CheckCircle2, CalendarDays } from "lucide-react";
 import { Separator } from "@/components/ui/separator"
 
-
 //Redux Imports
 import { getProductById } from "@/api/listingApi";
-import { cancelBooking, createBooking, payForBooking } from '@/api/bookingApi';
-import { setLoading as setBookingLoading, setCurrentBooking } from '@/redux/slices/bookingSlice';
+import { cancelBooking, createBooking, payForBooking, getBookingById } from '@/api/bookingApi';
+import { setLoading as setBookingLoading, setCurrentBooking, setError as setBookingError } from '@/redux/slices/bookingSlice';
 import { setSelectedProducts, setLoading, setError } from '@/redux/slices/productslices';
 import { useSelector, useDispatch } from 'react-redux';
+import { toast } from "sonner";
 
 
 // import { userInfo } from 'node:os';
@@ -43,88 +43,107 @@ import { useSelector, useDispatch } from 'react-redux';
 // shadcn components -> breadcrumbs, date, input, badge, avatar, tooltip, separator, calendar, popover
 
 const Bookings = () => {
-  
+
   const [startOpen, setStartOpen] = useState(false);
   const [endOpen, setEndOpen] = useState(false);
 
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
-  
-  
+
+
   const product = useSelector((state) => state.products.selectedProduct);
   const user = useSelector((state) => state.auth.user);
   const currentBooking = useSelector((state) => state.booking.currentBooking);
   const dispatch = useDispatch();
-  
-  // const {id} = useParams();
+
+  const { id } = useParams();
   // const {} = useParams();
 
-    useEffect(() => {
-        console.log("Product ID:", id);
-        fetchProduct(); 
-      }, [id]);
+  useEffect(() => {
+    console.log("Product ID:", id);
+    fetchProduct();
+  }, [id]);
 
-    const fetchProduct = async () => {
-      try {
-        dispatch(setLoading(true));
-        const response = await getProductById(id);
-        console.log("Product response : ", response.data);
-        dispatch(setLoading(false));
-      } catch(error){
-          dispatch(setError(error.message));
-          dispatch(setLoading(false));
-      }
-    };
-
+  const fetchProduct = async () => {
+    try {
+      dispatch(setLoading(true));
+      const response = await getProductById(id);
+      dispatch(setSelectedProducts(response.data));
+      dispatch(setLoading(false));
+    } catch (error) {
+      dispatch(setError(error.message));
+      dispatch(setLoading(false));
+    }
+  };
 
   const handleRequestBooking = async () => {
     dispatch(setBookingLoading(true));
-    try{
+    try {
       const payload = {
-        listingId: product.id,
-        renterId: user.id,
+        listingId: product.productId,
+        renterId: user.userId,
         startDateTime: startDate,
         endDateTime: endDate,
       };
+      console.log("user object:", user);
+    console.log("payload being sent:", payload);
       const response = await createBooking(payload);
       dispatch(setCurrentBooking(response.data));
-    } catch(err){
+    } catch (err) {
       dispatch(setBookingError(err.message));
-    } finally{
+    } finally {
       dispatch(setBookingLoading(false));
     }
   };
 
   const handlePayForBooking = async () => {
     dispatch(setBookingLoading(true));
-    try{
+    try {
       const response = await payForBooking(currentBooking.bookingId);
       dispatch(setCurrentBooking(response.data));
-    } catch (err){
+      toast.success("Payment successful! Your booking is confirmed.")
+    } catch (err) {
       dispatch(setBookingError(err.message));
+       toast.error("Payment failed. Please try again.");
     } finally {
       dispatch(setBookingLoading(false));
     }
   }
 
-
   const handleCancelBooking = async () => {
     dispatch(setBookingLoading(true));
     try {
-      const response = await cancelBooking(currentBooking.bookingId, user.id);
+      const response = await cancelBooking(currentBooking.bookingId, user.userId);
       dispatch(setCurrentBooking(response.data));
-    } catch (err){
+    } catch (err) {
       dispatch(setBookingError(err.message));
-    } finally{
+    } finally {
       dispatch(setBookingLoading(false));
     }
   };
 
-    const rentalDays = startDate && endDate ? Math.ceil((endDate-startDate) / (1000*60*60*24)) : 0;
-    const totalRent = product ? rentalDays * product?.dailyRate : 0;  
-    const platformFee = totalRent * 0.10;
-    const estimatedTax = totalRent * 0.08;
-    const grandTotal = totalRent + platformFee + estimatedTax + (product?.securityDeposit || 0);
+
+  useEffect(() => {
+    if (!currentBooking) return;
+    if (currentBooking.status !== "PENDING" && currentBooking.status !== "ACCEPTED") return;
+
+    const intervalId = setInterval(async () => {
+      try {
+        const response = await getBookingById(currentBooking.bookingId);
+        dispatch(setCurrentBooking(response.data));
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [currentBooking?.bookingId, currentBooking?.status]);
+
+  const rentalDays = startDate && endDate ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) : 0;
+  const totalRent = product ? rentalDays * product?.dailyRate : 0;
+  const platformFee = totalRent * 0.10;
+  const estimatedTax = totalRent * 0.08;
+  const grandTotal = totalRent + platformFee + estimatedTax + (product?.securityDeposit || 0);
 
 
   return (
@@ -173,7 +192,7 @@ const Bookings = () => {
               <div className="product-description flex flex-col justify-center space-y-2">
                 <div className="badge flex gap-2 items-center">
                   <Badge className="bg-indigo-50 text-indigo-600 hover:bg-indigo-50 font-semibold border-none rounded-md px-2 py-0.5 text-xs tracking-wide">
-                    {product.category}
+                    {product?.category}
                   </Badge>
                   <Badge variant="ghost" className="text-slate-600 flex items-center gap-1 text-xs font-medium px-1">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 fill-emerald-500 stroke-white" />
@@ -187,7 +206,7 @@ const Bookings = () => {
                   <span className="text-slate-400">(124)</span>
                   <span className="text-slate-300 mx-1">•</span>
                   <span className="bg-indigo-100 text-indigo-700 w-5 h-5 rounded-full inline-flex items-center justify-center text-[10px] font-bold">A</span>
-                  <span className="text-slate-500">By Alex Chen</span>
+                  <span className="text-slate-500">{ }</span>
                   <CheckCircle2 className="w-3.5 h-3.5 text-indigo-500 fill-indigo-500 stroke-white" />
                 </p>
                 <div className="pricing pt-1">
@@ -341,53 +360,47 @@ const Bookings = () => {
 
             {/* Action Buttons */}
             <div className="button flex flex-col gap-2.5 pt-2">
-              {/* <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1">
-                Confirm & Pay <span className="text-base font-normal">→</span>
-              </Button>
-              <Button variant="outline" className="w-full border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-800 font-semibold h-12 rounded-xl text-sm transition-colors">
-                Cancel
-              </Button> */}
 
               {!currentBooking || currentBooking.status === "REJECTED" ? (
-                <Button 
+                <Button
                   onClick={handleRequestBooking}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"  
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"
                 >
-                  Request to Book  
+                  Request to Book
                   <span className="text-base font-normal">→</span>
                 </Button>
-                ) : currentBooking.status === "PENDING" ? (
-                  <Button 
-                    disabled 
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"
-                  > 
-                    Waiting for Owner Approval
-                  </Button>
-                ) : currentBooking.status === "ACCEPTED" ? (
-                  <Button 
-                    onClick={handlePayForBooking}
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"
-                  >
-                    Pay ${grandTotal.toFixed(2)}
-                  </Button>
-                ) : currentBooking.status === "PAID" ? (
-                  <Button 
-                    disabled
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"
-                  >
-                    Booking Confirmed 
-                  </Button>
-                ): null}
+              ) : currentBooking.status === "PENDING" ? (
+                <Button
+                  disabled
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"
+                >
+                  Waiting for Owner Approval
+                </Button>
+              ) : currentBooking.status === "ACCEPTED" ? (
+                <Button
+                  onClick={handlePayForBooking}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"
+                >
+                  Pay ${grandTotal.toFixed(2)}
+                </Button>
+              ) : currentBooking.status === "COMPLETED" ? (
+                <Button
+                  disabled
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"
+                >
+                  Booking Confirmed
+                </Button>
+              ) : null}
 
-                {currentBooking && (currentBooking.status === "PENDING" || currentBooking.status === "ACCEPTED") &&(
-                  <Button 
-                    onClick={handleCancelBooking}
-                    variant="outline"
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"    
-                    >
-                      Cancel Request
-                    </Button>
-                )}
+              {currentBooking && (currentBooking.status === "PENDING" || currentBooking.status === "ACCEPTED") && (
+                <Button
+                  onClick={handleCancelBooking}
+                  variant="outline"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold h-12 rounded-xl text-sm transition-colors shadow-sm shadow-indigo-100 flex items-center justify-center gap-1"
+                >
+                  Cancel Request
+                </Button>
+              )}
 
             </div>
 

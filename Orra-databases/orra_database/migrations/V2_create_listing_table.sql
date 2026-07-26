@@ -21,6 +21,8 @@ CREATE TABLE listings (
 
     health_score INT CHECK (health_score BETWEEN 1 AND 100),
 
+    specifications JSONB, 
+
     location VARCHAR(150),
 
     is_active BOOLEAN DEFAULT TRUE,

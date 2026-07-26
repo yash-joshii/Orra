@@ -25,6 +25,7 @@ public class User {
 //    private String profilePic;
 
     private String address;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private UserRole role;

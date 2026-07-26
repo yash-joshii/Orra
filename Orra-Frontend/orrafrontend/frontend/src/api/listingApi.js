@@ -5,5 +5,5 @@ export const getAllProducts = () => {
 };
 
 export const getProductById = (id) => {
-  return axiosinstance.get(`/api/product/$(id)`);
+  return axiosinstance.get(`/api/product/${id}`);
 };

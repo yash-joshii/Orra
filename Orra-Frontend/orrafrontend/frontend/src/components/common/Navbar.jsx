@@ -24,6 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
   
@@ -74,11 +75,12 @@ const Navbar = () => {
             />
           </div>
 
-          <button className="relative">
+          {/* <button className="relative">
             <Bell className="w-5 h-5 text-gray-600" />
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-teal-500 rounded-full"></span>
-          </button>
-
+          </button> */}
+            <NotificationBell />
+            
           <button className="relative">
             <Calendar className="text-black w-5 h-5" />
             <span className="absolute -top-2 -right-2 text-xs bg-indigo-600 text-white px-1.5 py-0.5 rounded-full">

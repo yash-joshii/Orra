@@ -6,6 +6,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class SignInResponseDTO {
-    String name;
-    String message;
+
+    private Long userId;
+    private String name;
+    private String message;
+
 }

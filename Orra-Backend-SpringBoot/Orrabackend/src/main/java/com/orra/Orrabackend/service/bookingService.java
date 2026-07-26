@@ -2,6 +2,7 @@ package com.orra.Orrabackend.service;
 
 import com.orra.Orrabackend.dto.booking.BookingRequestDTO;
 import com.orra.Orrabackend.dto.booking.BookingResponseDTO;
+import com.orra.Orrabackend.dto.transaction.TransactionRequestDTO;
 import com.orra.Orrabackend.enums.BookingStatus;
 import com.orra.Orrabackend.model.Booking;
 import com.orra.Orrabackend.model.ProductList;
@@ -20,13 +21,15 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class BookingService {
+public class bookingService {
     private final BookingRepository bookingRepository;
     private final ProductListRepository productListRepository;
     private final UserRepository userRepository;
+    private final TransactionService transactionService;
+    private final NotificationService notificationService;
 
     private static final long ACCEPT_TO_PAY_TIMEOUT_DAYS = 5;
-    private static final long PAY_TO_SHIP_TIMEOUT_DAYS = 5;
+//    private static final long PAY_TO_SHIP_TIMEOUT_DAYS = 5;
 
     public BookingResponseDTO createBooking(BookingRequestDTO request){
         ProductList listing = productListRepository.findById(request.getListingId())
@@ -53,6 +56,7 @@ public class BookingService {
         booking.setStartDateTime(request.getStartDateTime());
         booking.setEndDateTime(request.getEndDateTime());
         booking.setTotalPrice(totalPrice);
+        booking.setDepositAmount(listing.getSecurityDeposit());
         booking.setStatus(BookingStatus.PENDING);
         booking.setCreatedAt(Instant.now());
 
@@ -68,29 +72,63 @@ public class BookingService {
         return toResponseDTO(bookingRepository.save(booking));
     }
 
+    private static final BigDecimal PLATFORM_FEE_RATE = new BigDecimal("0.10");
+
     public BookingResponseDTO payForBooking(Long bookingId){
+
         Booking booking = getBookingOrThrow(bookingId);
         requireStatus(booking, BookingStatus.ACCEPTED);
-        booking.setStatus(BookingStatus.PAID);
-        booking.setPaidAt(Instant.now());
-        return toResponseDTO(bookingRepository.save(booking));
-    }
-
-    public BookingResponseDTO shipBooking(Long bookingId){
-        Booking booking = getBookingOrThrow(bookingId);
-        requireStatus(booking, BookingStatus.PAID);
-        booking.setStatus(BookingStatus.SHIPPED);
-        booking.setShippedAt(Instant.now());
-        return toResponseDTO(bookingRepository.save(booking));
-    }
-
-    public BookingResponseDTO confirmReceipt(Long bookingId){
-        Booking booking = getBookingOrThrow(bookingId);
-        requireStatus(booking, BookingStatus.SHIPPED);
         booking.setStatus(BookingStatus.COMPLETED);
+        booking.setPaidAt(Instant.now());
         booking.setCompletedAt(Instant.now());
-        return toResponseDTO(bookingRepository.save(booking));
+        Booking saved = bookingRepository.save(booking);
+
+        //Payment Transaction (renter's money in)
+        TransactionRequestDTO paymentDto = new TransactionRequestDTO();
+        paymentDto.setBookingId(saved.getId());
+        paymentDto.setAmount(saved.getTotalPrice().doubleValue());
+        paymentDto.setType("PAYMENT");
+        paymentDto.setStatus("SUCCESS");
+        transactionService.createTransaction(paymentDto);
+
+        //Payout transaction (Owner's cut)
+        BigDecimal payoutAmount = saved.getTotalPrice().multiply(BigDecimal.ONE.subtract(PLATFORM_FEE_RATE));
+        TransactionRequestDTO payoutDto = new TransactionRequestDTO();
+        payoutDto.setBookingId(saved.getId());
+        payoutDto.setAmount(payoutAmount.doubleValue());
+        payoutDto.setType("PAYOUT");
+        payoutDto.setStatus("SUCCESS");
+        transactionService.createTransaction(payoutDto);
+
+        //Notification
+        notificationService.createNotification(
+                saved.getRenter(), saved, "Your Payment for " + saved.getListing().getProductName() + " was successful."
+                , "PAYMENT_SUCCESS"
+        );
+
+        notificationService.createNotification(
+                saved.getListing().getOwner(), saved, "You have been paid for " + saved.getListing().getProductName() + " ."
+                , "PAYMENT_RECEIVED"
+        );
+
+        return toResponseDTO(saved);
     }
+
+//    public BookingResponseDTO shipBooking(Long bookingId){
+//        Booking booking = getBookingOrThrow(bookingId);
+//        requireStatus(booking, BookingStatus.PAID);
+//        booking.setStatus(BookingStatus.SHIPPED);
+//        booking.setShippedAt(Instant.now());
+//        return toResponseDTO(bookingRepository.save(booking));
+//    }
+//
+//    public BookingResponseDTO confirmReceipt(Long bookingId){
+//        Booking booking = getBookingOrThrow(bookingId);
+//        requireStatus(booking, BookingStatus.SHIPPED);
+//        booking.setStatus(BookingStatus.COMPLETED);
+//        booking.setCompletedAt(Instant.now());
+//        return toResponseDTO(bookingRepository.save(booking));
+//    }
 
     public BookingResponseDTO rejectBooking(Long bookingId){
         Booking booking = getBookingOrThrow(bookingId);
@@ -120,6 +158,11 @@ public class BookingService {
                 .stream()
                 .map(this::toResponseDTO)
                 .collect((Collectors.toList()));
+    }
+
+    public BookingResponseDTO getBookingById(Long bookingId){
+        Booking booking = getBookingOrThrow(bookingId);
+        return toResponseDTO(booking);
     }
 
     public BookingResponseDTO cancelBooking(Long bookingId, Long renterId){
@@ -181,13 +224,13 @@ public class BookingService {
             }
         }
 
-        if(booking.getStatus() == BookingStatus.PAID && booking.getPaidAt() != null){
-            long daysSincePaid = Duration.between(booking.getPaidAt(), now).toDays();
-            if(daysSincePaid >= PAY_TO_SHIP_TIMEOUT_DAYS){
-                booking.setStatus(BookingStatus.REFUNDED);
-                bookingRepository.save(booking);
-            }
-        }
+//        if(booking.getStatus() == BookingStatus.PAID && booking.getPaidAt() != null){
+//            long daysSincePaid = Duration.between(booking.getPaidAt(), now).toDays();
+//            if(daysSincePaid >= PAY_TO_SHIP_TIMEOUT_DAYS){
+//                booking.setStatus(BookingStatus.REFUNDED);
+//                bookingRepository.save(booking);
+//            }
+//        }
     }
 
     private BookingResponseDTO toResponseDTO(Booking booking){
@@ -207,7 +250,7 @@ public class BookingService {
                 .endDateTime(booking.getEndDateTime())
                 .totalPrice(booking.getTotalPrice())
                 .depositAmount(booking.getDepositAmount())
-                .status(booking.getStatus().name())
+                .status(booking.getStatus())
                 .createdAt(booking.getCreatedAt())
                 .build();
     }

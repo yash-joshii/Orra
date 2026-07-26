@@ -73,12 +73,12 @@ const ProductCard = ({ data }) => {
       <div className="flex items-start justify-between w-full max-w-[293px]">
         <div className="price  ml-[6%]">
           <span className=" flex justify-between text-[20px] font-bold">
-            {data.purchasePrice}
+            {data.dailyRate}
             <span className="text-[10px] text-gray-300 mt-[16%]"> /day</span>
           </span>
         </div>
         <div className="bookbtn mr-[2%]">
-          <button onClick={() => navigate(`/booking/${data.id}`)}
+          <button onClick={() => navigate(`/booking/${data.productId}`)}
           className="bg-black w-[100%] h-[10%] p-2 rounded-[12px] shadow-[rgba(50,50,93,0.25)_0px_2px_5px_-1px,rgba(0,0,0,0.3)_0px_1px_3px_-1px] cursor-pointer hover:bg-[#5650cc] ">
             {" "}
             <Calendar className="text-white w-4 h-4" />{" "}

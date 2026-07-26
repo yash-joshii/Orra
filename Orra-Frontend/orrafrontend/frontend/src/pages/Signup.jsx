@@ -12,23 +12,81 @@ const Signup = () => {
     username: "",
     name: "",
     email: "",
+    phone: "",
     password: "",
+    confirmPassword: "",
   });
   const navigate = useNavigate();
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   console.log(formData);
+  //   try {
+  //     const response = SignupUser(formData);
+  //     console.log(response);
+  //     toast.success("Signup Successful");
+  //     navigate("/login");
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error("Signup Failed");
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-    try {
-      const response = SignupUser(formData);
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    //Empty Field Validation
+    if(
+      !formData.username.trim() ||
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.phone.trim() ||
+      !formData.password.trim() ||
+      !formData.confirmPassword.trim()
+    ){
+      toast.error("Please Fill All the fields");
+      return;
+    }
+
+    //Username validation
+    if(formData.username.length < 3){
+      toast.error("Username must be atleast 3 characters");
+      return;
+    }
+
+    //Email Validation
+    if(!emailRegex.test(formData.email)){
+      toast.error("Invalid email address");
+      return;
+    }
+
+    //Phone Validation
+    if(formData.phone.length !== 10){
+      toast.error("Phone Number must be 10 digits");
+      return;
+    }
+
+    //Confirm Password Validation
+    if(formData.password !== formData.confirmPassword){
+      toast.error("Password do not match");
+    }
+
+    try{
+      const {confirmPassword, ...signupData} = formData;
+      const response = await SignupUser(formData);
+
       console.log(response);
       toast.success("Signup Successful");
       navigate("/login");
-    } catch (error) {
+    } catch(error){
       console.log(error);
       toast.error("Signup Failed");
     }
   };
+
+
 
   return (
     <>
@@ -78,13 +136,18 @@ const Signup = () => {
                   <Field>
                     <FieldLabel htmlFor="User-name">Username</FieldLabel>
                     <Input
-                      onChange={(e) =>
+                      value={formData.username}
+                      onChange={(e) => {
+                        
+                        const value = e.target.value.replace(/\s/g, "");
+                        
                         setFormData({
                           ...formData,
-                          username: e.target.value,
-                        })
-                      }
-                      id="user-name"
+                          username: value,
+                        });
+
+                      }}
+                      
                       placeholder="Enter your UserName"
                       className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
                   bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
@@ -94,12 +157,14 @@ const Signup = () => {
                   <Field>
                     <FieldLabel htmlFor="full-name">Full Name</FieldLabel>
                     <Input
-                      onChange={(e) =>
+                      value={formData.name}
+                      onChange={(e) =>{
+                        const value = e.target.value.replace(/[^a-zA-Z ]/g, "");
                         setFormData({
                           ...formData,
-                          name: e.target.value,
+                          name: value,
                         })
-                      }
+                      }}
                       id="full-name"
                       placeholder="Enter your Full Name"
                       className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
@@ -109,11 +174,12 @@ const Signup = () => {
                 </FieldGroup>
               </div>
 
-              <div className="user-email-password">
+              <div className="user-email-phone-password">
                 <Field className="mt-[30px]">
                   <FieldLabel htmlFor="input-demo-disabled">Email</FieldLabel>
                   <Input
                     onChange={(e) =>
+
                       setFormData({
                         ...formData,
                         email: e.target.value,
@@ -122,6 +188,25 @@ const Signup = () => {
                     id="input-demo-disabled"
                     type="email"
                     placeholder="Email"
+                    className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
+                  bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
+                  />
+                </Field>
+
+                <Field className="mt-[30px]">
+                  <FieldLabel htmlFor="input-demo-disabled">Phone Number</FieldLabel>
+                  <Input
+                    value={formData.phone}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "").slice(0,10);
+                      setFormData({
+                        ...formData,
+                        phone: value,
+                      })
+                    }}
+                    id="input-demo-disabled"
+                    type="tel"
+                    placeholder="Phone Number"
                     className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
                   bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
                   />
@@ -136,12 +221,32 @@ const Signup = () => {
                         password: e.target.value,
                       })
                     }
+                    type="password"
                     id="password"
                     placeholder="Enter your Password"
                     className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
                   bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
                   />
                 </Field>
+
+                  <Field className="mt-[15px]">
+                  <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
+                  <Input
+                    value={formData.confirmPassword}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                    type="password"
+                    id="Confirm-password"
+                    placeholder="Re-Enter your Password"
+                    className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
+                  bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
+                  />
+                </Field>
+
               </div>
 
               <div className="button-password-login">
@@ -155,9 +260,11 @@ const Signup = () => {
                 <div className="text-login mt-[28px]">
                   <span className="text-[15px]">
                     Already have an account ?{" "}
-                    <a href="#" className=" text-[#554cea]">
+                    <span 
+                      onClick={() => navigate("/login")}
+                      className=" text-[#554cea]">
                       Log in
-                    </a>
+                    </span>
                   </span>
                 </div>
               </div>

@@ -10,6 +10,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Bookings from "@/pages/Bookings";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Dashboard from "@/pages/Dashboard";
 
 const AppRoutes = () => {
   return (
@@ -22,6 +23,7 @@ const AppRoutes = () => {
             <Bookings />
           </ProtectedRoute>
           } />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Route>
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
