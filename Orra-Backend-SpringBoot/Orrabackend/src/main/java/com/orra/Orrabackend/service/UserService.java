@@ -7,6 +7,7 @@ import com.orra.Orrabackend.exception.UserNotFoundException;
 import com.orra.Orrabackend.model.User;
 import com.orra.Orrabackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -14,10 +15,15 @@ import java.util.List;
 public class UserService {
 //    @Autowired
     private final UserRepository repo;
-    public UserService(UserRepository repo) { this.repo = repo; }
+    private final PasswordEncoder passwordEncoder;
+    public UserService(UserRepository repo, PasswordEncoder passwordEncoder) {
+        this.repo = repo;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public List<User> getAll() { return repo.findAll(); }
     public User create(User user) { return repo.save(user); }
+
 
     public User getById(Long id){
         return repo.findById(id)
@@ -30,7 +36,8 @@ public class UserService {
         user.setUsername(dto.getUsername());
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
+        user.setPhone(dto.getPhone());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         user.setRole(UserRole.both);   // default
         user.setAddress("NA");    // temporary

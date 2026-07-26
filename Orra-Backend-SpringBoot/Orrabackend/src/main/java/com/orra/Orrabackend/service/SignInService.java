@@ -9,23 +9,47 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SignInService {
+
     @Autowired
     private SignInRepository signInRepository;
 
-    public SignInResponseDTO SignIn(SignInRequestDTO dto) {
-        User user = signInRepository.findByUsername(dto.getUsername());
-        if (user == null) {
-            throw new RuntimeException("username not found");
+    public SignInResponseDTO signIn(SignInRequestDTO dto) {
+
+        System.out.println("==================================");
+        System.out.println("Email Received    : '" + dto.getEmail() + "'");
+        System.out.println("Password Received : '" + dto.getPassword() + "'");
+        System.out.println("==================================");
+
+        // Check for empty email
+        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+            throw new RuntimeException("Email is required");
         }
 
-        if (!user.getPassword().equals(dto.getPassword())) {
-            throw new RuntimeException("password not match");
+        // Check for empty password
+        if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
+            throw new RuntimeException("Password is required");
         }
+
+        // Find user by email
+        User user = signInRepository.findByEmail(dto.getEmail());
+
+        System.out.println("User Found : " + user);
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        // Validate password
+        if (!user.getPassword().equals(dto.getPassword())) {
+            throw new RuntimeException("Invalid Password");
+        }
+
+        System.out.println("Login Successful for User ID : " + user.getId());
 
         return new SignInResponseDTO(
+                user.getId(),
                 user.getName(),
-                "login successful"
+                "Login Successful"
         );
     }
-
 }

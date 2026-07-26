@@ -3,21 +3,27 @@ package com.orra.Orrabackend.controller;
 import com.orra.Orrabackend.dto.SignIn.SignInRequestDTO;
 import com.orra.Orrabackend.dto.SignIn.SignInResponseDTO;
 import com.orra.Orrabackend.service.SignInService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/signin")
 public class SignInController {
 
     @Autowired
-    public SignInService signInService;
+    private SignInService signInService;
 
     @PostMapping
-    public SignInResponseDTO SignIn(@RequestBody SignInRequestDTO dto){
-        return signInService.SignIn(dto);
+    public SignInResponseDTO signIn(@RequestBody SignInRequestDTO dto,
+                                    HttpServletRequest request) {
+
+        SignInResponseDTO response = signInService.signIn(dto);
+
+        HttpSession session = request.getSession(true);
+        session.setAttribute("userId", response.getUserId());
+
+        return response;
     }
 }

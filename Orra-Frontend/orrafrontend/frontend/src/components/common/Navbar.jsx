@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useSelector } from "react-redux";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Search,
   Bell,
@@ -26,9 +26,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import logo from "../../assets/logo/orralogo.svg";
+import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate(); // also missing, see #2 below
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -90,12 +93,13 @@ const Navbar = () => {
             />
           </div>
 
-          <button className="relative">
+          {/* <button className="relative">
             <Bell className="w-5 h-5 text-gray-600" />
 
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-teal-500 rounded-full"></span>
-          </button>
-
+          </button> */}
+            <NotificationBell />
+            
           <button className="relative">
             <Calendar className="text-black w-5 h-5" />
 
@@ -120,11 +124,11 @@ const Navbar = () => {
             <DropdownMenuContent className="w-[220px] p-3">
               <div className="px-2 pb-2">
                 <p className="text-sm font-semibold">
-                  Hello {firstName}
+                  Hello {user?.firstName}
                 </p>
 
                 <p className="text-xs text-gray-500">
-                  {email}
+                  {user?.email}
                 </p>
               </div>
 

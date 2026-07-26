@@ -4,6 +4,8 @@ import lombok.Data;
 
 @Data
 public class SignInRequestDTO {
-    private String username;
+
+    private String email;
     private String password;
+
 }

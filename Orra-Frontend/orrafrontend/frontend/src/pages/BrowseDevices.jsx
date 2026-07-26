@@ -28,7 +28,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const BrowseDevices = () => {
   const navigate = useNavigate();
@@ -39,6 +39,15 @@ const BrowseDevices = () => {
   const loading = useSelector((state) => state.products.loading);
 
   const error = useSelector((state) => state.products.error);
+
+  const [searchParams] = useSearchParams();
+  const categoryFilter = searchParams.get("category");
+
+  const filteredProducts = categoryFilter 
+    ? products?.filter((p) => p.category === categoryFilter)
+    : products;
+
+
    console.log("products");
   useEffect(() => {
     fetchProduct();
@@ -56,12 +65,16 @@ const BrowseDevices = () => {
     }
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryFilter]);
+
   const ITEMS_PER_PAGE = 6;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil((products?.length || 0) / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil((filteredProducts?.length || 0) / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedProducts = products?.slice(
+  const paginatedProducts = filteredProducts?.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE,
   );

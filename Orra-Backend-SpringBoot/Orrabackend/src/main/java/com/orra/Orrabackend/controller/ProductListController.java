@@ -3,6 +3,7 @@ package com.orra.Orrabackend.controller;
 
 import com.orra.Orrabackend.dto.productlist.ProductlistRequestDTO;
 import com.orra.Orrabackend.model.ProductList;
+import com.orra.Orrabackend.repository.CategoryCountProjection;
 import com.orra.Orrabackend.repository.ProductListImageRepository;
 import com.orra.Orrabackend.repository.ProductListRepository;
 import com.orra.Orrabackend.service.ProductListService;
@@ -50,7 +51,10 @@ public class ProductListController {
         return new ResponseEntity<>("Product deleted", HttpStatus.OK);
     }
 
-
+    @GetMapping("/product/categories/summary")
+    public ResponseEntity<List<CategoryCountProjection>> getCategorySummary() {
+        return new ResponseEntity<>(productlistservice.getCategorySummary(), HttpStatus.OK);
+    }
 
 }
 

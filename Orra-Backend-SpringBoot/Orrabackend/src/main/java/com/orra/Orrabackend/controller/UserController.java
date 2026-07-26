@@ -3,6 +3,7 @@ package com.orra.Orrabackend.controller;
 import com.orra.Orrabackend.dto.signup.SignupRequestDTO;
 import com.orra.Orrabackend.model.User;
 import com.orra.Orrabackend.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> signup(@RequestBody SignupRequestDTO dto) {
+    public ResponseEntity<User> signup(@Valid @RequestBody SignupRequestDTO dto) {
         return ResponseEntity.ok(service.signup(dto));
     }
 

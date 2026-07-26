@@ -3,6 +3,7 @@ package com.orra.Orrabackend.service;
 
 import com.orra.Orrabackend.model.ProductList;
 import com.orra.Orrabackend.model.Productimage;
+import com.orra.Orrabackend.repository.CategoryCountProjection;
 import com.orra.Orrabackend.repository.ProductListImageRepository;
 import com.orra.Orrabackend.repository.ProductListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,5 +87,9 @@ public class ProductListService {
                 repoImage.saveAll(imagelist);;
         }
         return saved;
+    }
+
+    public List<CategoryCountProjection> getCategorySummary(){
+        return repo.getCategoryCounts();
     }
 }

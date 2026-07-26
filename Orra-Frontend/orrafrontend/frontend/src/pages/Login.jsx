@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import Signup from "./Signup";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -176,6 +177,22 @@ const Login = () => {
 
             {/* Sign In */}
 
+            {/* Remember Me */}
+            <div className="flex justify-between items-center mb-6">
+              <label className="flex items-center gap-2 text-gray-600 text-sm">
+                <input type="checkbox" />
+                Remember me
+              </label>
+
+              <a
+                href="#"
+                className="text-purple-700 text-sm hover:underline"
+              >
+                Forgot password?
+              </a>
+            </div>
+
+            {/* Sign In */}
             <button
               type="submit"
               className="w-full bg-[#544be9] text-white py-4 rounded-xl font-semibold text-lg hover:opacity-90 transition"
@@ -183,15 +200,16 @@ const Login = () => {
               Sign In
             </button>
 
+
           </form>
+
 
           <p className="text-center mt-6 text-gray-500">
             Don't have an account?{" "}
             <span
-              onClick={() => navigate("/signup")}
-              className="text-[#544be9] font-medium cursor-pointer"
-            >
-              Sign up
+              onClick={() => navigate("/signup")} 
+              className="text-[#544be9] font-medium cursor-pointer">
+              Sign Up
             </span>
           </p>
 
@@ -202,10 +220,9 @@ const Login = () => {
 
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-purple-950 via-purple-800 to-indigo-950 items-center justify-center">
 
+
         <div className="absolute w-[700px] h-[700px] rounded-full bg-purple-400/10 top-[-250px] right-[-200px]" />
-
         <div className="absolute w-[500px] h-[500px] rounded-full bg-indigo-400/10 bottom-[-150px] left-[-100px]" />
-
         <div className="absolute w-[300px] h-[300px] rounded-full bg-pink-400/10 top-[150px] left-[150px]" />
 
         <div className="relative z-10 max-w-xl px-12 text-white translate-y-12">
@@ -226,6 +243,7 @@ const Login = () => {
           </div>
 
         </div>
+
 
       </div>
 
