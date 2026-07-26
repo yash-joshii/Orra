@@ -11,6 +11,7 @@ const Signup = () => {
   const [formData, setFormData] = React.useState({
     username: "",
     name: "",
+    phone: "",
     email: "",
     phone: "",
     password: "",
@@ -151,8 +152,8 @@ const Signup = () => {
                       placeholder="Enter your UserName"
                       className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
                   bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
-                    />
-                  </Field>
+                      />
+                    </Field>
 
                   <Field>
                     <FieldLabel htmlFor="full-name">Full Name</FieldLabel>
@@ -169,26 +170,48 @@ const Signup = () => {
                       placeholder="Enter your Full Name"
                       className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
                   bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
-                    />
-                  </Field>
-                </FieldGroup>
-              </div>
+                      />
+                    </Field>
+                  </FieldGroup>
+                </div>
 
               <div className="user-email-phone-password">
                 <Field className="mt-[30px]">
-                  <FieldLabel htmlFor="input-demo-disabled">Email</FieldLabel>
+                  <FieldLabel htmlFor="phone">Phone Number</FieldLabel>
+
                   <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    maxLength={10}
+                    placeholder="Enter your Phone Number"
                     onChange={(e) =>
 
                       setFormData({
                         ...formData,
-                        email: e.target.value,
+                        phone: e.target.value,
                       })
                     }
-                    id="input-demo-disabled"
-                    type="email"
-                    placeholder="Email"
-                    className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
+                    className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)]
+                     bg-gray-50 py-3 px-4 h-[50px] rounded-[17px]"
+                  />
+                </Field>
+
+                <div className="user-email-password">
+                  <Field className="mt-[30px]">
+                    <FieldLabel htmlFor="input-demo-disabled">Email</FieldLabel>
+                    <Input
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          email: e.target.value,
+                        })
+                      }
+                      id="input-demo-disabled"
+                      type="email"
+                      placeholder="Email"
+                      className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
                   bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
                   />
                 </Field>
@@ -212,19 +235,20 @@ const Signup = () => {
                   />
                 </Field>
 
-                <Field className="mt-[15px]">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <Input
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        password: e.target.value,
-                      })
-                    }
-                    type="password"
-                    id="password"
-                    placeholder="Enter your Password"
-                    className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
+                  <Field className="mt-[15px]">
+                    <FieldLabel htmlFor="password">Password</FieldLabel>
+                    <Input
+                      value={formData.password}
+                      type="password"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          password: e.target.value,
+                        })
+                      }
+                      id="password"
+                      placeholder="Enter your Password"
+                      className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
                   bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
                   />
                 </Field>
@@ -249,13 +273,13 @@ const Signup = () => {
 
               </div>
 
-              <div className="button-password-login">
-                <Button
-                  type="submit"
-                  className="mt-[20px] w-full h-[50px] rounded-[15px] bg-[#554cea] font-bold text-[16px]"
-                >
-                  Create Account
-                </Button>
+                <div className="button-password-login">
+                  <Button
+                    type="submit"
+                    className="mt-[20px] w-full h-[50px] rounded-[15px] bg-[#554cea] font-bold text-[16px]"
+                  >
+                    Create Account
+                  </Button>
 
                 <div className="text-login mt-[28px]">
                   <span className="text-[15px]">

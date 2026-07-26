@@ -28,8 +28,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useNavigate } from "react-router-dom";
 
 const BrowseDevices = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const products = useSelector((state) => state.products.products);
@@ -37,7 +39,7 @@ const BrowseDevices = () => {
   const loading = useSelector((state) => state.products.loading);
 
   const error = useSelector((state) => state.products.error);
-
+   console.log("products");
   useEffect(() => {
     fetchProduct();
   }, []);
@@ -123,7 +125,11 @@ const BrowseDevices = () => {
         <div className="rightbrowdev w-full min-h-full">
           <div className="flex flex-wrap gap-[36px]">
             {paginatedProducts?.map((item) => (
-              <ProductCard key={item.ProductId} data={item} />
+              <ProductCard
+                key={item.productId}
+                data={item}
+               
+              />
             ))}
           </div>
 

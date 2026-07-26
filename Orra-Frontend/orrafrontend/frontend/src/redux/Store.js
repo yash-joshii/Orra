@@ -1,13 +1,17 @@
+
 import { configureStore } from "@reduxjs/toolkit";
-import authreducer from "./slices/authslices";
-import productreducer from "./slices/productslices";
+
+import authReducer from "./slices/authslices";
+import productReducer from "./slices/productslices";
 import bookingreducer from "./slices/bookingSlice"
 import categoryReducer from "@/redux/slices/categorySlices";
-//reponse to the action and update the state
+import userProfileReducer from "./slices/userprofileSlice";
+
 export const store = configureStore({
   reducer: {
-    auth: authreducer,
-    products: productreducer,
+    auth: authReducer,
+    products: productReducer,
+    userProfile: userProfileReducer,
     booking: bookingreducer,
     categories: categoryReducer,
   },
