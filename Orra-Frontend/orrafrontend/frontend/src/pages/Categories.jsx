@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 // Components
@@ -20,6 +21,7 @@ import { getCategoryStyle, formatCategoryLabel } from "@/constants/categoryStyle
 const Categories = () => {
   // ---- Redux state ----
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const categories = useSelector((state) => state.categories.categories);
   const loading = useSelector((state) => state.categories.loading);
   const error = useSelector((state) => state.categories.error);
@@ -75,6 +77,7 @@ const Categories = () => {
                 icon={icon}
                 iconBg={iconBg}
                 iconColor={iconColor}
+                onClick={() => navigate(`/browserdevices?category=${cat.category}`)}
               />
             );
           })}

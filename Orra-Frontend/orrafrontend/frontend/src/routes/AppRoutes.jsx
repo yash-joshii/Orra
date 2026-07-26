@@ -5,9 +5,17 @@ import Mainlayout from "@/layout/Mainlayout";
 import LandingPage from "@/pages/LandingPage";
 import BrowseDevices from "@/pages/BrowseDevices";
 import Signup from "@/pages/Signup";
-import WhyChooseOrra from "@/pages/WhyChooseOrra";
+// import WhyChooseOrra from "@/pages/WhyChooseOrra";
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import Categories from "@/pages/Categories";
+import Productpage from "@/pages/Productpage";
+import SettingPage from "@/pages/SettingPage";
+import Dashboard from "@/pages/Dashboard";
+import Login from "@/pages/Login";
+import ProductCard from "@/components/common/ProductCard";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import Bookings from "@/pages/Bookings";
+// import { Route, Routes } from "react-router-dom";
 
 const AppRoutes = () => {
   return (

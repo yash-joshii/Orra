@@ -11,9 +11,12 @@ const CategoryCard = ({
   iconBg,
   iconColor,
   trending,
+  onClick,
 }) => {
   return (
-    <Card className="group cursor-pointer border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+    <Card
+      onClick = {onClick} 
+      className="group cursor-pointer border-slate-200 shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-6 flex flex-col h-full">
         {/* Top row: icon tile + trending badge */}
         <div className="flex items-start justify-between mb-5">
