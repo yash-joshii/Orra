@@ -11,6 +11,7 @@ import { Route, Routes } from "react-router-dom";
 import Bookings from "@/pages/Bookings";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Dashboard from "@/pages/Dashboard";
+import Categories from "@/pages/Categories";
 
 const AppRoutes = () => {
   return (
@@ -18,6 +19,7 @@ const AppRoutes = () => {
       <Route element={<Mainlayout />}>
         <Route path="/" element={<LandingPage />} />
         <Route path="/browserdevices" element={<BrowseDevices />} />
+        <Route path="/categories" element={<Categories />} />
         <Route path="/booking/:id" element={
           <ProtectedRoute>
             <Bookings />

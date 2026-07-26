@@ -1,6 +1,17 @@
-import React from 'react'
+import React from "react";
+import { ArrowRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-const CategoryCard = () => {
+const CategoryCard = ({
+  name,
+  description,
+  deviceCount,
+  icon: Icon,
+  iconBg,
+  iconColor,
+  trending,
+}) => {
   return (
     <Card className="group cursor-pointer border-slate-200 shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-6 flex flex-col h-full">
@@ -15,11 +26,13 @@ const CategoryCard = () => {
             </Badge>
           )}
         </div>
- 
+
         {/* Title + description */}
         <h3 className="text-xl font-bold text-slate-900 mb-1">{name}</h3>
-        <p className="text-slate-500 text-sm leading-snug mb-6">{description}</p>
- 
+        {description && (
+          <p className="text-slate-500 text-sm leading-snug mb-6">{description}</p>
+        )}
+
         {/* Footer: device count + arrow, pinned to bottom via mt-auto */}
         <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
           <span className="text-sm text-slate-500">{deviceCount} Devices</span>
@@ -37,4 +50,4 @@ const CategoryCard = () => {
   );
 };
 
-export default CategoryCard
+export default CategoryCard;
