@@ -3,6 +3,8 @@
 -- RESTART IDENTITY COMMAND RESETS PostgreSQL index count to Zero 
 -- Execute commands in this order only 
 
+TRUNCATE TABLE wishlist RESTART IDENTITY CASCADE;
+TRUNCATE TABLE notifications RESTART IDENTITY CASCADE;
 TRUNCATE TABLE listing_images RESTART IDENTITY CASCADE;
 TRUNCATE TABLE reviews RESTART IDENTITY CASCADE;
 TRUNCATE TABLE transactions RESTART IDENTITY CASCADE;
@@ -18,6 +20,8 @@ DROP TABLE IF EXISTS bookings CASCADE;
 DROP TABLE IF EXISTS listing CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS listing_images CASCADE;
+DROP TABLE IF EXISTS notifications CASCADE;
+DROP TABLE IF EXISTS wishlist CASCADE;
 
 DROP TYPE IF EXISTS user_role_enum;
 DROP TYPE IF EXISTS id_proof_enum;
@@ -31,7 +35,7 @@ DROP TYPE IF EXISTS transaction_status_enum;
 CREATE TYPE user_role_enum AS ENUM(
     'OWNER',
     'RENTER',
-    'BOTH'
+    'ADMIN'
 );
 
 CREATE TYPE id_proof_enum AS ENUM(
@@ -43,10 +47,12 @@ CREATE TYPE id_proof_enum AS ENUM(
 
 CREATE TYPE booking_status-enum AS ENUM(
     'PENDING',
-    'CONFIRMED',
-    'ACTIVE',
+    'ACCEPTED',
+    'REJECTED',
+    'PAID',
+    'SHIPPED',
     'COMPLETED',
-    'DISPUTED',
+    'REFUNDED',
     'CANCELLED'
 );
 
@@ -109,6 +115,7 @@ CREATE TABLE listings(
     security_deposit DECIMAL(10,2) NOT NULL,
 
     health_score INT DEFAULT 100 CHECK(health_score BETWEEN 1 AND 100),
+    specifications JSONB,
 
     location VARCHAR(150),
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
@@ -164,4 +171,38 @@ CREATE TABLE listing_images (
     is_cover BOOLEAN NOT NULL DEFAULT FALSE,    
     display_order INT NOT NULL DEFAULT 0,  -- Controls gallery order (0, 1, 2, 3...)
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- V6 NOTIFICATION TABLE CREATION
+
+CREATE TABLE notifications (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(user_id),
+    booking_id BIGINT REFERENCES bookings(booking_id),
+    message TEXT NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+)
+
+--V7 WHISLIST TABLE CREATION
+
+CREATE TABLE wishlist (
+    wishlist_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    added_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT fk_wishlist_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_wishlist_product
+        FOREIGN KEY (product_id)
+        REFERENCES listings(product_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT uq_wishlist_user_product
+        UNIQUE (user_id, product_id)
 );
