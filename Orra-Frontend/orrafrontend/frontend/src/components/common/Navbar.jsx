@@ -1,5 +1,4 @@
 
-import React from "react";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import {
@@ -124,11 +123,11 @@ const Navbar = () => {
             <DropdownMenuContent className="w-[220px] p-3">
               <div className="px-2 pb-2">
                 <p className="text-sm font-semibold">
-                  Hello {user?.firstName}
+                  {/* Hello {firstName} */}
                 </p>
 
                 <p className="text-xs text-gray-500">
-                  {user?.email}
+                  {/* {email} */}
                 </p>
               </div>
 
