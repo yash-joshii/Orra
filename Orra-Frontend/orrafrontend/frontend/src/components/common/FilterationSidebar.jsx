@@ -4,7 +4,7 @@ import { SlidersHorizontal, Star } from "lucide-react";
 const categories = [
   "ALL",
   "LAPTOPS",
-  "CAMERAS",
+  "CAMERA",
   "GAMING_CONSOLES",
   "DRONES",
   "SMARTPHONES",
@@ -18,7 +18,9 @@ const categories = [
   "PROJECTORS",
   "MICROPHONES",
   "TABLETS",
-  "ACCESSORIES"
+  "ACCESSORIES",
+  "REFRIGERATOR",
+  "TV"
 ];
 
 const FilterationSidebar = () => {

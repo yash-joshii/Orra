@@ -1,8 +1,8 @@
 package com.orra.Orrabackend.enums;
 
 public enum Category {
-    LAPTOPS,
-    CAMERAS,
+    LAPTOP,
+    CAMERA,
     GAMING_CONSOLES,
     DRONES,
     SMARTPHONES,
@@ -16,5 +16,7 @@ public enum Category {
     PROJECTORS,
     MICROPHONES,
     TABLETS,
-    ACCESSORIES
+    ACCESSORIES,
+    REFRIGERATOR,
+    TV,
 }
