@@ -8,8 +8,12 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/signin")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class SignInController {
 
     @Autowired
@@ -25,5 +29,13 @@ public class SignInController {
         session.setAttribute("userId", response.getUserId());
 
         return response;
+    }
+
+    @PostMapping("/logout")
+    public Map<String, String> logout(HttpSession session) {
+
+        session.invalidate();
+
+        return Collections.singletonMap("message", "Logout Successful");
     }
 }

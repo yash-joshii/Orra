@@ -16,22 +16,22 @@ public class SignInService {
     public SignInResponseDTO signIn(SignInRequestDTO dto) {
 
         System.out.println("==================================");
-        System.out.println("Email Received    : '" + dto.getEmail() + "'");
+        System.out.println("Username Received : " + dto.getUsername());
         System.out.println("Password Received : '" + dto.getPassword() + "'");
         System.out.println("==================================");
 
         // Check for empty email
-        if (dto.getEmail() == null || dto.getEmail().trim().isEmpty()) {
+        if(dto.getUsername()==null || dto.getUsername().trim().isEmpty()) {
             throw new RuntimeException("Email is required");
         }
 
         // Check for empty password
         if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
-            throw new RuntimeException("Password is required");
+            throw new RuntimeException("Username is required");
         }
 
         // Find user by email
-        User user = signInRepository.findByEmail(dto.getEmail());
+        User user = signInRepository.findByUsername(dto.getUsername());
 
         System.out.println("User Found : " + user);
 
