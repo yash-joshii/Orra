@@ -1,7 +1,9 @@
 
-import React from "react";
 import { useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { logout } from "@/redux/slices/authslices";
+import { LogoutUser } from "@/api/authApi";
 import {
   Search,
   Bell,
@@ -26,12 +28,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import logo from "../../assets/logo/orralogo.svg";
-import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
-  const navigate = useNavigate(); // also missing, see #2 below
-  const user = useSelector((state) => state.auth.user);
+
+const navigate = useNavigate();
+const dispatch = useDispatch();
+
+const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,6 +43,18 @@ const Navbar = () => {
     };
     window.addEventListener("scroll", handleScroll);
   }, []);
+
+  const handleLogout = async () => {
+  try {
+    await LogoutUser();
+
+    dispatch(logout());
+
+    navigate("/login");
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -93,13 +109,12 @@ const Navbar = () => {
             />
           </div>
 
-          {/* <button className="relative">
+          <button className="relative">
             <Bell className="w-5 h-5 text-gray-600" />
 
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-teal-500 rounded-full"></span>
-          </button> */}
-            <NotificationBell />
-            
+          </button>
+
           <button className="relative">
             <Calendar className="text-black w-5 h-5" />
 
@@ -108,65 +123,74 @@ const Navbar = () => {
             </span>
           </button>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="flex items-center gap-2 p-6 bg-transparent border-none hover:rounded-[40px] hover:border-gray-300 hover:border hover:bg-gray-100 transition duration-200 focus:bg-background focus:border-none">
-                <img
-                  src="https://i.pravatar.cc/40"
-                  alt="profile"
-                  className="w-8 h-8 rounded-full"
-                />
+          {user ? (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button className="flex items-center gap-2 p-6 bg-transparent border-none hover:rounded-[40px] hover:border-gray-300 hover:border hover:bg-gray-100 transition duration-200 focus:bg-background focus:border-none">
+        <img
+          src="https://i.pravatar.cc/40"
+          alt="profile"
+          className="w-8 h-8 rounded-full"
+        />
 
-                <ChevronDown className="w-4 h-4 text-gray-600" />
-              </Button>
-            </DropdownMenuTrigger>
+        <ChevronDown className="w-4 h-4 text-gray-600" />
+      </Button>
+    </DropdownMenuTrigger>
 
-            <DropdownMenuContent className="w-[220px] p-3">
-              <div className="px-2 pb-2">
-                <p className="text-sm font-semibold">
-                  Hello {user?.firstName}
-                </p>
+    <DropdownMenuContent className="w-[220px] p-3">
+      <DropdownMenuSeparator />
 
-                <p className="text-xs text-gray-500">
-                  {user?.email}
-                </p>
-              </div>
+      <DropdownMenuItem>
+        <UserIcon className="mr-2 h-4 w-4" />
+        Profile
+      </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
+      <DropdownMenuItem>
+        <Package className="mr-2 h-4 w-4" />
+        My Products
+      </DropdownMenuItem>
 
-              <DropdownMenuItem>
-                <UserIcon className="mr-2 h-4 w-4" />
-                Profile
-              </DropdownMenuItem>
+      <DropdownMenuItem>
+        <LayoutDashboardIcon className="mr-2 h-4 w-4" />
+        My Bookings
+      </DropdownMenuItem>
 
-              <DropdownMenuItem>
-                <Package className="mr-2 h-4 w-4" />
-                My Products
-              </DropdownMenuItem>
+      <DropdownMenuItem>
+        <Heart className="mr-2 h-4 w-4" />
+        Wishlist
+      </DropdownMenuItem>
 
-              <DropdownMenuItem>
-                <LayoutDashboardIcon className="mr-2 h-4 w-4" />
-                My Bookings
-              </DropdownMenuItem>
+      <DropdownMenuSeparator />
 
-              <DropdownMenuItem>
-                <Heart className="mr-2 h-4 w-4" />
-                Wishlist
-              </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => navigate("/settings")}>
+        <SettingsIcon className="mr-2 h-4 w-4" />
+        Settings
+      </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
+      <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
+        <LogOutIcon className="mr-2 h-4 w-4" />
+        Log out
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+) : (
+  <div className="flex items-center gap-3">
+    <Button
+      variant="outline"
+      className="rounded-full px-6"
+      onClick={() => navigate("/login")}
+    >
+      Login
+    </Button>
 
-              <DropdownMenuItem onClick={()=>navigate("/settings")}>
-                <SettingsIcon className="mr-2 h-4 w-4"   />
-                Settings
-              </DropdownMenuItem>
-
-              <DropdownMenuItem className="text-red-600">
-                <LogOutIcon className="mr-2 h-4 w-4" />
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+    <Button
+      className="rounded-full px-6 bg-indigo-600 hover:bg-indigo-700"
+      onClick={() => navigate("/signup")}
+    >
+      Sign Up
+    </Button>
+  </div>
+)}
         </div>
       </div>
     </header>

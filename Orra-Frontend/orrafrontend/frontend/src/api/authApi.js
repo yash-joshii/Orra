@@ -21,10 +21,12 @@ export const SendOtp = async (phone) => {
 };
 
 
-// VERIFY OTP (LOGIN)
-
 export const SignIn = async (data) => {
-  console.log("Verify OTP:", data);
+    return axiosinstance.post("/signin", data);
+};
 
-  return await axiosinstance.post("/signin", data);
+// LOGOUT
+
+export const LogoutUser = async () => {
+  return await axiosinstance.post("/signin/logout");
 };

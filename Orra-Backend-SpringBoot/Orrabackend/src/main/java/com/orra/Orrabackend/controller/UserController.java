@@ -8,13 +8,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    @Autowired
+
     private final UserService service;
-    public UserController(UserService service) { this.service = service; }
+
+    public UserController(UserService service) {
+        this.service = service;
+    }
 
     @GetMapping
     public ResponseEntity<List<User>> getAll() {
