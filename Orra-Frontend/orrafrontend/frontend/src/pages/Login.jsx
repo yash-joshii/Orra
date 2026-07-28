@@ -1,4 +1,4 @@
-import { SignIn } from "@/api/authApi";
+import { GetCurrentUser, SignIn } from "@/api/authApi";
 import { setError, setLoading, setUser } from "@/redux/slices/authslices";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -15,32 +15,33 @@ const Login = () => {
   const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    console.log(formData);
+  console.log(formData);
 
-    try {
-      dispatch(setLoading(true));
+  try {
+    dispatch(setLoading(true));
 
-      const response = await SignIn(formData);
+    await SignIn(formData);
 
-      dispatch(setUser(response.data));
+    const meResponse = await GetCurrentUser();
+    dispatch(setUser(meResponse.data));
 
-      dispatch(setLoading(false));
+    dispatch(setLoading(false));
 
-      toast.success("Login Successful");
+    toast.success("Login Successful");
 
-      navigate("/");
-    } catch (error) {
-      dispatch(setLoading(false));
+    navigate("/");
+  } catch (error) {
+    dispatch(setLoading(false));
 
-      dispatch(setError(error.message));
+    dispatch(setError(error.message));
 
-      toast.error("Invalid Email or Password");
+    toast.error("Invalid Email or Password");
 
-      console.log(error);
-    }
-  };
+    console.log(error);
+  }
+};
 
   return (
     <div className="min-h-screen flex">

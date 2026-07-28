@@ -1,30 +1,52 @@
+import { supabase } from "@/lib/supabaseclient";
 import axiosinstance from "./Axiosconfig";
 
-
 // SIGNUP
-
 export const SignupUser = async (data) => {
   console.log("Signup Request:", data);
 
-  return await axiosinstance.post("/api/users/signup", data);
-};
+  // Step 1 — create auth user in Supabase (handles password)
+  const { data: authData, error } = await supabase.auth.signUp({
+    email: data.email,
+    password: data.password,
+  });
+  if (error) throw error;
 
-
-// SEND OTP
-
-export const SendOtp = async (phone) => {
-  console.log("Phone:", phone);
-
-  return await axiosinstance.post("/signin/send-otp", {
-    phone: phone,
+  // Step 2 — create profile row in Spring Boot, linked by supabase user id
+  const { password, confirmPassword, ...profileData } = data;
+  return await axiosinstance.post("/api/users/signup", {
+    ...profileData,
+    supabaseUserId: authData.user.id,
   });
 };
 
 
-// VERIFY OTP (LOGIN)
+// Restore session on page refresh
+export const GetCurrentUser = async () => {
+  return await axiosinstance.get("/api/auth/me", { withCredentials: true });
+};
+
+// Establish httpOnly cookie session after Supabase login
+export const CreateSession = async (token) => {
+  return await axiosinstance.post("/api/auth/session", { token }, { withCredentials: true });
+};
+
+export const Logout = async () => {
+  return await axiosinstance.post("/api/auth/logout", {}, { withCredentials: true });
+};
 
 export const SignIn = async (data) => {
-  console.log("Verify OTP:", data);
+  console.log("Sign In:", data);
 
-  return await axiosinstance.post("/signin", data);
+  // Step 1 — authenticate with Supabase
+  const { data: authData, error } = await supabase.auth.signInWithPassword({
+    email: data.email,
+    password: data.password,
+  });
+  if (error) throw error;
+
+  // Step 2 — establish httpOnly cookie session on Spring Boot
+  await axiosinstance.post("/api/auth/session", { token: authData.session.access_token }, { withCredentials: true });
+
+  return authData;
 };
