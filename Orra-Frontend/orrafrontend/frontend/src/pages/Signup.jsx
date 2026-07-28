@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field";
@@ -17,20 +18,6 @@ const Signup = () => {
     confirmPassword: "",
   });
   const navigate = useNavigate();
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   console.log(formData);
-  //   try {
-  //     const response = SignupUser(formData);
-  //     console.log(response);
-  //     toast.success("Signup Successful");
-  //     navigate("/login");
-  //   } catch (error) {
-  //     console.log(error);
-  //     toast.error("Signup Failed");
-  //   }
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

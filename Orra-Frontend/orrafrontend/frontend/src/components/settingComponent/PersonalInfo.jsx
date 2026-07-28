@@ -1,12 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
+import { getUser, updateUserProfile } from "@/api/userApi";
 
-import { getUser } from "@/api/userApi";
-
-import { setError, setLoading, setUser } from "@/redux/slices/userprofileSlice";
-
-
+import {
+  setError,
+  setLoading,
+  setUser,
+  updateUser,
+} from "@/redux/slices/userprofileSlice";
 
 function PersonalInfo() {
   const dispatch = useDispatch();
@@ -14,6 +16,7 @@ function PersonalInfo() {
   const user = useSelector((state) => state.userProfile.user);
   const loading = useSelector((state) => state.userProfile.loading);
   const error = useSelector((state) => state.userProfile.error);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     fetchUser();
@@ -40,17 +43,32 @@ function PersonalInfo() {
     dispatch(
       updateUser({
         [name]: value,
-      })
+      }),
     );
   };
 
-  const handleSave = () => {
-    console.log("Updated User :", user);
+ const handleSave = async () => {
+  try {
+    dispatch(setLoading(true));
 
- 
+    const response = await updateUserProfile(user);
+
+    dispatch(setUser(response.data));
+
+    dispatch(setLoading(false));
 
     alert("Profile updated successfully!");
-  };
+
+    setIsEditing(false);
+
+  } catch (err) {
+    dispatch(setLoading(false));
+
+    dispatch(setError(err.message));
+
+    alert("Failed to update profile");
+  }
+};
 
   if (loading) {
     return <div>Loading...</div>;
@@ -66,17 +84,14 @@ function PersonalInfo() {
 
   return (
     <div>
-      <h2 className="text-3xl font-semibold mb-8">
-        Personal Information
-      </h2>
+      <h2 className="text-3xl font-semibold mb-8">Personal Information</h2>
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block mb-2">
-            First Name
-          </label>
+          <label className="block mb-2">First Name</label>
 
           <input
+            disabled={!isEditing}
             type="text"
             name="firstName"
             value={user.firstName || ""}
@@ -86,11 +101,10 @@ function PersonalInfo() {
         </div>
 
         <div>
-          <label className="block mb-2">
-            Last Name
-          </label>
+          <label className="block mb-2">Last Name</label>
 
           <input
+            disabled={!isEditing}
             type="text"
             name="lastName"
             value={user.lastName || ""}
@@ -101,11 +115,10 @@ function PersonalInfo() {
       </div>
 
       <div className="mb-4">
-        <label className="block mb-2">
-          Email Address
-        </label>
+        <label className="block mb-2">Email Address</label>
 
         <input
+          disabled={!isEditing}
           type="email"
           name="email"
           value={user.email || ""}
@@ -115,11 +128,10 @@ function PersonalInfo() {
       </div>
 
       <div className="mb-4">
-        <label className="block mb-2">
-          Phone Number
-        </label>
+        <label className="block mb-2">Phone Number</label>
 
         <input
+          disabled={!isEditing}
           type="text"
           name="phone"
           value={user.phone || ""}
@@ -129,11 +141,10 @@ function PersonalInfo() {
       </div>
 
       <div className="mb-4">
-        <label className="block mb-2">
-          Location
-        </label>
+        <label className="block mb-2">Location</label>
 
         <input
+          disabled={!isEditing}
           type="text"
           name="location"
           value={user.location || ""}
@@ -143,11 +154,10 @@ function PersonalInfo() {
       </div>
 
       <div className="mb-6">
-        <label className="block mb-2">
-          Bio
-        </label>
+        <label className="block mb-2">Bio</label>
 
         <textarea
+          disabled={!isEditing}
           rows="4"
           name="bio"
           value={user.bio || ""}
@@ -156,14 +166,21 @@ function PersonalInfo() {
         />
       </div>
 
-      <div className="flex justify-end">
+      <button
+        onClick={() => setIsEditing(true)}
+        className="px-5 py-2 border rounded-lg"
+      >
+        Edit
+      </button>
+
+      {isEditing && (
         <button
           onClick={handleSave}
           className="bg-purple-600 text-white px-6 py-3 rounded-lg"
         >
           Save Changes
         </button>
-      </div>
+      )}
     </div>
   );
 }

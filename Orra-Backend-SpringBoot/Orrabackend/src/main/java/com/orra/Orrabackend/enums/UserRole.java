@@ -1,8 +1,7 @@
 package com.orra.Orrabackend.enums;
 
 public enum UserRole {
-    renter,
-    owner,
-    both,
-    admin
+    BUYER,
+    OWNER,
+    ADMIN
 }
