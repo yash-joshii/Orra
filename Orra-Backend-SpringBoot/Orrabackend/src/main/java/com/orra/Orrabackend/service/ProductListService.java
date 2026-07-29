@@ -1,6 +1,7 @@
 // ProductListService.java
 package com.orra.Orrabackend.service;
 
+import com.orra.Orrabackend.exception.ProductNotFoundException;
 import com.orra.Orrabackend.model.ProductList;
 import com.orra.Orrabackend.model.Productimage;
 import com.orra.Orrabackend.repository.ProductListImageRepository;
@@ -23,19 +24,27 @@ public class ProductListService {
     }
 
     public ProductList getOne(Long id) {
-        return repo.findById(id).orElse(null);
+        return repo.findById(id)
+                .orElseThrow(() ->
+                        new ProductNotFoundException("Product not found with id: " + id));
     }
 
     public ProductList create(ProductList product) {
         return repo.save(product);
     }
-
+    public List<ProductList> searchProducts(String keyword) {
+        return repo.searchProducts(keyword);
+    }
     public ProductList update(ProductList product) {
-        ProductList existing = repo.findById(product.getProductId()).orElse(null);
 
-        if (existing != null) {
-            if (product.getProductName() != null)
-                existing.setProductName(product.getProductName());
+
+        ProductList existing = repo.findById(product.getProductId())
+                .orElseThrow(() ->
+                        new ProductNotFoundException(
+                                "Product not found with id: " + product.getProductId()));
+
+        if (product.getProductName() != null)
+            existing.setProductName(product.getProductName());
 
             if (product.getCategory() != null)
                 existing.setCategory(product.getCategory());
@@ -63,15 +72,22 @@ public class ProductListService {
 
             return repo.save(existing);
         }
-        return null;
-    }
 
-    public void delete(Long id) {
-        repo.deleteById(id);
-        repo.findById(id);
-    }
+
+
+public void delete(Long id) {
+
+    ProductList product = repo.findById(id)
+            .orElseThrow(() ->
+                    new ProductNotFoundException("Product not found with id: " + id));
+
+    repo.delete(product);
+}
 
     public ProductList Createwithimage(ProductList product, List<String> images) {
+        System.out.println("Serial Number = " + product.getSerialOrImei());
+        System.out.println("Brand = " + product.getBrand());
+        System.out.println("Product Name = " + product.getProductName());
         ProductList saved = repo.save(product);
 
         if (images != null && !images.isEmpty()) {

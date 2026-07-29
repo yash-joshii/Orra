@@ -1,17 +1,11 @@
-package com.orra.Orrabackend.dto.signup;
+package com.orra.Orrabackend.dto.SignIn.dto.signup;
 
-import com.orra.Orrabackend.enums.UserRole;
 import lombok.Data;
 
 @Data
 public class SignupRequestDTO {
-
     private String username;
     private String name;
     private String email;
     private String password;
-    private String phone;
-    private String address;
-
-    private UserRole role;
 }

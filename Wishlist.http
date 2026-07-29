@@ -1,0 +1,6 @@
+### Add request to example server
+POST http://localhost:8081/wishlist/add?userId=1&productId=1
+Accept: application/json
+
+
+###

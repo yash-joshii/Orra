@@ -6,6 +6,7 @@ import com.orra.Orrabackend.model.ProductList;
 import com.orra.Orrabackend.repository.ProductListImageRepository;
 import com.orra.Orrabackend.repository.ProductListRepository;
 import com.orra.Orrabackend.service.ProductListService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+
 public class ProductListController {
     @Autowired
     private ProductListService productlistservice;
@@ -26,13 +28,25 @@ public class ProductListController {
         return new ResponseEntity<>(productlistservice.getAll(), HttpStatus.OK);
     }
 
+
+    @GetMapping("/products/search")
+    public ResponseEntity<List<ProductList>> searchProducts(
+            @RequestParam String keyword) {
+
+        return new ResponseEntity<>(
+                productlistservice.searchProducts(keyword),
+                HttpStatus.OK
+        );
+    }
+
     @GetMapping("/product/{id}")
     public ResponseEntity<ProductList> getOne(@PathVariable Long id) {
         return new ResponseEntity<>(productlistservice.getOne(id), HttpStatus.OK);
     }
 
+
     @PostMapping("/createProduct")
-    public ResponseEntity<ProductList> create(@RequestBody ProductlistRequestDTO dto) {
+    public ResponseEntity<ProductList> create(@Valid @RequestBody ProductlistRequestDTO dto) {
        ProductList saved = productlistservice.Createwithimage(dto.getProduct(),dto.getImages());
 
         return new ResponseEntity<>(saved, HttpStatus.CREATED);

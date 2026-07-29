@@ -21,7 +21,7 @@ public class UserService {
 
     public User getById(Long id){
         return repo.findById(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " +id));
     }
 
     public User signup(SignupRequestDTO dto){
@@ -32,7 +32,7 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
 
-        user.setRole(UserRole.both);   // default
+        user.setRole(dto.getRole());      // default
         user.setAddress("NA");    // temporary
 
         user.setIdProof(UserIdProof.NONE);
