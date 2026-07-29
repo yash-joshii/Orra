@@ -5,7 +5,7 @@ public enum Category {
     CAMERA,
     GAMING_CONSOLES,
     DRONES,
-    SMARTPHONES,
+    MOBILE,
     SMART_WATCHES,
     AUDIO_DEVICES,
     MONITORS,
