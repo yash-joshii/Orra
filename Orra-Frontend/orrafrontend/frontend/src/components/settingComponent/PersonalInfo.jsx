@@ -64,7 +64,7 @@ function PersonalInfo() {
   } catch (err) {
     dispatch(setLoading(false));
 
-    dispatch(setError(err.message));
+    dispatch(setError(error.message));
 
     alert("Failed to update profile");
   }

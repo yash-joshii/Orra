@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { logout } from "@/redux/slices/authslices";
-import { LogoutUser } from "@/api/authApi";
+import { Logout } from "@/api/authApi";
 import {
   Search,
   Bell,
@@ -46,7 +46,7 @@ const { user } = useSelector((state) => state.auth);
 
   const handleLogout = async () => {
   try {
-    await LogoutUser();
+    await Logout;
 
     dispatch(logout());
 

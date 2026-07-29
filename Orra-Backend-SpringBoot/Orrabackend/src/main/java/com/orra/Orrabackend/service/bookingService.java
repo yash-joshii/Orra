@@ -1,5 +1,6 @@
 package com.orra.Orrabackend.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import com.orra.Orrabackend.dto.booking.BookingRequestDTO;
 import com.orra.Orrabackend.dto.booking.BookingResponseDTO;
 import com.orra.Orrabackend.dto.transaction.TransactionRequestDTO;
@@ -74,6 +75,7 @@ public class bookingService {
 
     private static final BigDecimal PLATFORM_FEE_RATE = new BigDecimal("0.10");
 
+    @Transactional
     public BookingResponseDTO payForBooking(Long bookingId){
 
         Booking booking = getBookingOrThrow(bookingId);

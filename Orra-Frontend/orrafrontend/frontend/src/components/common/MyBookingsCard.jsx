@@ -7,16 +7,20 @@ import { Calendar, MapPinIcon } from 'lucide-react'
 
 // badgeConfig maps a booking's derived "displayStatus" to its label + classes
 const badgeConfig = {
-    currently_rented: {
-        label: "Currently Rented",
+    active: {
+        label: "Active/Paid",
         className: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
     },
-    upcoming: {
-        label: "Upcoming",
+    completed: {
+        label: "Completed",
         className: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
     },
-    unavailable: {
-        label: "Unavailable",
+    cancelled: {
+        label: "Cancelled/Rejected",
+        className: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
+    },
+    reuested: {
+        label: "Requested",
         className: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
     }
 }

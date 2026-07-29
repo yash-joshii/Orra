@@ -88,7 +88,7 @@ const ProductCard = ({ data }) => {
         />
         <div className="ownername">
           <span className="flex gap-[7px] text-[13px] text-gray-500 font-medium items-center">
-            {data.owner.name}
+          {data.owner?.name || "Unknown Owner"}
             <CheckCircle2 className="w-3.5 h-3.5 !text-green-500" />
           </span>
         </div>

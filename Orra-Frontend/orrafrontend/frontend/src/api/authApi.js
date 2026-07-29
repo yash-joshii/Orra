@@ -1,32 +1,38 @@
+import { supabase } from "@/lib/supabaseclient";
 import axiosinstance from "./Axiosconfig";
 
-
 // SIGNUP
-
 export const SignupUser = async (data) => {
   console.log("Signup Request:", data);
-
   return await axiosinstance.post("/api/users/signup", data);
 };
 
-
-// SEND OTP
-
-export const SendOtp = async (phone) => {
-  console.log("Phone:", phone);
-
-  return await axiosinstance.post("/signin/send-otp", {
-    phone: phone,
-  });
+// Restore session on page refresh
+export const GetCurrentUser = async () => {
+  return await axiosinstance.get("/api/auth/me", { withCredentials: true });
 };
 
+// Establish httpOnly cookie session after Supabase login
+export const CreateSession = async (token) => {
+  return await axiosinstance.post("/api/auth/session", { token }, { withCredentials: true });
+};
+
+export const Logout = async () => {
+  return await axiosinstance.post("/api/auth/logout", {}, { withCredentials: true });
+};
 
 export const SignIn = async (data) => {
-    return axiosinstance.post("/signin", data);
-};
+  console.log("Sign In:", data);
 
-// LOGOUT
+  // Step 1 — authenticate with Supabase
+  const { data: authData, error } = await supabase.auth.signInWithPassword({
+    email: data.email,
+    password: data.password,
+  });
+  if (error) throw error;
 
-export const LogoutUser = async () => {
-  return await axiosinstance.post("/signin/logout");
+  // Step 2 — establish httpOnly cookie session on Spring Boot
+  await axiosinstance.post("/api/auth/session", { token: authData.session.access_token }, { withCredentials: true });
+
+  return authData;
 };

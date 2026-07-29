@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -55,8 +56,8 @@ public class UserService {
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         user.setPhone(dto.getPhone());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-
+//        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setSupabaseId(UUID.fromString(dto.getSupabaseUserId()));
         user.setRoles(new HashSet<>());
 
         user.setRoles(new HashSet<>(Set.of(UserRole.BUYER)));  // default — matches your "everyone starts BUYER" rule

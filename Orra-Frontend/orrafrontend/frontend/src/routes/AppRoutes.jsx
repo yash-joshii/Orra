@@ -16,6 +16,7 @@ import ProductCard from "@/components/common/ProductCard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Bookings from "@/pages/Bookings";
 import MyBookings from "@/pages/MyBookings";
+import MyBookings from "@/pages/MyBookings";
 // import { Route, Routes } from "react-router-dom";
 
 const AppRoutes = () => {
@@ -41,7 +42,11 @@ const AppRoutes = () => {
           
         <Route path="/dashboard" element={<Dashboard />} />
       </Route>
-
+<Route path="/mybookings" element={
+          <ProtectedRoute>
+        <MyBookings/>
+          </ProtectedRoute>
+          } />
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
       <Route path="/product" element={<ProductCard />} />

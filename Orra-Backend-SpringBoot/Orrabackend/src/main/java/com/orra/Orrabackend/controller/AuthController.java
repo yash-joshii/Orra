@@ -27,7 +27,7 @@ public class AuthController {
     public ResponseEntity<?> createSession(@RequestBody TokenRequest req, HttpServletResponse response){
         Cookie cookie =  new Cookie("sb-access-token", req.getToken());
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge(60*60);
         cookie.setAttribute("SamaSite", "Lax");
@@ -37,16 +37,28 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
-        if (authentication == null) {
+        if (authentication == null || authentication.getPrincipal() == null) {
             return ResponseEntity.status(401).build();
         }
-        String supabaseUserId = (String) authentication.getPrincipal();
-        User user = userrepository.findBySupabaseId(UUID.fromString(supabaseUserId))
+        Long userId = (Long) authentication.getPrincipal();
+        User user = userrepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         return ResponseEntity.ok(Map.of(
                 "userId", user.getId(),
                 "roles", user.getRoles()
         ));
+    }
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("sb-access-token", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // must match the flags used when the cookie was set
+        response.addCookie(cookie);
+        return ResponseEntity.ok().build();
     }
 }
