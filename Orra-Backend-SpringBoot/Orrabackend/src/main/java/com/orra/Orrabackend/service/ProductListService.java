@@ -105,6 +105,7 @@ import com.orra.Orrabackend.repository.ProductListImageRepository;
 import com.orra.Orrabackend.repository.ProductListRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -132,10 +133,13 @@ public class ProductListService {
         return repo.findById(id).orElse(null);
     }
 
+    @Transactional
     public ProductList create(ProductList product, Long userId) {
         userService.grantOwnerRole(userId);
+
         User owner = userService.getById(userId);
         product.setOwner(owner);
+
         return repo.save(product);
     }
 
@@ -190,7 +194,8 @@ public class ProductListService {
         repo.deleteById(id);
     }
 
-    public ProductList Createwithimage(ProductList product, List<String> images, Long userId) {
+    @Transactional
+    public ProductList CreateWithImage(ProductList product, List<String> images, Long userId) {
         userService.grantOwnerRole(userId);
         User owner = userService.getById(userId);
         product.setOwner(owner);

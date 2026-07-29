@@ -15,34 +15,31 @@ CREATE TABLE users (
 
     address TEXT,
 
-    roles TEXT[] NOT NULL DEFAULT ARRAY['BUYER'],
+    -- Supabase Auth User ID
+    supabase_id UUID UNIQUE NOT NULL,
+
+    -- A user can have one or more roles
+    roles app_user_role_enum[] NOT NULL
+        DEFAULT ARRAY['BUYER']::app_user_role_enum[],
 
     id_proof id_proof_enum NOT NULL,
 
-    -- Actual ID numbers
     pan_number VARCHAR(20),
+
     aadhaar_number VARCHAR(20),
 
-    is_verified BOOLEAN DEFAULT FALSE,
+    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    -- Validation logic (unchanged)
-    CHECK (
+    CONSTRAINT roles_not_empty
+        CHECK (array_length(roles, 1) > 0),
+
+    CONSTRAINT id_proof_validation CHECK (
         (id_proof = 'PAN' AND pan_number IS NOT NULL AND aadhaar_number IS NULL)
         OR
         (id_proof = 'AADHAAR' AND aadhaar_number IS NOT NULL AND pan_number IS NULL)
         OR
-        (id_proof = 'both' AND pan_number IS NOT NULL AND aadhaar_number IS NOT NULL)
-    ),
-
-    -- Roles array constraints
-    CONSTRAINT roles_not_empty 
-        CHECK (array_length(roles, 1) > 0),
-
-    CONSTRAINT roles_valid_values 
-        CHECK (roles <@ ARRAY['BUYER','OWNER','ADMIN']::text[]),
-
-    CONSTRAINT roles_must_include_buyer 
-        CHECK ('BUYER' = ANY(roles))
+        (id_proof = 'BOTH' AND pan_number IS NOT NULL AND aadhaar_number IS NOT NULL)
+    )
 );

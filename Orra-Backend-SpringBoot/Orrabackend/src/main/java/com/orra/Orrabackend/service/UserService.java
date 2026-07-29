@@ -9,6 +9,7 @@ import com.orra.Orrabackend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -37,6 +38,7 @@ public class UserService {
     }
 
     public void grantOwnerRole(Long userId) {
+
         User user = repo.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -55,7 +57,9 @@ public class UserService {
         user.setPhone(dto.getPhone());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-        user.setRoles(Set.of(UserRole.BUYER));   // default — matches your "everyone starts BUYER" rule
+        user.setRoles(new HashSet<>());
+
+        user.setRoles(new HashSet<>(Set.of(UserRole.BUYER)));  // default — matches your "everyone starts BUYER" rule
         user.setAddress("NA");                    // temporary
 
         user.setIdProof(UserIdProof.NONE);

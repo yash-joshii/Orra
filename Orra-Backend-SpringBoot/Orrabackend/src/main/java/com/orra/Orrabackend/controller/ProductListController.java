@@ -96,7 +96,7 @@ public class ProductListController {
     public ResponseEntity<ProductList> create(@RequestBody ProductlistRequestDTO dto,
                                               Authentication authentication) {
         Long userId = (Long) authentication.getPrincipal();
-        ProductList saved = productlistservice.Createwithimage(dto.getProduct(), dto.getImages(), userId);
+        ProductList saved = productlistservice.CreateWithImage(dto.getProduct(), dto.getImages(), userId);
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
