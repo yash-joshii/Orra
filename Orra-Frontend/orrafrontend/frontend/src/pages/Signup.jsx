@@ -21,6 +21,7 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  console.log("Password typed:", JSON.stringify(formData.password));
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

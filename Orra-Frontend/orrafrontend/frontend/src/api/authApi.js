@@ -4,22 +4,8 @@ import axiosinstance from "./Axiosconfig";
 // SIGNUP
 export const SignupUser = async (data) => {
   console.log("Signup Request:", data);
-
-  // Step 1 — create auth user in Supabase (handles password)
-  const { data: authData, error } = await supabase.auth.signUp({
-    email: data.email,
-    password: data.password,
-  });
-  if (error) throw error;
-
-  // Step 2 — create profile row in Spring Boot, linked by supabase user id
-  const { password, confirmPassword, ...profileData } = data;
-  return await axiosinstance.post("/api/users/signup", {
-    ...profileData,
-    supabaseUserId: authData.user.id,
-  });
+  return await axiosinstance.post("/api/users/signup", data);
 };
-
 
 // Restore session on page refresh
 export const GetCurrentUser = async () => {
