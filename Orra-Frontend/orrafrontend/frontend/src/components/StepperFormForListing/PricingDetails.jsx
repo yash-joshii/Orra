@@ -13,7 +13,7 @@ const PricingDetails = ({ prev, next, formData, setFormData }) => {
             ...prev,
             pricing: {
                 ...prev.pricing,
-                  originalPrice: e.target.value,
+                  purchasePrice: e.target.value,
                   securityDeposit: securityDeposit.toFixed(2),
                   rentalPrice: rentalPrice.toFixed(2),
             },
@@ -81,7 +81,7 @@ const PricingDetails = ({ prev, next, formData, setFormData }) => {
                         <input
                             type="number"
                             placeholder="e.g. 100000"
-                            value={formData.pricing?.originalPrice || ""}
+                           value={formData.pricing?.purchasePrice || ""}
                             onChange={handlePriceChange}
                             className="w-full h-12 rounded-xl border border-gray-300 px-4 outline-none focus:ring-2 focus:ring-[#5B4CF6]"
                         />

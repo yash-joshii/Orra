@@ -2,15 +2,33 @@ import { ImagePlus, Info, Trash2 } from 'lucide-react';
 import React from 'react'
 
 const UploadPhoto = ({prev, next, formData, setFormData}) => {
+const convertToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
+    reader.readAsDataURL(file);
 
-    setFormData((prev) => ({
-      ...prev,
-      images: [...(prev.images || []), ...files],
-    }));
-  };
+    reader.onload = () => resolve(reader.result);
+
+    reader.onerror = (error) => reject(error);
+  });
+};
+  const handleImageUpload = async (e) => {
+  const files = Array.from(e.target.files);
+
+  const uploadedImages = await Promise.all(
+    files.map(async (file, index) => ({
+      imageBase64: await convertToBase64(file),
+      isCover: (formData.images?.length || 0) + index === 0,
+      displayOrder: (formData.images?.length || 0) + index,
+    }))
+  );
+
+  setFormData((prev) => ({
+    ...prev,
+    images: [...(prev.images || []), ...uploadedImages],
+  }));
+};
 
   const removeImage = (index) => {
     setFormData((prev) => ({
@@ -90,7 +108,7 @@ const UploadPhoto = ({prev, next, formData, setFormData}) => {
                 >
 
                   <img
-                    src={URL.createObjectURL(image)}
+                    src={image.imageBase64}
                     alt=""
                     className="h-28 w-full object-cover rounded-xl"
                   />

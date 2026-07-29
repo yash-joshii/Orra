@@ -1,4 +1,4 @@
-import React from 'react'
+/*import React from 'react'
 
 const ReviewRating = () => {
   return (
@@ -6,4 +6,4 @@ const ReviewRating = () => {
   )
 }
 
-export default ReviewRating
+export default ReviewRating*/

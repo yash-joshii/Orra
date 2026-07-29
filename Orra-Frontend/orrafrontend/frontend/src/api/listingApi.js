@@ -7,3 +7,7 @@ export const getAllProducts = () => {
 export const getProductById = (id)=>{
   return axiosinstance.get(`/api/product/${id}`)
 }
+
+export const searchProducts = (keyword) => {
+  return axiosinstance.get(`/api/products/search?keyword=${keyword}`);
+};

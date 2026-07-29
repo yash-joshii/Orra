@@ -2,5 +2,6 @@ import axiosinstance from "./Axiosconfig"
 
 
 export const listdevice = (data)=>{
-    return axiosinstance.post("/api/createProduct");
-}
+    console.log(data);
+    return axiosinstance.post("/api/createProduct", data);
+}               

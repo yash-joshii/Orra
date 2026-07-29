@@ -99,8 +99,8 @@ const BasicDetails = ({next, formData, setFormData}) => {
 
             <input
               type="text"
-              name="modelName"
-              value={formData.basicDetails?.modelName || ""}
+              name="model"
+              value={formData.basicDetails?.model || ""}
               onChange={handleChange}
               placeholder="Sony A7 IV"
               className="w-full h-12 rounded-xl border border-gray-300 px-4 outline-none focus:ring-2 focus:ring-[#5B4CF6]"
@@ -116,8 +116,9 @@ const BasicDetails = ({next, formData, setFormData}) => {
 
             <input
               type="text"
-              name="deviceTitle"
-              value={formData.basicDetails?.deviceTitle || ""}
+              name="productName"
+              
+              value={formData.basicDetails?.productName || ""}
               onChange={handleChange}
               placeholder="Sony A7 IV + 24-70mm GM Lens"
               className="w-full h-12 rounded-xl border border-gray-300 px-4 outline-none focus:ring-2 focus:ring-[#5B4CF6]"

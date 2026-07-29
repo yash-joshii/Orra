@@ -60,13 +60,15 @@ const ProductDetails = ({prev, next, formData, setFormData}) => {
             </label>
 
             <input
-              type="text"
-              name="serialNumber"
-              value={formData.productDetails?.serialNumber || ""}
-              onChange={handleChange}
-              placeholder="Enter serial number"
-              className="w-full h-12 rounded-xl border border-gray-300 px-4 outline-none focus:ring-2 focus:ring-[#5B4CF6]"
-            />
+              
+  type="text"
+  name="serialorimei"
+  value={formData.productDetails?.serialorimei || ""}
+  onChange={handleChange}
+  placeholder="Enter serial number"
+  className="w-full h-12 rounded-xl border border-gray-300 px-4 outline-none focus:ring-2 focus:ring-[#5B4CF6]"
+/>
+            
           </div>
 
           {/* Purchase Year */}
@@ -105,7 +107,7 @@ const ProductDetails = ({prev, next, formData, setFormData}) => {
 
           {/* Product Condition */}
 
-          <div className="mb-7">
+          {/* <div className="mb-7">
             <label className="block text-sm mb-2 font-medium">
               Product Condition
             </label>
@@ -123,10 +125,9 @@ const ProductDetails = ({prev, next, formData, setFormData}) => {
               <option>Good</option>
               <option>Fair</option>
             </select>
-          </div>
+          </div> */}
 
           {/* Buttons */}
-
           <div className="flex justify-between">
             <button
               onClick={prev}

@@ -13,6 +13,7 @@ import Productpage from "@/pages/Productpage";
 import Signup from "@/pages/Signup";
 import WhyChooseOrra from "@/pages/WhyChooseOrra";
 import React from "react";
+import Wishlist from "@/pages/Wishlist";
 import { Route, Routes } from "react-router-dom";
 
 const AppRoutes = () => {
@@ -20,11 +21,11 @@ const AppRoutes = () => {
     <Routes>
       <Route element={<Mainlayout />}>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/browserdevices" element={<BrowseDevices />} 
          />
          <Route path="/listingdevice" element={<ListingDevice/>} />
-          
-
+          <Route path="/product/:id" element={<Productpage />} />
       </Route>
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />

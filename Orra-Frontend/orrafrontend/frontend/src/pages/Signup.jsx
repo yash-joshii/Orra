@@ -9,25 +9,29 @@ import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const [formData, setFormData] = React.useState({
-    username: "",
-    name: "",
-    email: "",
-    password: "",
-  });
+  username: "",
+  name: "",
+  email: "",
+  password: "",
+  phone: "",
+  address: "",
+  role: "",
+});
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
     try {
-      const response = SignupUser(formData);
-      console.log(response);
-      toast.success("Signup Successful");
-      navigate("/login");
-    } catch (error) {
-      console.log(error);
-      toast.error("Signup Failed");
-    }
+  const response = await SignupUser(formData);
+  console.log(response.data);
+
+  toast.success("Signup Successful");
+  navigate("/login");
+} catch (error) {
+ console.error(error.response?.data || error);
+  toast.error("Signup Failed");
+}
   };
 
   return (
@@ -126,6 +130,48 @@ const Signup = () => {
                   bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
                   />
                 </Field>
+                <Field className="mt-[15px]">
+  <FieldLabel>Phone</FieldLabel>
+  <Input
+    placeholder="Enter Phone Number"
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        phone: e.target.value,
+      })
+    }
+  />
+</Field>
+<Field className="mt-[15px]">
+  <FieldLabel>Address</FieldLabel>
+  <Input
+    placeholder="Enter Address"
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        address: e.target.value,
+      })
+    }
+  />
+</Field>
+<Field className="mt-[15px]">
+  <FieldLabel>Role</FieldLabel>
+
+  <select
+    className="w-full h-[50px] rounded-[17px] border border-gray-300 px-3"
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        role: e.target.value,
+      })
+    }
+  >
+    <option value="">Select Role</option>
+    <option value="renter">Renter</option>
+    <option value="owner">Owner</option>
+    <option value="both">Both</option>
+  </select>
+</Field>
 
                 <Field className="mt-[15px]">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -165,6 +211,7 @@ const Signup = () => {
             </div>
           </div>
         </div>
+        
 
         <div className="right-left-container w-2/4 min-h-screen relative h-screen bg-[url('/public/image.avif')] bg-cover bg-center ">
           <div className="text-right absolute top-[550px] ml-[55px]">
