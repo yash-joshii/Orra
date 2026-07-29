@@ -1,7 +1,27 @@
 import { useState } from "react";
 import { SlidersHorizontal, Star } from "lucide-react";
 
-const categories = ["All", "Cameras", "Laptops", "Drones", "Gaming", "Tablets", "VR & AR"];
+const categories = [
+  "ALL",
+  "LAPTOPS",
+  "CAMERA",
+  "GAMING_CONSOLES",
+  "DRONES",
+  "SMARTPHONES",
+  "SMART_WATCHES",
+  "AUDIO_DEVICES",
+  "MONITORS",
+  "VR_AR",
+  "LENSES",
+  "LIGHTING",
+  "ACTION_CAMERAS",
+  "PROJECTORS",
+  "MICROPHONES",
+  "TABLETS",
+  "ACCESSORIES",
+  "REFRIGERATOR",
+  "TV"
+];
 
 const FilterationSidebar = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");

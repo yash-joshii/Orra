@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
+// import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,15 +19,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Eye,
   Calendar,
   CheckCircle2,
-  Heart,
   MapPinCheck,
   MapPinIcon,
   SeparatorVertical,
   Verified,
   VerifiedIcon,
+  Eye,
+  Heart
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -52,7 +54,7 @@ useEffect(() => {
 }, [data]);
   const imageUrl =
     data.images && data.images.length > 0
-      ? (data.images[0].imageBase64 ?? data.images[0])
+      ? data.images[0].imageBase64 ?? data.images[0]  // handles both cases
       : "https://placehold.co/400x200?text=No+Image";
       const handleWishlist = async (e) => {
   e.stopPropagation();
@@ -129,21 +131,22 @@ useEffect(() => {
         />
         <div className="ownername">
           <span className="flex gap-[7px] text-[13px] text-gray-500 font-medium items-center">
-  {data.owner?.name || "Unknown Owner"}
-  <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
-</span>
+          {data.owner?.name || "Unknown Owner"}
+            <CheckCircle2 className="w-3.5 h-3.5 !text-green-500" />
+          </span>
         </div>
       </CardContent>
       <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
       <div className="flex items-start justify-between w-full max-w-[293px]">
         <div className="price  ml-[6%]">
           <span className=" flex justify-between text-[20px] font-bold">
-            {data.purchasePrice}
+            {data.dailyRate}
             <span className="text-[10px] text-gray-300 mt-[16%]"> /day</span>
           </span>
         </div>
         <div className="bookbtn mr-[2%]">
-          <button className="bg-black w-[100%] h-[10%] p-2 rounded-[12px] shadow-[rgba(50,50,93,0.25)_0px_2px_5px_-1px,rgba(0,0,0,0.3)_0px_1px_3px_-1px] cursor-pointer hover:bg-[#5650cc] ">
+          <button onClick={() => navigate(`/booking/${data.productId}`)}
+          className="bg-black w-[100%] h-[10%] p-2 rounded-[12px] shadow-[rgba(50,50,93,0.25)_0px_2px_5px_-1px,rgba(0,0,0,0.3)_0px_1px_3px_-1px] cursor-pointer hover:bg-[#5650cc] ">
             {" "}
             <Calendar className="text-white w-4 h-4" />{" "}
           </button>

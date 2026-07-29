@@ -1,7 +1,12 @@
+
+import { useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
 import { searchProducts } from "@/api/listingApi";
 import { NavLink, useNavigate } from "react-router-dom";
-
+import { Button } from "@/components/ui/button";
+import { useDispatch } from "react-redux";
+import { logout } from "@/redux/slices/authslices";
+import { Logout } from "@/api/authApi";
 import {
   Search,
   Bell,
@@ -18,7 +23,7 @@ import {
   UserIcon,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+
 
 import {
   DropdownMenu,
@@ -57,6 +62,10 @@ const Navbar = () => {
     }
   };
 
+const dispatch = useDispatch();
+
+const { user } = useSelector((state) => state.auth);
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -66,6 +75,18 @@ const Navbar = () => {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleLogout = async () => {
+  try {
+    await Logout;
+
+    dispatch(logout());
+
+    navigate("/login");
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -163,78 +184,90 @@ const Navbar = () => {
 
           <button className="relative">
             <Bell className="w-5 h-5 text-gray-600" />
+
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-teal-500 rounded-full"></span>
           </button>
 
           <button className="relative">
-            <Calendar className="w-5 h-5" />
+            <Calendar className="text-black w-5 h-5" />
 
             <span className="absolute -top-2 -right-2 text-xs bg-indigo-600 text-white px-1.5 py-0.5 rounded-full">
               2
             </span>
           </button>
 
-          <DropdownMenu>
+          {user ? (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button className="flex items-center gap-2 p-6 bg-transparent border-none hover:rounded-[40px] hover:border-gray-300 hover:border hover:bg-gray-100 transition duration-200 focus:bg-background focus:border-none">
+        <img
+          src="https://i.pravatar.cc/40"
+          alt="profile"
+          className="w-8 h-8 rounded-full"
+        />
 
-            <DropdownMenuTrigger asChild>
+        <ChevronDown className="w-4 h-4 text-gray-600" />
+      </Button>
+    </DropdownMenuTrigger>
 
-              <Button className="flex items-center gap-2 p-6 bg-transparent border-none hover:bg-gray-100">
+    <DropdownMenuContent className="w-[220px] p-3">
+      <DropdownMenuSeparator />
 
-                <img
-                  src="https://i.pravatar.cc/40"
-                  alt="profile"
-                  className="w-8 h-8 rounded-full"
-                />
+      <DropdownMenuItem>
+        <UserIcon className="mr-2 h-4 w-4" />
+        Profile
+      </DropdownMenuItem>
 
-                <ChevronDown className="w-4 h-4 text-gray-600" />
+      <DropdownMenuItem>
+        <Package className="mr-2 h-4 w-4" />
+        My Products
+      </DropdownMenuItem>
 
-              </Button>
+      <DropdownMenuItem>
+        <LayoutDashboardIcon className="mr-2 h-4 w-4" />
+        My Bookings
+      </DropdownMenuItem>
 
-            </DropdownMenuTrigger>
+      <DropdownMenuItem>
+        <Heart className="mr-2 h-4 w-4" />
+        Wishlist
+      </DropdownMenuItem>
 
-            <DropdownMenuContent className="w-[130%] p-[11%]">
+      <DropdownMenuSeparator />
 
-              <DropdownMenuItem>
-                <UserIcon />
-                Profile
-              </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => navigate("/settings")}>
+        <SettingsIcon className="mr-2 h-4 w-4" />
+        Settings
+      </DropdownMenuItem>
 
-              <DropdownMenuItem>
-                <Package />
-                My Products
-              </DropdownMenuItem>
+      <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
+        <LogOutIcon className="mr-2 h-4 w-4" />
+        Log out
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+) : (
+  <div className="flex items-center gap-3">
+    <Button
+      variant="outline"
+      className="rounded-full px-6"
+      onClick={() => navigate("/login")}
+    >
+      Login
+    </Button>
 
-              <DropdownMenuItem>
-                <LayoutDashboardIcon />
-                My Booking
-              </DropdownMenuItem>
-
-              <DropdownMenuItem>
-                <Heart />
-                Wishlist
-              </DropdownMenuItem>
-
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem>
-                <SettingsIcon />
-                Settings
-              </DropdownMenuItem>
-
-              <DropdownMenuItem variant="destructive">
-                <LogOutIcon />
-                Logout
-              </DropdownMenuItem>
-
-            </DropdownMenuContent>
-
-          </DropdownMenu>
-
+    <Button
+      className="rounded-full px-6 bg-indigo-600 hover:bg-indigo-700"
+      onClick={() => navigate("/signup")}
+    >
+      Sign Up
+    </Button>
+  </div>
+)}
         </div>
 
       </div>
     </header>
   );
 };
-
 export default Navbar;

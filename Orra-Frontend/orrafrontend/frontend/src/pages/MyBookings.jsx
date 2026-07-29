@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/avatar"
 import { Calendar, LocateFixedIcon, LocateIcon, Map, MapIcon, MapPinIcon, ArrowRight } from 'lucide-react'
 
-const Bookings = () => {
+const MyBookings = () => {
     return <>
         {/* Shadcn - tabs, cards, button, badge, avatar, lucide icons */}
 
@@ -155,6 +155,6 @@ const Bookings = () => {
         </div>
 
     </>
-}
+};
 
-export default Bookings
+export default MyBookings;
