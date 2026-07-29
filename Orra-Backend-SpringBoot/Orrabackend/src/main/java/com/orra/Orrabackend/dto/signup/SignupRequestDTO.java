@@ -22,6 +22,9 @@ public class SignupRequestDTO {
     private String phone;
 
     @NotBlank
-    @Size(min = 8)
-    private String password;
+    private String supabaseUserId;
+//    @NotBlank
+//    @Size(min = 8)
+//    private String password;
+
 }

@@ -1,5 +1,4 @@
-
-import { SignIn } from "@/api/authApi";
+import { GetCurrentUser, SignIn } from "@/api/authApi";
 import { setError, setLoading, setUser } from "@/redux/slices/authslices";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -8,7 +7,7 @@ import { toast } from "sonner";
 
 const Login = () => {
   const [formData, setFormdata] = useState({
-    username: "",
+    email: "",
     password: "",
   });
 
@@ -16,38 +15,40 @@ const Login = () => {
   const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    console.log(formData);
+  console.log(formData);
 
-    try {
-      dispatch(setLoading(true));
+  try {
+    dispatch(setLoading(true));
 
-      const response = await SignIn(formData);
+    await SignIn(formData);
 
-      dispatch(setUser(response.data));
+    const meResponse = await GetCurrentUser();
+    dispatch(setUser(meResponse.data));
 
-      dispatch(setLoading(false));
+    dispatch(setLoading(false));
 
-      toast.success("Login Successful");
+    toast.success("Login Successful");
 
-      navigate("/");
-    } catch (error) {
-      dispatch(setLoading(false));
+    navigate("/");
+  } catch (error) {
+    dispatch(setLoading(false));
 
-      dispatch(setError(error.message));
+    dispatch(setError(error.message));
 
-      toast.error("Invalid Username or Password");
+    toast.error("Invalid Email or Password");
 
-      console.log(error);
-    }
-  };
+    console.log(error);
+  }
+};
 
   return (
     <div className="min-h-screen flex">
       {/* LEFT SIDE */}
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-white px-8 py-12">
         <div className="w-full max-w-md">
+
           <h1 className="text-5xl font-bold text-gray-900 mb-3">
             Welcome back
           </h1>
@@ -57,14 +58,14 @@ const Login = () => {
           </p>
 
           {/* Google Button */}
-          <button className="w-full border border-gray-200 rounded-2xl py-4 mb-4 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08),0_0px_4px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_-4px_rgba(0,0,0,0.12),0_4px_8px_rgba(0,0,0,0.05)]">
-            <img src="/google.svg" alt="Google" className="w-5 h-5" />
+          <button className="w-full border border-gray-200 rounded-2xl py-4 mb-4 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08),0_0px_4px_rgba(0,0px_4px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_-4px_rgba(0,0,0,0.12),0_4px_8px_rgba(0,0,0,0.05)]">
+            <img src="/public/google.svg" alt="Google" className="w-5 h-5" />
             <span className="font-medium">Continue with Google</span>
           </button>
 
           {/* Apple Button */}
           <button className="w-full border border-gray-200 rounded-2xl py-4 mb-6 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08),0_0px_4px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_-4px_rgba(0,0,0,0.12),0_4px_8px_rgba(0,0,0,0.05)]">
-            <img src="/apple.svg" alt="Apple" className="w-5 h-5" />
+            <img src="/public/apple.svg" alt="Apple" className="w-5 h-5" />
             <span className="font-medium">Continue with Apple</span>
           </button>
 
@@ -72,28 +73,29 @@ const Login = () => {
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px bg-gray-300 flex-1"></div>
             <span className="text-gray-400 text-sm">
-              Or continue with username
+              Or continue with email
             </span>
             <div className="h-px bg-gray-300 flex-1"></div>
           </div>
 
           <form onSubmit={handleSubmit}>
-            {/* Username */}
+
+            {/* Email */}
             <div className="mb-5">
               <label className="block mb-2 font-medium">
-                Username
+                Email
               </label>
 
               <input
-                value={formData.username}
+                value={formData.email}
                 onChange={(e) =>
                   setFormdata({
                     ...formData,
-                    username: e.target.value,
+                    email: e.target.value,
                   })
                 }
-                type="text"
-                placeholder="Enter your username"
+                type="email"
+                placeholder="Enter your email"
                 className="w-full border border-gray-200 rounded-2xl p-4 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08),0_0px_4px_rgba(0,0,0,0.03)] focus:outline-none focus:ring-2 focus:ring-[#544be9]"
               />
             </div>
@@ -140,22 +142,22 @@ const Login = () => {
             >
               Sign In
             </button>
+
           </form>
 
           <p className="text-center mt-6 text-gray-500">
             Don't have an account?{" "}
-            <span
-              onClick={() => navigate("/signup")}
-              className="text-[#544be9] font-medium cursor-pointer"
-            >
+            <span className="text-[#544be9] font-medium cursor-pointer">
               Sign up
             </span>
           </p>
+
         </div>
       </div>
 
       {/* RIGHT SIDE */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-purple-950 via-purple-800 to-indigo-950 items-center justify-center">
+
         <div className="absolute w-[700px] h-[700px] rounded-full bg-purple-400/10 top-[-250px] right-[-200px]" />
         <div className="absolute w-[500px] h-[500px] rounded-full bg-indigo-400/10 bottom-[-150px] left-[-100px]" />
         <div className="absolute w-[300px] h-[300px] rounded-full bg-pink-400/10 top-[150px] left-[150px]" />
@@ -176,6 +178,7 @@ const Login = () => {
             <div className="w-3 h-3 rounded-full bg-white/40"></div>
           </div>
         </div>
+
       </div>
     </div>
   );

@@ -30,16 +30,17 @@ public class User {
     @Column(nullable = false, unique = true)
     private String phone;
 
-    @Column(nullable = false)
-    private String password;
+//    @Column(nullable = false)
+//    private String password;
 
 //    @Column(name = "profile_pic")
 //    private String profilePic;
 
     private String address;
 
+    @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "roles", columnDefinition = "text[]")
+    @Column(name = "roles", columnDefinition = "app_user_role_enum[]")
     private Set<UserRole> roles;
 
     @Enumerated(EnumType.STRING)
