@@ -7,6 +7,7 @@ import lombok.Data;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -38,10 +40,14 @@ public class User {
 
     private String address;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "roles", columnDefinition = "app_user_role_enum[]")
-    private Set<UserRole> roles;
+    private Set<UserRole> roles = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "id_proof")
