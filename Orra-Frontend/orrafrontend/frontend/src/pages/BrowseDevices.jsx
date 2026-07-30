@@ -29,6 +29,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import LogoLoader from "@/components/common/LogoLoader";
 
 const BrowseDevices = () => {
   const navigate = useNavigate();
@@ -43,12 +44,11 @@ const BrowseDevices = () => {
   const [searchParams] = useSearchParams();
   const categoryFilter = searchParams.get("category");
 
-  const filteredProducts = categoryFilter 
+  const filteredProducts = categoryFilter
     ? products?.filter((p) => p.category === categoryFilter)
     : products;
 
-
-   console.log("products");
+  console.log("products");
   useEffect(() => {
     fetchProduct();
   }, []);
@@ -72,7 +72,9 @@ const BrowseDevices = () => {
   const ITEMS_PER_PAGE = 6;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil((filteredProducts?.length || 0) / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(
+    (filteredProducts?.length || 0) / ITEMS_PER_PAGE,
+  );
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedProducts = filteredProducts?.slice(
     startIndex,
@@ -101,108 +103,110 @@ const BrowseDevices = () => {
     return pages;
   };
 
-  return (
-    <div className="BrowseDevices-container w-full max-h-full">
-      <div className="upper-section-browdev w-full p-8 pl-[8.5%] h-[40%] ">
-        <h2 className="text-[40px] font-extrabold">Browse Devices</h2>
-        <div className="upper-sec-data flex flex-row justify-center ">
-          <div className="search-box mt-5 w-[70%]">
-            <SearchBar
-              className="!w-[97%] !p-[17px] !rounded-[10px] !text-[16px] !font-semibold "
-              placeholder="search for Drone or Mobile..."
-            />
-          </div>
-          <div className="bd-filter  mt-5 w-[30%]">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-[70%] p-7  ">
-                  SortBy: Recommanded
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel>SortBy: Recommanded</DropdownMenuLabel>
-                  <DropdownMenuItem>Price: Low to High</DropdownMenuItem>
-                  <DropdownMenuItem>Price: high to low</DropdownMenuItem>
-                  <DropdownMenuItem>Highest Rated</DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
-      <div className="lower-section-browdev bg-gray-200 pt-8 pb-8 flex flex-row justify-center">
-        <div className="left-browdev w-[50%] pr-[2%]">
-          <FilterationSidebar />
-        </div>
-        <div className="rightbrowdev w-full min-h-full">
-          <div className="flex flex-wrap gap-[36px]">
-            {paginatedProducts?.map((item) => (
-              <ProductCard
-                key={item.productId}
-                data={item}
-               
+  return loading ? (
+    <LogoLoader />
+  ) : (
+    <>
+      <div className="BrowseDevices-container w-full max-h-full">
+        <div className="upper-section-browdev w-full p-8 pl-[8.5%] h-[40%] ">
+          <h2 className="text-[40px] font-extrabold">Browse Devices</h2>
+          <div className="upper-sec-data flex flex-row justify-center ">
+            <div className="search-box mt-5 w-[70%]">
+              <SearchBar
+                className="!w-[97%] !p-[17px] !rounded-[10px] !text-[16px] !font-semibold "
+                placeholder="search for Drone or Mobile..."
               />
-            ))}
+            </div>
+            <div className="bd-filter  mt-5 w-[30%]">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-[70%] p-7  ">
+                    SortBy: Recommanded
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>SortBy: Recommanded</DropdownMenuLabel>
+                    <DropdownMenuItem>Price: Low to High</DropdownMenuItem>
+                    <DropdownMenuItem>Price: high to low</DropdownMenuItem>
+                    <DropdownMenuItem>Highest Rated</DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
+        </div>
+        <div className="lower-section-browdev bg-gray-200 pt-8 pb-8 flex flex-row justify-center">
+          <div className="left-browdev w-[50%] pr-[2%]">
+            <FilterationSidebar />
+          </div>
+          <div className="rightbrowdev w-full min-h-full">
+            <div className="flex flex-wrap gap-[36px]">
+              {paginatedProducts?.map((item) => (
+                <ProductCard key={item.productId} data={item} />
+              ))}
+            </div>
 
-          {totalPages > 1 && (
-            <Pagination className="mt-10">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      goToPage(currentPage - 1);
-                    }}
-                    className={
-                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                    }
-                  />
-                </PaginationItem>
+            {totalPages > 1 && (
+              <Pagination className="mt-10">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        goToPage(currentPage - 1);
+                      }}
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
+                  </PaginationItem>
 
-                {getPageNumbers().map((page, idx) =>
-                  page === "ellipsis" ? (
-                    <PaginationItem key={`ellipsis-${idx}`}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  ) : (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        href="#"
-                        isActive={page === currentPage}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          goToPage(page);
-                        }}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ),
-                )}
+                  {getPageNumbers().map((page, idx) =>
+                    page === "ellipsis" ? (
+                      <PaginationItem key={`ellipsis-${idx}`}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    ) : (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href="#"
+                          isActive={page === currentPage}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            goToPage(page);
+                          }}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ),
+                  )}
 
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      goToPage(currentPage + 1);
-                    }}
-                    className={
-                      currentPage === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : ""
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        goToPage(currentPage + 1);
+                      }}
+                      className={
+                        currentPage === totalPages
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
