@@ -21,7 +21,7 @@ public class ProductList {
     private Long productId;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", referencedColumnName = "id")
+    @JoinColumn(name = "owner_id", referencedColumnName = "user_id")
     private User owner;
 
     @Column(name = "serial_or_imei", unique = true)
