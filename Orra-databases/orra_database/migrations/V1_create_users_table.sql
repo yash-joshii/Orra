@@ -15,7 +15,7 @@ CREATE TABLE users (
 
     address TEXT,
 
-    role user_role_enum NOT NULL,
+    roles TEXT[] NOT NULL DEFAULT ARRAY['BUYER'],
 
     id_proof id_proof_enum NOT NULL,
 
@@ -27,13 +27,22 @@ CREATE TABLE users (
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    -- Validation logic
+    -- Validation logic (unchanged)
     CHECK (
         (id_proof = 'PAN' AND pan_number IS NOT NULL AND aadhaar_number IS NULL)
         OR
         (id_proof = 'AADHAAR' AND aadhaar_number IS NOT NULL AND pan_number IS NULL)
         OR
         (id_proof = 'both' AND pan_number IS NOT NULL AND aadhaar_number IS NOT NULL)
-    )
-);
+    ),
 
+    -- Roles array constraints
+    CONSTRAINT roles_not_empty 
+        CHECK (array_length(roles, 1) > 0),
+
+    CONSTRAINT roles_valid_values 
+        CHECK (roles <@ ARRAY['BUYER','OWNER','ADMIN']::text[]),
+
+    CONSTRAINT roles_must_include_buyer 
+        CHECK ('BUYER' = ANY(roles))
+);

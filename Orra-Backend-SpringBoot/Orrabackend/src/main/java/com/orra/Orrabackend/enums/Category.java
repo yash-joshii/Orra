@@ -2,8 +2,21 @@ package com.orra.Orrabackend.enums;
 
 public enum Category {
     LAPTOP,
-    TV,
+    CAMERA,
+    GAMING_CONSOLES,
+    DRONES,
     MOBILE,
+    SMART_WATCHES,
+    AUDIO_DEVICES,
+    MONITORS,
+    VR_AR,
+    LENSES,
+    LIGHTING,
+    ACTION_CAMERAS,
+    PROJECTORS,
+    MICROPHONES,
+    TABLETS,
+    ACCESSORIES,
     REFRIGERATOR,
-    CAMERA
+    TV,
 }

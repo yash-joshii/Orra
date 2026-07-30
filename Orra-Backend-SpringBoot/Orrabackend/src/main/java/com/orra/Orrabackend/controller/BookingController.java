@@ -2,7 +2,7 @@ package com.orra.Orrabackend.controller;
 
 import com.orra.Orrabackend.dto.booking.BookingRequestDTO;
 import com.orra.Orrabackend.dto.booking.BookingResponseDTO;
-import com.orra.Orrabackend.service.BookingService;
+import com.orra.Orrabackend.service.bookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/booking")
 @RequiredArgsConstructor
 public class BookingController {
-    private final BookingService bookingService;
+    private final bookingService bookingService;
 
     @PostMapping
     public ResponseEntity<BookingResponseDTO> createBooking(@RequestBody BookingRequestDTO request){
@@ -35,11 +35,17 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{bookingId}/ship")
-    public ResponseEntity<BookingResponseDTO> shipBooking(@PathVariable Long bookingId){
-        BookingResponseDTO response = bookingService.shipBooking(bookingId);
+    @PatchMapping("/{bookingId}/cancel")
+    public ResponseEntity<BookingResponseDTO> cancelBooking(@PathVariable Long bookingId, @RequestParam Long renterId){
+        BookingResponseDTO response = bookingService.cancelBooking(bookingId, renterId);
         return ResponseEntity.ok(response);
     }
+
+//    @PatchMapping("/{bookingId}/ship")
+//    public ResponseEntity<BookingResponseDTO> shipBooking(@PathVariable Long bookingId){
+//        BookingResponseDTO response = bookingService.shipBooking(bookingId);
+//        return ResponseEntity.ok(response);
+//    }
 
     //Customer Side
     @PatchMapping("/{bookingId}/pay")
@@ -48,16 +54,22 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{bookingId}/confirm-receipt")
-    public ResponseEntity<BookingResponseDTO> confirmReceipt(@PathVariable Long bookingId){
-        BookingResponseDTO response = bookingService.confirmReceipt(bookingId);
-        return ResponseEntity.ok(response);
-    }
+//    @PatchMapping("/{bookingId}/confirm-receipt")
+//    public ResponseEntity<BookingResponseDTO> confirmReceipt(@PathVariable Long bookingId){
+//        BookingResponseDTO response = bookingService.confirmReceipt(bookingId);
+//        return ResponseEntity.ok(response);
+//    }
 
     //Renter - My Bookings
     @GetMapping("/renter/{renterId}")
     public ResponseEntity<List<BookingResponseDTO>> getMyBooking(@PathVariable Long renterId){
         List<BookingResponseDTO> response = bookingService.getMyBookings(renterId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{bookingId}")
+    public ResponseEntity<BookingResponseDTO> getBookingById(@PathVariable Long bookingId){
+        BookingResponseDTO response = bookingService.getBookingById(bookingId);
         return ResponseEntity.ok(response);
     }
 
@@ -68,7 +80,7 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/renter/{ownerId}")
+    @GetMapping("/owner/{ownerId}")
     public ResponseEntity<List<BookingResponseDTO>> getOwnerBookings(@PathVariable Long ownerId){
         List<BookingResponseDTO> response = bookingService.getOwnerBookings(ownerId);
         return ResponseEntity.ok(response);

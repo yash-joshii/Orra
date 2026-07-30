@@ -1,17 +1,30 @@
 package com.orra.Orrabackend.dto.signup;
 
-import com.orra.Orrabackend.enums.UserRole;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
 public class SignupRequestDTO {
 
+    @NotBlank
     private String username;
-    private String name;
-    private String email;
-    private String password;
-    private String phone;
-    private String address;
 
-    private UserRole role;
+    @NotBlank
+    private String name;
+
+    @NotBlank
+    @Email
+    private String email;
+
+    @NotBlank
+    private String phone;
+
+    @NotBlank
+    private String supabaseUserId;
+//    @NotBlank
+//    @Size(min = 8)
+//    private String password;
+
 }

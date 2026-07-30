@@ -5,4 +5,9 @@ public class UserNotFoundException extends RuntimeException{
 
         super(id);
     }
+
+    public UserNotFoundException(Long id){
+
+        super(String.valueOf(id));
+    }
 }
