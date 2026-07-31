@@ -4,7 +4,7 @@ import { Field, FieldLabel, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { SignupUser } from "@/api/authApi";
 import apple from "/public/apple.svg";
-import { toast } from "sonner";
+import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabaseclient";
 

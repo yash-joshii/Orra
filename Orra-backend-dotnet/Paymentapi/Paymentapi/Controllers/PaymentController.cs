@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Paymentapi.Data;
 using Paymentapi.Models;
@@ -9,6 +10,7 @@ namespace Paymentapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PaymentController : ControllerBase
     {
         private readonly RazorPayService _razorpayService;
@@ -48,6 +50,13 @@ public async Task<IActionResult> GetStatus(long transactionId)
         [HttpPost("create-order")]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
         {
+            var supabaseId = User.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(supabaseId))
+            {
+                return Unauthorized(new { error = "No valid user identity found in token" });
+            }
+
             try
             {
                 // Generate a receipt id (used to track this order in Razorpay + our DB)
