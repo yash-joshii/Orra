@@ -2,7 +2,7 @@ import { GetCurrentUser, SignIn } from "@/api/authApi";
 import { setError, setLoading, setUser } from "@/redux/slices/authslices";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 
 const Login = () => {
@@ -147,9 +147,11 @@ const Login = () => {
 
           <p className="text-center mt-6 text-gray-500">
             Don't have an account?{" "}
-            <span className="text-[#544be9] font-medium cursor-pointer">
+            <Link
+              to="/signup" 
+              className="text-[#544be9] font-medium cursor-pointer">
               Sign up
-            </span>
+            </Link>
           </p>
 
         </div>

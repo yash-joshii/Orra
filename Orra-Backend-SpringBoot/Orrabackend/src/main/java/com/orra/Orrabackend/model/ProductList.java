@@ -25,7 +25,6 @@ public class ProductList {
 
     @ManyToOne
     @JoinColumn(name = "owner_id", referencedColumnName = "user_id")
-    @JoinColumn(name = "owner_id", referencedColumnName = "user_id")
     private User owner;
 
     @Column(name = "serial_or_imei", unique = true)
@@ -93,11 +92,6 @@ public class ProductList {
             orphanRemoval = true
     )
     private List<Productimage> images;
-
-
-    @Type(JsonType.class)
-    @Column(columnDefinition = "jsonb")
-    private List<String> productspec;
 
     @Column(name = "is_available", nullable = false)
     private Boolean isAvailable = true;
