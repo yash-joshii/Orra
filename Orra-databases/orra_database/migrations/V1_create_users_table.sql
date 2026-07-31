@@ -3,11 +3,11 @@ CREATE TABLE users (
 
     fullname VARCHAR(100) NOT NULL,
 
-    username VARCHAR(100) NOT NULL,
+    username VARCHAR(100) NOT NULL UNIQUE,
 
     email VARCHAR(150) UNIQUE NOT NULL,
 
-    phone VARCHAR(15),
+    phone VARCHAR(15) UNIQUE,
 
     password VARCHAR(255) NOT NULL,
 

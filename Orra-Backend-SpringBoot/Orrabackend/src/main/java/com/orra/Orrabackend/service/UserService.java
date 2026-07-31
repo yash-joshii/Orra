@@ -6,6 +6,7 @@ import com.orra.Orrabackend.enums.UserRole;
 import com.orra.Orrabackend.exception.UserNotFoundException;
 import com.orra.Orrabackend.model.User;
 import com.orra.Orrabackend.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
 
 @Service
 public class UserService {

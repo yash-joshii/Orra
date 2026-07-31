@@ -33,6 +33,11 @@ public class ProductListService {
         return repo.findAll();
     }
 
+    // SEARCH PRODUCTS
+    public List<ProductList> searchProducts(String keyword) {
+        return repo.searchProducts(keyword);
+    }
+
     public ProductList getOne(Long id) {
         return repo.findById(id).orElse(null);
     }
@@ -48,9 +53,11 @@ public class ProductListService {
     }
 
     public ProductList update(ProductList product, Long userId) {
+
         ProductList existing = repo.findById(product.getProductId()).orElse(null);
 
-        if (existing == null) return null;
+        if (existing == null)
+            return null;
 
         if (!existing.getOwner().getId().equals(userId)) {
             throw new AccessDeniedException("You do not own this listing");
@@ -93,9 +100,11 @@ public class ProductListService {
     }
 
     public void delete(Long id, Long userId) {
+
         ProductList existing = repo.findById(id).orElse(null);
 
-        if (existing == null) return;
+        if (existing == null)
+            return;
 
         if (!existing.getOwner().getId().equals(userId)) {
             throw new AccessDeniedException("You do not own this listing");
@@ -107,21 +116,27 @@ public class ProductListService {
     @Transactional
     public ProductList CreateWithImage(ProductList product, List<String> images, Long userId) {
         userService.grantOwnerRole(userId);
+
         User owner = userService.getById(userId);
+
         product.setOwner(owner);
+
         ProductList saved = repo.save(product);
 
         if (images != null && !images.isEmpty()) {
-            List<Productimage> imagelist = images.stream().map(
-                    img -> {
+
+            List<Productimage> imagelist = images.stream()
+                    .map(img -> {
                         Productimage prodimg = new Productimage();
                         prodimg.setImageBase64(img);
                         prodimg.setProduct(saved);
                         return prodimg;
-                    }
-            ).collect(Collectors.toList());
+                    })
+                    .collect(Collectors.toList());
+
             repoImage.saveAll(imagelist);
         }
+
         return saved;
     }
 

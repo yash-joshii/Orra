@@ -1,6 +1,7 @@
 package com.orra.Orrabackend.model;
 
 import com.orra.Orrabackend.enums.Category;
+import com.orra.Orrabackend.enums.ProductCondition;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -21,7 +22,9 @@ public class ProductList {
     @Column(name = "product_id")
     private Long productId;
 
+
     @ManyToOne
+    @JoinColumn(name = "owner_id", referencedColumnName = "user_id")
     @JoinColumn(name = "owner_id", referencedColumnName = "user_id")
     private User owner;
 
@@ -33,12 +36,12 @@ public class ProductList {
     private Category category;
 
     private Integer days;
-
     @Column(name = "productName")
     private String productName;
 
     private String description;
     private String brand;
+
     private String model;
 
     @Column(name = "purchase_price")
@@ -53,15 +56,36 @@ public class ProductList {
 //    @Column(name = "health_score")
 //    private Integer healthScore;
 //
-//    private String location;
+    private String location;
 
-    @Column(name = "is_active")
-    private Boolean isActive = true;
+  @Column(name = "is_active")
+  private Boolean isActive = true;
 
+  //  @Column(name = "created_at")
+  //  private LocalDateTime createdAt;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name ="purchase_year")
+    private Integer purchaseYear;
+
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "product_condition")
+//    private ProductCondition productcondition;
+
+    @Column(name = "available_from")
+    private LocalDateTime availableFrom;
+
+    @Column(name = "available_to")
+    private LocalDateTime availableTo;
+
+    @Column(name = "minimum_rental_days")
+    private Integer minimumRentalDays;
+
+    @Column(name = "maximum_rental_days")
+    private Integer maximumRentalDays;
+
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb")
+    private List<String> productspec;
 
     @OneToMany(
             mappedBy = "product",
@@ -78,3 +102,6 @@ public class ProductList {
     @Column(name = "is_available", nullable = false)
     private Boolean isAvailable = true;
 }
+
+
+

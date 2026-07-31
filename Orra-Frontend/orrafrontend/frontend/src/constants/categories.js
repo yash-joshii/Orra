@@ -1,0 +1,12 @@
+export const CATEGORIES = [
+  "ALL",
+  "LAPTOPS",
+  "CAMERA",
+  "GAMING_CONSOLES",
+  "DRONES",
+  "SMARTPHONES",
+  "SMART_WATCHES",
+  "AUDIO_DEVICES",
+  "MONITORS",
+  "VR_AR",
+];

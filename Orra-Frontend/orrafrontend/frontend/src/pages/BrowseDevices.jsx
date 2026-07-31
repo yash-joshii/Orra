@@ -1,6 +1,13 @@
 import SearchBar from "@/components/common/SearchBar";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { getAllProducts, searchProducts } from "@/api/listingApi";
+import FilterationSidebar from "@/components/common/FilterationSidebar";
+import ProductCard from "@/components/common/ProductCard";
+import { useDispatch, useSelector } from "react-redux";
+
+
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,15 +17,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ProductCard from "@/components/common/ProductCard";
-import { useDispatch, useSelector } from "react-redux";
+
 import {
   setError,
   setLoading,
   setProducts,
 } from "@/redux/slices/productslices";
-import { getAllProducts } from "@/api/listingApi";
-import FilterationSidebar from "@/components/common/FilterationSidebar";
+
+
 import {
   Pagination,
   PaginationContent,
@@ -33,12 +39,14 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 const BrowseDevices = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  
 
   const products = useSelector((state) => state.products.products);
 
   const loading = useSelector((state) => state.products.loading);
 
   const error = useSelector((state) => state.products.error);
+  const [search, setSearch] = useState("");
 
   const [searchParams] = useSearchParams();
   const categoryFilter = searchParams.get("category");
@@ -54,16 +62,45 @@ const BrowseDevices = () => {
   }, []);
 
   const fetchProduct = async () => {
-    try {
-      dispatch(setLoading(true));
-      const response = await getAllProducts();
-      dispatch(setProducts(response.data));
-      dispatch(setLoading(false));
-    } catch (error) {
-      dispatch(setLoading(false));
-      dispatch(setError(error.message));
+  try {
+    dispatch(setLoading(true));
+
+    const response = await getAllProducts();
+
+
+
+console.log("Status:", response.status);
+console.log("Data:", response.data);
+console.log("Is Array:", Array.isArray(response.data));
+    console.log("Base URL:", import.meta.env.VITE_SPRINGBOOT_API_URL);
+    console.log("Response:", response);
+    console.log("Response Data:", response.data);
+
+    dispatch(setProducts(response.data));
+    dispatch(setLoading(false));
+  } catch (error) {
+    console.error("API Error:", error);
+    dispatch(setLoading(false));
+    dispatch(setError(error.message));
+  }
+};
+  const handleSearch = async (value) => {
+  setSearch(value);
+
+  try {
+    if (value.trim() === "") {
+      fetchProduct();
+      return;
     }
-  };
+
+    const response = await searchProducts(value);
+
+    dispatch(setProducts(response.data));
+    setCurrentPage(1);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
   useEffect(() => {
     setCurrentPage(1);
@@ -84,6 +121,7 @@ const BrowseDevices = () => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+  
 
   const getPageNumbers = () => {
     const pages = [];
@@ -100,17 +138,20 @@ const BrowseDevices = () => {
     }
     return pages;
   };
-
+  console.log("Products:", products);
+console.log("Paginated:", paginatedProducts);
   return (
     <div className="BrowseDevices-container w-full max-h-full">
       <div className="upper-section-browdev w-full p-8 pl-[8.5%] h-[40%] ">
         <h2 className="text-[40px] font-extrabold">Browse Devices</h2>
         <div className="upper-sec-data flex flex-row justify-center ">
           <div className="search-box mt-5 w-[70%]">
-            <SearchBar
-              className="!w-[97%] !p-[17px] !rounded-[10px] !text-[16px] !font-semibold "
-              placeholder="search for Drone or Mobile..."
-            />
+           <SearchBar
+  value={search}
+  onChange={(e) => handleSearch(e.target.value)}
+  className="!w-[97%] !p-[17px] !rounded-[10px] !text-[16px] !font-semibold"
+  placeholder="Search gear..."
+/>
           </div>
           <div className="bd-filter  mt-5 w-[30%]">
             <DropdownMenu>
