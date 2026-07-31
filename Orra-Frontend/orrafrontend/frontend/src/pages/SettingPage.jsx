@@ -23,7 +23,7 @@ const SettingPage = () => {
       <div className="flex gap-8 mt-8">
 
        
-        <div className="w-64 border rounded-lg p-4">
+        <div className="w-64  rounded-lg p-4">
 
           <ul className="space-y-2">
 
@@ -83,7 +83,7 @@ const SettingPage = () => {
         </div>
 
        
-        <div className="flex-1 border rounded-lg p-6">
+        <div className="flex-1 rounded-lg p-6">
 
           {activeTab === "personal" && (
             <PersonalInfo />

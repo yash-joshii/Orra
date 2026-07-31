@@ -1,6 +1,7 @@
 package com.orra.Orrabackend.model;
 
 import com.orra.Orrabackend.enums.Category;
+import com.orra.Orrabackend.enums.ListingStatus;
 import com.orra.Orrabackend.enums.ProductCondition;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
@@ -55,6 +56,10 @@ public class ProductList {
 //    @Column(name = "health_score")
 //    private Integer healthScore;
 //
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_status")
+    private ListingStatus approvalStatus = ListingStatus.PENDING;
     private String location;
 
   @Column(name = "is_active")
