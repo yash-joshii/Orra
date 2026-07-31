@@ -5,6 +5,12 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
+  addToWishlist,
+  removeFromWishlist,
+  checkWishlist,
+} from "@/api/wishlist";
+
+import {
   Card,
   CardAction,
   CardContent,
@@ -28,11 +34,48 @@ import { useNavigate } from "react-router-dom";
 const ProductCard = ({ data }) => {
   const navigate = useNavigate();
   console.log("images →", data.images);
-  const [liked, setLiked] = useState(false);
+ const [liked, setLiked] = useState(false);
+
+// Temporary userId
+const userId = 1;
+useEffect(() => {
+  const fetchWishlistStatus = async () => {
+    try {
+      const response = await checkWishlist(userId, data.productId);
+      setLiked(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  if (data?.productId) {
+    fetchWishlistStatus();
+  }
+}, [data]);
   const imageUrl =
     data.images && data.images.length > 0
       ? data.images[0].imageBase64 ?? data.images[0]  // handles both cases
       : "https://placehold.co/400x200?text=No+Image";
+      const handleWishlist = async (e) => {
+  e.stopPropagation();
+
+  console.log("Heart clicked");
+  console.log("Product ID:", data.productId);
+
+  try {
+    if (liked) {
+      await removeFromWishlist(userId, data.productId);
+      setLiked(false);
+      console.log("Removed from wishlist");
+    } else {
+      await addToWishlist(userId, data.productId);
+      setLiked(true);
+      console.log("Added to wishlist");
+    }
+  } catch (error) {
+    console.error("Wishlist Error:", error.response?.data || error.message);
+  }
+};
   return (
     <Card className="relative group w-[30%] h-[50%] rounded-[25px]  pt-0 shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-y-1 hover:shadow-xl hover:cursor-pointer">
       <div className="relative ">
@@ -54,9 +97,9 @@ const ProductCard = ({ data }) => {
           <Eye className="w-4 h-4 text-center mt-[2px]" /> Quick view
         </div>
         <div
-          onClick={() => setLiked(!liked)}
-          className="btn bg-white absolute z-20 w-[9%] p-[1.5%] rounded-full font-medium text-center top-[2%] right-[2%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)] cursor-pointer flex items-center justify-center"
-        >
+  onClick={handleWishlist}
+  className="btn bg-white absolute z-20 w-[9%] p-[1.5%] rounded-full font-medium text-center top-[2%] right-[2%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)] cursor-pointer flex items-center justify-center"
+>
           <Heart
             className={`w-5 h-5 transition ${
               liked ? "fill-red-500 text-red-500" : "text-gray-600"
