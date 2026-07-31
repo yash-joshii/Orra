@@ -2,6 +2,7 @@ package com.orra.Orrabackend.controller.admin;
 
 import com.orra.Orrabackend.dto.admin.DashboardStatsDTO;
 import com.orra.Orrabackend.service.admin.AdminDashboardService;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/admin/dashboard")
-@RequiredArgsConstructor
+@AllArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminDashboardController {
 
