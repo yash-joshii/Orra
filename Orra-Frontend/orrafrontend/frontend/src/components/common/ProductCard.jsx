@@ -9,7 +9,7 @@ import {
   removeFromWishlist,
   checkWishlist,
 } from "@/api/wishlist";
-import { useEffect } from "react";
+
 import {
   Card,
   CardAction,

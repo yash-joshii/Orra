@@ -5,7 +5,7 @@ import { getAllProducts, searchProducts } from "@/api/listingApi";
 import FilterationSidebar from "@/components/common/FilterationSidebar";
 import ProductCard from "@/components/common/ProductCard";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+
 
 
 import {
@@ -62,16 +62,28 @@ const BrowseDevices = () => {
   }, []);
 
   const fetchProduct = async () => {
-    try {
-      dispatch(setLoading(true));
-      const response = await getAllProducts();
-      dispatch(setProducts(response.data));
-      dispatch(setLoading(false));
-    } catch (error) {
-      dispatch(setLoading(false));
-      dispatch(setError(error.message));
-    }
-  };
+  try {
+    dispatch(setLoading(true));
+
+    const response = await getAllProducts();
+
+
+
+console.log("Status:", response.status);
+console.log("Data:", response.data);
+console.log("Is Array:", Array.isArray(response.data));
+    console.log("Base URL:", import.meta.env.VITE_SPRINGBOOT_API_URL);
+    console.log("Response:", response);
+    console.log("Response Data:", response.data);
+
+    dispatch(setProducts(response.data));
+    dispatch(setLoading(false));
+  } catch (error) {
+    console.error("API Error:", error);
+    dispatch(setLoading(false));
+    dispatch(setError(error.message));
+  }
+};
   const handleSearch = async (value) => {
   setSearch(value);
 

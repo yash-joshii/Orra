@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-
+import SearchResults from "@/pages/SearchResults";
 import Mainlayout from "@/layout/Mainlayout";
 import Booking from "@/pages/Bookings";
 import BrowseDevices from "@/pages/BrowseDevices";
@@ -12,12 +12,12 @@ import Signup from "@/pages/Signup";
 // import WhyChooseOrra from "@/pages/WhyChooseOrra";
 import React from "react";
 import Wishlist from "@/pages/Wishlist";
-import { Route, Routes } from "react-router-dom";
+
 import Categories from "@/pages/Categories";
-import Productpage from "@/pages/Productpage";
+
 import SettingPage from "@/pages/SettingPage";
 import Dashboard from "@/pages/Dashboard";
-import Login from "@/pages/Login";
+
 import ProductCard from "@/components/common/ProductCard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Bookings from "@/pages/Bookings";
