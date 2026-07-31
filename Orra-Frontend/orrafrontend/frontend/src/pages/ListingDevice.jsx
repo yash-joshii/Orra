@@ -48,58 +48,58 @@ const ListingDevice = () => {
     },
   });
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    const toNumber = (val) => (val === "" || val === null || val === undefined ? null : Number(val));
+    try {
+      const toNumber = (val) => (val === "" || val === null || val === undefined ? null : Number(val));
 
-    const dto = {
-      product: {
-        productName: formData.basicDetails.productName || null,
-        category: formData.basicDetails.category || null,
-        brand: formData.basicDetails.brand || null,
-        model: formData.basicDetails.model || null,
-        description: formData.basicDetails.description || null,
+      const dto = {
+        product: {
+          productName: formData.basicDetails.productName || null,
+          category: formData.basicDetails.category || null,
+          brand: formData.basicDetails.brand || null,
+          model: formData.basicDetails.model || null,
+          description: formData.basicDetails.description || null,
 
-        purchaseYear: toNumber(formData.productDetails.purchaseYear),
-        serialOrImei: formData.productDetails.serialorimei?.trim() || null,
-        location: formData.productDetails.location || null,
+          purchaseYear: toNumber(formData.productDetails.purchaseYear),
+          serialOrImei: formData.productDetails.serialorimei?.trim() || null,
+          location: formData.productDetails.location || null,
 
-        purchasePrice: toNumber(formData.pricing.purchasePrice),
-        securityDeposit: toNumber(formData.pricing.securityDeposit),
-        dailyRate: toNumber(formData.pricing.rentalPrice),
+          purchasePrice: toNumber(formData.pricing.purchasePrice),
+          securityDeposit: toNumber(formData.pricing.securityDeposit),
+          dailyRate: toNumber(formData.pricing.rentalPrice),
 
-        availableFrom: formData.availability.availableFrom
-          ? `${formData.availability.availableFrom}T00:00:00`
-          : null,
+          availableFrom: formData.availability.availableFrom
+            ? new Date(formData.availability.availableFrom).toISOString()
+            : null,
 
-        availableTo: formData.availability.availableTo
-          ? `${formData.availability.availableTo}T00:00:00`
-          : null,
+          availableTo: formData.availability.availableTo
+            ? new Date(formData.availability.availableTo).toISOString()
+            : null,
 
-        minimumRentalDays: toNumber(formData.availability.minimumRentalDays),
-        maximumRentalDays: toNumber(formData.availability.maximumRentalDays),
+          minimumRentalDays: toNumber(formData.availability.minimumRentalDays),
+          maximumRentalDays: toNumber(formData.availability.maximumRentalDays),
 
-        productspec: formData.specifications.whatsIncluded || [],
-      },
+          productspec: formData.specifications.whatsIncluded || [],
+        },
 
-      images: formData.images.map((img) => img.imageBase64),
-    };
+        images: formData.images.map((img) => img.imageBase64),
+      };
 
-   console.log("FORM DATA");
-console.log(formData);
+      console.log("FORM DATA");
+      console.log(formData);
 
-console.log("DTO");
-console.log(JSON.stringify(dto, null, 2));
+      console.log("DTO");
+      console.log(JSON.stringify(dto, null, 2));
 
-    const response = await listdevice(dto);
-    console.log(response);
+      const response = await listdevice(dto);
+      console.log(response);
 
-  } catch (error) {
-    console.log(error);
-  }
-};
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>

@@ -2,15 +2,16 @@ package com.orra.Orrabackend.model;
 
 import com.orra.Orrabackend.enums.Category;
 import com.orra.Orrabackend.enums.ListingStatus;
-import com.orra.Orrabackend.enums.ProductCondition;
+//import com.orra.Orrabackend.enums.ProductCondition;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
+//import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
+//import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -76,10 +77,10 @@ public class ProductList {
 //    private ProductCondition productcondition;
 
     @Column(name = "available_from")
-    private LocalDateTime availableFrom;
+    private Instant availableFrom;
 
     @Column(name = "available_to")
-    private LocalDateTime availableTo;
+    private Instant availableTo;
 
     @Column(name = "minimum_rental_days")
     private Integer minimumRentalDays;

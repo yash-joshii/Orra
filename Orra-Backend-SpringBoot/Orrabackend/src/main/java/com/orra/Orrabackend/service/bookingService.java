@@ -33,21 +33,18 @@ public class bookingService {
     private static final long ACCEPT_TO_PAY_TIMEOUT_DAYS = 1;
 //    private static final long PAY_TO_SHIP_TIMEOUT_DAYS = 5;
 
-    public BookingResponseDTO createBooking(BookingRequestDTO request){
+    public BookingResponseDTO createBooking(BookingRequestDTO request) {
+
         ProductList listing = productListRepository.findById(request.getListingId())
                 .orElseThrow(() -> new RuntimeException("Listing Not Found"));
 
         User renter = userRepository.findById(request.getRenterId())
                 .orElseThrow(() -> new RuntimeException("Renter Not Found"));
 
-        // Prevent owner from booking their own listing
+        // Owner cannot book own listing
         if (listing.getOwner().getId().equals(renter.getId())) {
-            throw new IllegalStateException("Owner cannot book their own listing");
-        }
-
-        long days = Duration.between(request.getStartDateTime(), request.getEndDateTime()).toDays();
-        if(days <= 0) {
-            throw new IllegalArgumentException("End date must be after start date");
+            throw new IllegalStateException(
+                    "You cannot book your own product.");
         }
 
         // Listing must be active
@@ -62,9 +59,52 @@ public class bookingService {
                     "This product is currently unavailable.");
         }
 
-        BigDecimal totalPrice = listing.getDailyRate().multiply(BigDecimal.valueOf(days));
+        // End date must be after start date
+        if (!request.getEndDateTime().isAfter(request.getStartDateTime())) {
+            throw new IllegalArgumentException(
+                    "End date must be after start date.");
+        }
+
+        long rentalDays = Duration.between(
+                request.getStartDateTime(),
+                request.getEndDateTime()
+        ).toDays();
+
+        // Booking cannot start before availableFrom
+        if (request.getStartDateTime().isBefore(listing.getAvailableFrom())) {
+            throw new IllegalArgumentException(
+                    "Booking cannot start before "
+                            + listing.getAvailableFrom());
+        }
+
+        // Booking cannot end after availableTo
+        if (request.getEndDateTime().isAfter(listing.getAvailableTo())) {
+            throw new IllegalArgumentException(
+                    "Booking cannot end after "
+                            + listing.getAvailableTo());
+        }
+
+        // Minimum rental days
+        if (rentalDays < listing.getMinimumRentalDays()) {
+            throw new IllegalArgumentException(
+                    "Minimum rental duration is "
+                            + listing.getMinimumRentalDays()
+                            + " days.");
+        }
+
+        // Maximum rental days
+        if (rentalDays > listing.getMaximumRentalDays()) {
+            throw new IllegalArgumentException(
+                    "Maximum rental duration is "
+                            + listing.getMaximumRentalDays()
+                            + " days.");
+        }
+
+        BigDecimal totalPrice = listing.getDailyRate()
+                .multiply(BigDecimal.valueOf(rentalDays));
 
         Booking booking = new Booking();
+
         booking.setListing(listing);
         booking.setRenter(renter);
         booking.setStartDateTime(request.getStartDateTime());
@@ -74,8 +114,9 @@ public class bookingService {
         booking.setStatus(BookingStatus.PENDING);
         booking.setCreatedAt(Instant.now());
 
-        Booking saved = bookingRepository.save(booking);
-        return toResponseDTO(saved);
+        Booking savedBooking = bookingRepository.save(booking);
+
+        return toResponseDTO(savedBooking);
     }
 
     @Transactional

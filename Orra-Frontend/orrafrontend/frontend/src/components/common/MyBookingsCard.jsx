@@ -15,10 +15,6 @@ const badgeConfig = {
         label: "Completed",
         className: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
     },
-    cancelled: {
-        label: "Cancelled/Rejected",
-        className: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
-    },
     reuested: {
         label: "Requested",
         className: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"

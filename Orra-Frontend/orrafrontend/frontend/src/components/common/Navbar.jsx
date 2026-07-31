@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
 import { searchProducts } from "@/api/listingApi";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, Link } from "react-router-dom";
 
 import { useDispatch } from "react-redux";
 import { logout } from "@/redux/slices/authslices";
@@ -111,16 +111,28 @@ const Navbar = () => {
     { name: "Home", path: "/" },
     { name: "Browse Devices", path: "/browserdevices" },
     { name: "Categories", path: "/categories" },
-    { name: "My Bookings", path: "/bookings" },
+    { name: "My Bookings", path: "/mybookings" },
     { name: "Wishlist", path: "/wishlist" },
     { name: "Dashboard", path: "/dashboard" },
   ];
 
+  // 1. Get the current booking state from Redux
+  const currentBooking = useSelector((state) => state.booking.currentBooking);
+
+  // 2. Check if a booking is currently pending or accepted
+  const isBookingPendingPayment =
+    currentBooking &&
+    (currentBooking.status === "PENDING" || currentBooking.status === "ACCEPTED");
+
+  // 3. Set the target destination dynamically
+  const targetRoute = isBookingPendingPayment
+    ? `/booking/${currentBooking.bookingId}`
+    : "/cart";
+
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-        scrolled ? "bg-white shadow-md" : "bg-white/30 backdrop-blur-md"
-      }`}
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled ? "bg-white shadow-md" : "bg-white/30 backdrop-blur-md"
+        }`}
     >
       <div className="flex items-center justify-center p-[2.2rem] h-16 relative">
         <div className="flex items-center gap-8">
@@ -206,13 +218,18 @@ const Navbar = () => {
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-teal-500 rounded-full"></span>
           </button>
 
-          <button className="relative">
-            <Calendar className="text-black w-5 h-5" />
+          <Link to={targetRoute} className="relative inline-block">
+            <button className="relative p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer flex items-center justify-center">
+              <Calendar className="text-black w-5 h-5" />
 
-            <span className="absolute -top-2 -right-2 text-xs bg-indigo-600 text-white px-1.5 py-0.5 rounded-full">
-              2
-            </span>
-          </button>
+              {/* Show badge only when a pending booking exists */}
+              {isBookingPendingPayment && (
+                <span className="absolute -top-1 -right-1 text-xs bg-indigo-600 text-white font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  1
+                </span>
+              )}
+            </button>
+          </Link>
 
           {user ? (
             <DropdownMenu>
