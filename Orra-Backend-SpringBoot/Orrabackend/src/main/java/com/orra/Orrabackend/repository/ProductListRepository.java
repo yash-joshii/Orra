@@ -9,8 +9,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+
+
 @Repository
 public interface ProductListRepository extends JpaRepository<ProductList, Long> {
+
+
+
     @Query("SELECT p.category AS category, COUNT(p) AS count " +
         "FROM ProductList p " +
             "WHERE p.isActive = true " +
@@ -18,13 +23,11 @@ public interface ProductListRepository extends JpaRepository<ProductList, Long> 
     List<CategoryCountProjection> getCategoryCounts();
 
 
-    @Query("""
-        SELECT p FROM ProductList p
-        WHERE LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-           OR LOWER(p.brand) LIKE LOWER(CONCAT('%', :keyword, '%'))
-           OR LOWER(p.category) LIKE LOWER(CONCAT('%', :keyword, '%'))
-           OR LOWER(p.model) LIKE LOWER(CONCAT('%', :keyword, '%'))
-    """)
+    @Query("SELECT p FROM ProductList p WHERE " +
+            "LOWER(p.productName) LIKE LOWER(CONCAT(:keyword, '%')) OR " +
+            "LOWER(p.category) LIKE LOWER(CONCAT(:keyword, '%')) OR " +
+            "LOWER(p.brand) LIKE LOWER(CONCAT(:keyword, '%'))")
     List<ProductList> searchProducts(@Param("keyword") String keyword);
+
 }
 
