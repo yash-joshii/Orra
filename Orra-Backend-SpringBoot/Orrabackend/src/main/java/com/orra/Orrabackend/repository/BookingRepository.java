@@ -7,8 +7,21 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findByRenter_Id(Long renter_Id);
-    List<Booking> findByListing_OwnerIdAndStatus(Long ownerId, BookingStatus status);
+
+    List<Booking> findByRenter_Id(Long renterId);
+
+    // Used by Action Center
+    List<Booking> findByListing_OwnerIdAndStatus(
+            Long ownerId,
+            BookingStatus status
+    );
+
+    // Used to get all bookings
     List<Booking> findByListing_OwnerId(Long ownerId);
-//    List<Booking> findByStatus(BookingStatus status);
+
+    // Used only by Dashboard Statistics
+    long countByListing_OwnerIdAndStatus(
+            Long ownerId,
+            BookingStatus status
+    );
 }
