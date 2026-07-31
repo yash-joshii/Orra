@@ -52,11 +52,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException{
+            throws ServletException, IOException {
         String token = extracToken(request);
 
-        if(token != null){
-            try{
+        if (token != null) {
+            try {
                 // CHANGED — replaced HMAC secret-key parsing block below
                 DecodedJWT jwt = JWT.decode(token);
                 Jwk jwk = jwkProvider.get(jwt.getKeyId());
@@ -73,11 +73,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         .map(r -> new SimpleGrantedAuthority("ROLE_" + r.name()))
                         .collect(Collectors.toList());
 
+
+
                 Long principal = (user == null) ? null : user.getId();
 
                 var auth = new UsernamePasswordAuthenticationToken(principal, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(auth);
-            } catch (Exception e) {                            // CHANGED — was catch (JwtException | IllegalArgumentException e)
+            } catch (
+                    Exception e) {                            // CHANGED — was catch (JwtException | IllegalArgumentException e)
                 System.out.println("JWT validation failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
                 SecurityContextHolder.clearContext();
             }
@@ -85,8 +88,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    private String extracToken(HttpServletRequest request){
-        if(request.getCookies() == null) return null;
+    private String extracToken(HttpServletRequest request) {
+        if (request.getCookies() == null) return null;
         return Arrays.stream(request.getCookies())
                 .filter(c -> c.getName().equals("sb-access-token"))
                 .findFirst()
