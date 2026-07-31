@@ -1,5 +1,8 @@
 import { useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
+import { searchProducts } from "@/api/listingApi";
+import { NavLink, useNavigate } from "react-router-dom";
+
 import { useDispatch } from "react-redux";
 import { logout } from "@/redux/slices/authslices";
 import { Logout } from "@/api/authApi";
@@ -12,9 +15,14 @@ import {
   Package,
   LayoutDashboardIcon,
 } from "lucide-react";
-import { LogOutIcon, SettingsIcon, UserIcon } from "lucide-react";
-import { NavLink, useNavigate } from "react-router-dom";
+import {
+  LogOutIcon,
+  SettingsIcon,
+  UserIcon,
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,16 +30,40 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import logo from "../../assets/logo/orralogo.svg";
 import { setLoading, setUser } from "@/redux/slices/userprofileSlice";
 import { getUser } from "@/api/userApi";
 import { setError } from "@/redux/slices/productslices";
 
 const Navbar = () => {
-  const [scrolled, setScrolled] = useState(false);
-
   const navigate = useNavigate();
+
+  const [scrolled, setScrolled] = useState(false);
   const dispatch = useDispatch();
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState([]);
+
+  const handleSearch = async (e) => {
+    const value = e.target.value;
+
+    setSearch(value);
+
+    if (value.trim() === "") {
+      setResults([]);
+      return;
+    }
+
+    try {
+      const response = await searchProducts(value);
+
+      setResults(response.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+
 
   const user = useSelector((state) => state.auth.user);
   const userprofile = useSelector((state) => state.userProfile.user);
@@ -39,7 +71,10 @@ const Navbar = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
+
     window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = async () => {
@@ -89,12 +124,15 @@ const Navbar = () => {
     >
       <div className="flex items-center justify-center p-[2.2rem] h-16 relative">
         <div className="flex items-center gap-8">
+
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 flex items-center justify-center rounded-full bg-transparent text-white font-bold">
-              <img src={logo} className="text-#4F46E5" />
+            <div className="w-9 h-9 flex items-center justify-center">
+              <img src={logo} alt="logo" />
             </div>
 
-            <span className="text-xl font-semibold">ORRA</span>
+            <span className="text-xl font-semibold">
+              ORRA
+            </span>
           </div>
 
           <nav className="hidden md:flex items-center font-semibold text-gray-600 text-[14px] gap-[43px]">
@@ -112,17 +150,54 @@ const Navbar = () => {
               </NavLink>
             ))}
           </nav>
+
         </div>
 
         <div className="flex items-center gap-[25px] ml-[2%]">
-          <div className="hidden lg:flex items-center bg-gray-100 w-[90%] rounded-full px-3 py-2 border border-[#e2e8f0]">
-            <Search className="w-4 h-4 text-gray-500" />
 
-            <input
-              type="text"
-              placeholder="Search gear..."
-              className="bg-transparent outline-none ml-2 text-sm w-full"
-            />
+          {/* SEARCH */}
+          <div className="relative hidden lg:block w-[320px]">
+
+            <div className="flex items-center bg-gray-100 rounded-full px-3 py-2 border border-[#e2e8f0]">
+
+              <Search className="w-4 h-4 text-gray-500" />
+
+              <input
+                type="text"
+                value={search}
+                onChange={handleSearch}
+                placeholder="Search gear..."
+                className="bg-transparent outline-none ml-2 text-sm w-full"
+              />
+
+            </div>
+
+            {results.length > 0 && (
+              <div className="absolute top-12 left-0 w-full bg-white rounded-xl shadow-xl border z-50 max-h-80 overflow-y-auto">
+
+                {results.map((item) => (
+                  <div
+                    key={item.productId}
+                    className="p-3 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      navigate(`/product/${item.productId}`);
+                      setSearch("");
+                      setResults([]);
+                    }}
+                  >
+                    <p className="font-semibold">
+                      {item.productName}
+                    </p>
+
+                    <p className="text-sm text-gray-500">
+                      {item.brand}
+                    </p>
+                  </div>
+                ))}
+
+              </div>
+            )}
+
           </div>
 
           <button className="relative">
@@ -226,6 +301,7 @@ const Navbar = () => {
             </div>
           )}
         </div>
+
       </div>
     </header>
   );

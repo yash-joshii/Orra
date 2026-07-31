@@ -1,10 +1,43 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Heart, Share2, Star, MapPin, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  addToWishlist,
+  removeFromWishlist,
+  checkWishlist,
+} from "@/api/wishlist";
 
 const ProductDetails = ({ data }) => {
   const [selectedImage, setSelectedImage] = useState(0);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+useEffect(() => {
+  if (!data?.productId) return;
+
+  const fetchWishlistStatus = async () => {
+    try {
+      const response = await checkWishlist(userId, data.productId);
+      setIsWishlisted(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+const handleWishlist = async () => {
+  try {
+    if (isWishlisted) {
+      await removeFromWishlist(userId, data.productId);
+      setIsWishlisted(false);
+    } else {
+      await addToWishlist(userId, data.productId);
+      setIsWishlisted(true);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+  fetchWishlistStatus();
+}, [data]);
+const userId = 1;
 
   const images =
     data?.images?.length > 0
@@ -40,9 +73,19 @@ const ProductDetails = ({ data }) => {
         />
 
         <div className="absolute top-4 right-4 flex gap-2">
-          <button className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
-            <Heart size={18} />
-          </button>
+         <button
+  onClick={handleWishlist}
+  className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition"
+>
+  <Heart
+    size={20}
+    className={
+      isWishlisted
+        ? "fill-red-500 text-red-500"
+        : "text-gray-500"
+    }
+  />
+</button>
 
           <button className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
             <Share2 size={18} />

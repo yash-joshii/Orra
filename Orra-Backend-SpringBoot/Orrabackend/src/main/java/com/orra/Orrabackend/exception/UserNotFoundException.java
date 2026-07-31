@@ -1,7 +1,13 @@
 package com.orra.Orrabackend.exception;
 
 public class UserNotFoundException extends RuntimeException{
+    public UserNotFoundException(String id){
+
+        super(id);
+    }
+
     public UserNotFoundException(Long id){
-        super("User Not Found With ID : " + id);
+
+        super(String.valueOf(id));
     }
 }
