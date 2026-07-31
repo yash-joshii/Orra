@@ -62,6 +62,28 @@ const userId = 1;
         .filter((item) => item.length > 0)
     : [];
 
+
+    const handleWishlist = async (e) => {
+        e.stopPropagation();
+    
+        console.log("Heart clicked");
+        console.log("Product ID:", data.productId);
+    
+        try {
+          if (liked) {
+            await removeFromWishlist(userId, data.productId);
+            setLiked(false);
+            console.log("Removed from wishlist");
+          } else {
+            await addToWishlist(userId, data.productId);
+            setLiked(true);
+            console.log("Added to wishlist");
+          }
+        } catch (error) {
+          console.error("Wishlist Error:", error.response?.data || error.message);
+        }
+      };
+
   return (
     <div className="max-w-5xl mx-auto px-5 py-10">
       {/* Image */}

@@ -202,11 +202,11 @@ const BrowseDevices = () => {
 
                 {getPageNumbers().map((page, idx) =>
                   page === "ellipsis" ? (
-                    <PaginationItem key={idx}>
+                    <PaginationItem key={`ellipsis-${idx}`}>
                       <PaginationEllipsis />
                     </PaginationItem>
                   ) : (
-                    <PaginationItem key={page}>
+                    <PaginationItem key={`page-${page}`}>
                       <PaginationLink
                         isActive={page === currentPage}
                         onClick={(e) => {
