@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getUserNotifications, getUnreadCount, markAsRead } from "@/api/notificationApi";
-import { toast } from "sonner";
+import { toast } from 'react-toastify';
 
 const TYPE_CONFIG = {
     BOOKING_REQUEST: { icon: Package, bg: "bg-indigo-100", color: "text-indigo-600", title: "Booking Request" },

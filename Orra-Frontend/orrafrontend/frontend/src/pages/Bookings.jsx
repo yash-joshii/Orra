@@ -25,7 +25,7 @@ import {
   setError,
 } from "@/redux/slices/productslices";
 import { useSelector, useDispatch } from "react-redux";
-import { toast } from "sonner";
+import { toast } from 'react-toastify';
 
 // Split-out booking components
 import BookingBreadcrumb from "../components/booking/BookingBreadcrumb";
