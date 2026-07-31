@@ -4,6 +4,7 @@ import com.orra.Orrabackend.enums.Category;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 
 import java.math.BigDecimal;
@@ -21,7 +22,7 @@ public class ProductList {
     private Long productId;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", referencedColumnName = "id")
+    @JoinColumn(name = "owner_id", referencedColumnName = "user_id")
     private User owner;
 
     @Column(name = "serial_or_imei", unique = true)
@@ -57,12 +58,15 @@ public class ProductList {
     @Column(name = "is_active")
     private Boolean isActive = true;
 
-    @Column(name = "created_at")
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @OneToMany(
             mappedBy = "product",
-            cascade = CascadeType.ALL
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
     private List<Productimage> images;
 
@@ -70,4 +74,7 @@ public class ProductList {
     @Type(JsonType.class)
     @Column(columnDefinition = "jsonb")
     private List<String> productspec;
+
+    @Column(name = "is_available", nullable = false)
+    private Boolean isAvailable = true;
 }

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setMyBookings, setLoading, setError } from "@/redux/slices/bookingSlice"
-import { getMyBookings } from "@/redux/slices/BookingApi"
+import { getMyBookings } from "@/api/bookingApi"
 
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"

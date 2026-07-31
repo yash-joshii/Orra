@@ -18,10 +18,6 @@ CREATE TABLE users (
     -- Supabase Auth User ID
     supabase_id UUID UNIQUE NOT NULL,
 
-    -- A user can have one or more roles
-    roles app_user_role_enum[] NOT NULL
-        DEFAULT ARRAY['BUYER']::app_user_role_enum[],
-
     id_proof id_proof_enum NOT NULL,
 
     pan_number VARCHAR(20),
@@ -32,9 +28,6 @@ CREATE TABLE users (
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT roles_not_empty
-        CHECK (array_length(roles, 1) > 0),
-
     CONSTRAINT id_proof_validation CHECK (
         (id_proof = 'PAN' AND pan_number IS NOT NULL AND aadhaar_number IS NULL)
         OR
@@ -42,4 +35,17 @@ CREATE TABLE users (
         OR
         (id_proof = 'BOTH' AND pan_number IS NOT NULL AND aadhaar_number IS NOT NULL)
     )
+);
+
+
+CREATE TABLE user_roles (
+    user_id BIGINT NOT NULL,
+    role app_user_role_enum NOT NULL,
+
+    PRIMARY KEY (user_id, role),
+
+    CONSTRAINT fk_user_roles_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
 );

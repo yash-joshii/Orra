@@ -137,7 +137,8 @@ const Bookings = () => {
         currentBooking.bookingId,
         user.userId,
       );
-      dispatch(setCurrentBooking(response.data));
+      dispatch(setCurrentBooking(null));
+      toast.success("Booking cancelled.");
     } catch (err) {
       dispatch(setBookingError(err.message));
     } finally {
@@ -159,6 +160,8 @@ const Bookings = () => {
         dispatch(setCurrentBooking(response.data));
       } catch (error) {
         console.error("Polling error:", error);
+        toast.error("This booking request was declined by the owner.");
+        dispatch(setCurrentBooking(null));
       }
     }, 5000);
 

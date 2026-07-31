@@ -1,5 +1,6 @@
 package com.orra.Orrabackend.service;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 import com.orra.Orrabackend.dto.booking.BookingRequestDTO;
 import com.orra.Orrabackend.dto.booking.BookingResponseDTO;
@@ -29,7 +30,7 @@ public class bookingService {
     private final TransactionService transactionService;
     private final NotificationService notificationService;
 
-    private static final long ACCEPT_TO_PAY_TIMEOUT_DAYS = 5;
+    private static final long ACCEPT_TO_PAY_TIMEOUT_DAYS = 1;
 //    private static final long PAY_TO_SHIP_TIMEOUT_DAYS = 5;
 
     public BookingResponseDTO createBooking(BookingRequestDTO request){
@@ -49,6 +50,18 @@ public class bookingService {
             throw new IllegalArgumentException("End date must be after start date");
         }
 
+        // Listing must be active
+        if (!listing.getIsActive()) {
+            throw new IllegalStateException(
+                    "This listing is not active.");
+        }
+
+        // Product must be available
+        if (!listing.getIsAvailable()) {
+            throw new IllegalStateException(
+                    "This product is currently unavailable.");
+        }
+
         BigDecimal totalPrice = listing.getDailyRate().multiply(BigDecimal.valueOf(days));
 
         Booking booking = new Booking();
@@ -65,80 +78,103 @@ public class bookingService {
         return toResponseDTO(saved);
     }
 
-    public BookingResponseDTO acceptBooking(Long bookingId){
-        Booking booking = getBookingOrThrow(bookingId);
-        requireStatus(booking, BookingStatus.PENDING);
+    @Transactional
+    public BookingResponseDTO acceptBooking(Long bookingId) {
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new IllegalStateException(
+                    "Only pending bookings can be accepted.");
+        }
+
+        // Accept selected booking
         booking.setStatus(BookingStatus.ACCEPTED);
         booking.setAcceptedAt(Instant.now());
-        return toResponseDTO(bookingRepository.save(booking));
+
+        Booking savedBooking = bookingRepository.save(booking);
+
+        // Find all other pending bookings for the same listing
+        List<Booking> pendingBookings =
+                bookingRepository.findByListing_ProductIdAndStatus(
+                        booking.getListing().getProductId(),
+                        BookingStatus.PENDING
+                );
+
+        // Delete all other pending requests
+        for (Booking otherBooking : pendingBookings) {
+
+            if (!otherBooking.getId().equals(savedBooking.getId())) {
+
+                notificationService.createNotification(
+                        otherBooking.getRenter(),
+                        otherBooking,
+                        "Your booking request was not selected by the owner.",
+                        "BOOKING_REJECTED"
+                );
+
+                bookingRepository.delete(otherBooking);
+            }
+        }
+
+        // Notify accepted renter
+        notificationService.createNotification(
+                savedBooking.getRenter(),
+                savedBooking,
+                "Your booking request has been accepted. Please complete the payment within 24 hours.",
+                "BOOKING_ACCEPTED"
+        );
+
+        return toResponseDTO(savedBooking);
     }
 
-    private static final BigDecimal PLATFORM_FEE_RATE = new BigDecimal("0.10");
+//    private static final BigDecimal PLATFORM_FEE_RATE = new BigDecimal("0.10");
 
     @Transactional
-    public BookingResponseDTO payForBooking(Long bookingId){
+    public BookingResponseDTO payForBooking(Long bookingId) {
 
-        Booking booking = getBookingOrThrow(bookingId);
-        requireStatus(booking, BookingStatus.ACCEPTED);
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        // Only accepted bookings can be paid
+        if (booking.getStatus() != BookingStatus.ACCEPTED) {
+            throw new IllegalStateException(
+                    "Only accepted bookings can be paid.");
+        }
+
+        // Update booking
         booking.setStatus(BookingStatus.COMPLETED);
         booking.setPaidAt(Instant.now());
-        booking.setCompletedAt(Instant.now());
-        Booking saved = bookingRepository.save(booking);
 
-        //Payment Transaction (renter's money in)
-        TransactionRequestDTO paymentDto = new TransactionRequestDTO();
-        paymentDto.setBookingId(saved.getId());
-        paymentDto.setAmount(saved.getTotalPrice().doubleValue());
-        paymentDto.setType("PAYMENT");
-        paymentDto.setStatus("SUCCESS");
-        transactionService.createTransaction(paymentDto);
+        // Make listing unavailable
+        ProductList listing = booking.getListing();
+        listing.setIsAvailable(false);
 
-        //Payout transaction (Owner's cut)
-        BigDecimal payoutAmount = saved.getTotalPrice().multiply(BigDecimal.ONE.subtract(PLATFORM_FEE_RATE));
-        TransactionRequestDTO payoutDto = new TransactionRequestDTO();
-        payoutDto.setBookingId(saved.getId());
-        payoutDto.setAmount(payoutAmount.doubleValue());
-        payoutDto.setType("PAYOUT");
-        payoutDto.setStatus("SUCCESS");
-        transactionService.createTransaction(payoutDto);
+        // Save listing first
+        productListRepository.save(listing);
 
-        //Notification
+        // Save booking
+        Booking savedBooking = bookingRepository.save(booking);
+
+        // Notify owner
         notificationService.createNotification(
-                saved.getRenter(), saved, "Your Payment for " + saved.getListing().getProductName() + " was successful."
-                , "PAYMENT_SUCCESS"
+                booking.getListing().getOwner(),
+                savedBooking,
+                "Payment received successfully. Booking confirmed.",
+                "PAYMENT_SUCCESS"
         );
-
-        notificationService.createNotification(
-                saved.getListing().getOwner(), saved, "You have been paid for " + saved.getListing().getProductName() + " ."
-                , "PAYMENT_RECEIVED"
-        );
-
-        return toResponseDTO(saved);
+        return toResponseDTO(savedBooking);
     }
-
-//    public BookingResponseDTO shipBooking(Long bookingId){
-//        Booking booking = getBookingOrThrow(bookingId);
-//        requireStatus(booking, BookingStatus.PAID);
-//        booking.setStatus(BookingStatus.SHIPPED);
-//        booking.setShippedAt(Instant.now());
-//        return toResponseDTO(bookingRepository.save(booking));
-//    }
-//
-//    public BookingResponseDTO confirmReceipt(Long bookingId){
-//        Booking booking = getBookingOrThrow(bookingId);
-//        requireStatus(booking, BookingStatus.SHIPPED);
-//        booking.setStatus(BookingStatus.COMPLETED);
-//        booking.setCompletedAt(Instant.now());
-//        return toResponseDTO(bookingRepository.save(booking));
-//    }
 
     public BookingResponseDTO rejectBooking(Long bookingId){
         Booking booking = getBookingOrThrow(bookingId);
         if(booking.getStatus() != BookingStatus.PENDING && booking.getStatus() != BookingStatus.ACCEPTED){
             throw new IllegalStateException("Booking cannot be rejected from status: " + booking.getStatus());
         }
-        booking.setStatus(BookingStatus.REJECTED);
-        return toResponseDTO(bookingRepository.save(booking));
+        BookingResponseDTO responseDTO = toResponseDTOWithOverride(booking, BookingStatus.REJECTED);
+        bookingRepository.delete(booking);
+        return responseDTO;
     }
 
     public List<BookingResponseDTO> getMyBookings(Long renterId){
@@ -176,31 +212,39 @@ public class bookingService {
         if(booking.getStatus() != BookingStatus.PENDING && booking.getStatus() != BookingStatus.ACCEPTED){
             throw new IllegalStateException("Booking cannot be cancelled from status: " + booking.getStatus());
         }
-        booking.setStatus(BookingStatus.CANCELLED);
-        return toResponseDTO(bookingRepository.save(booking));
+        BookingResponseDTO responseDTO = toResponseDTOWithOverride(booking, BookingStatus.CANCELLED);
+        bookingRepository.delete(booking);
+        return responseDTO;
     }
 
+    @Scheduled(cron = "0 0 * * * *")
+    @Transactional
+    public void expireAcceptedBookings() {
 
-    //Orra Admin Panel
-//    public List<BookingResponseDTO> getAllBookingsAdmin(String statusFilter){
-//        List<Booking> bookings;
-//
-//        if(statusFilter == null || statusFilter.isBlank()){
-//            bookings = bookingRepository.findAll();
-//        }
-//        else{
-//            BookingStatus status;
-//            try{
-//                status = BookingStatus.valueOf(statusFilter.toUpperCase());
-//            } catch (IllegalArgumentException ex){
-//                throw new IllegalArgumentException("Invalid status filter: " + statusFilter);
-//            }
-//            bookings = bookingRepository.findByStatus(status);
-//        }
-//        return bookings.stream()
-//                .map(this::toResponseDTO)
-//                .collect(Collectors.toList());
-//    }
+        List<Booking> bookings =
+                bookingRepository.findByStatus(
+                        BookingStatus.ACCEPTED);
+
+        Instant now = Instant.now();
+
+        for (Booking booking : bookings) {
+
+            if (booking.getAcceptedAt() != null &&
+                    booking.getAcceptedAt()
+                            .plus(Duration.ofDays(1))
+                            .isBefore(now)) {
+
+                notificationService.createNotification(
+                        booking.getRenter(),
+                        booking,
+                        "Booking expired because payment was not completed.",
+                        "PAYMENT_EXPIRED"
+                );
+
+                bookingRepository.delete(booking);
+            }
+        }
+    }
 
     public Booking getBookingOrThrow(Long bookingId){
         return bookingRepository.findById(bookingId)
@@ -225,14 +269,6 @@ public class bookingService {
                 bookingRepository.save(booking);
             }
         }
-
-//        if(booking.getStatus() == BookingStatus.PAID && booking.getPaidAt() != null){
-//            long daysSincePaid = Duration.between(booking.getPaidAt(), now).toDays();
-//            if(daysSincePaid >= PAY_TO_SHIP_TIMEOUT_DAYS){
-//                booking.setStatus(BookingStatus.REFUNDED);
-//                bookingRepository.save(booking);
-//            }
-//        }
     }
 
     private BookingResponseDTO toResponseDTO(Booking booking){
@@ -253,6 +289,26 @@ public class bookingService {
                 .totalPrice(booking.getTotalPrice())
                 .depositAmount(booking.getDepositAmount())
                 .status(booking.getStatus())
+                .createdAt(booking.getCreatedAt())
+                .build();
+    }
+
+    private BookingResponseDTO toResponseDTOWithOverride(Booking booking, BookingStatus overrideStatus){
+        return BookingResponseDTO.builder()
+                .bookingId(booking.getId())
+                .listingId(booking.getListing().getProductId())
+                .listingTitle(booking.getListing().getProductName())
+                .listingImage(null)
+                .dailyRate(booking.getListing().getDailyRate())
+                .ownerId(booking.getListing().getOwner().getId())
+                .ownerName(booking.getListing().getOwner().getName())
+                .renterId(booking.getRenter().getId())
+                .renterName(booking.getRenter().getName())
+                .startDateTime(booking.getStartDateTime())
+                .endDateTime(booking.getEndDateTime())
+                .totalPrice(booking.getTotalPrice())
+                .depositAmount(booking.getDepositAmount())
+                .status(overrideStatus)
                 .createdAt(booking.getCreatedAt())
                 .build();
     }

@@ -16,7 +16,7 @@ import ProductCard from "@/components/common/ProductCard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Bookings from "@/pages/Bookings";
 import MyBookings from "@/pages/MyBookings";
-import MyBookings from "@/pages/MyBookings";
+// import MyBookings from "@/pages/MyBookings";
 // import { Route, Routes } from "react-router-dom";
 
 const AppRoutes = () => {
