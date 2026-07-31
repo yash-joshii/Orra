@@ -15,7 +15,8 @@ public interface ProductListRepository extends JpaRepository<ProductList, Long> 
             "WHERE p.isActive = true " +
             "GROUP BY p.category")
     List<CategoryCountProjection> getCategoryCounts();
-
+    long countByOwnerId(Long ownerId);
     long countByOwner_IdAndIsActiveTrue(Long ownerId);
+   // long countByStatus(String status);
 }
 

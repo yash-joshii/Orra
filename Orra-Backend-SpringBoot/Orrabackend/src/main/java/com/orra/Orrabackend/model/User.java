@@ -4,9 +4,11 @@ import com.orra.Orrabackend.enums.UserIdProof;
 import com.orra.Orrabackend.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -56,4 +58,13 @@ public class User {
     @Column(name = "supabase_id", unique = true, nullable = false)
     private UUID supabaseId;
 
+    @Column(nullable = false)
+    private boolean verified = false;
+
+    @Column(nullable = false)
+    private String status = "ACTIVE";
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt;
 }
