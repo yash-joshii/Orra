@@ -20,9 +20,9 @@ import {
   setError as setBookingError,
 } from "@/redux/slices/bookingSlice";
 import {
-  setSelectedProducts,
   setLoading,
   setError,
+  setSelectedProduct,
 } from "@/redux/slices/productslices";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from 'react-toastify';
@@ -61,7 +61,7 @@ const Bookings = () => {
     try {
       dispatch(setLoading(true));
       const response = await getProductById(id);
-      dispatch(setSelectedProducts(response.data));
+      dispatch(setSelectedProduct(response.data));
       dispatch(setLoading(false));
     } catch (error) {
       dispatch(setError(error.message));
