@@ -110,8 +110,8 @@ const AppRoutes = () => {
             <ProtectedRoute>
               <MyBookings />
             </ProtectedRoute>
-          } */}
-        />
+          } 
+        />*/}
         <Route
           path="/dashboard"
           element={
