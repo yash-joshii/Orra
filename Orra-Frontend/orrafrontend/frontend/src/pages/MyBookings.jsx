@@ -8,9 +8,24 @@ import Footer from "@/components/common/Footer"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowRight } from 'lucide-react'
+import LazyImage from '@/components/common/LazyImage'
 import MyBookingsCard from "@/components/common/MyBookingsCard"
 
 const MyBookings = () => {
+    return (<>
+        {/* Shadcn - tabs, cards, button, badge, avatar, lucide icons */}
+
+        {/* Bookings Body */}
+        <div className = "bookings-body">
+            <h1 className = "absolute top-[80px] left-[390px] font-bold text-[30px]">My Bookings</h1>
+            <div className = "tabs-change-container absolute top-[150px] left-[385px] text-[#5650cc]">
+                <Tabs defaultValue="overview">
+                    <TabsList variant="line">
+                        <TabsTrigger value="active&upcoming">Active & Upcoming</TabsTrigger>
+                        <TabsTrigger value="AwaitingOwner">Awaiting Owner</TabsTrigger>
+                        <TabsTrigger value="completed">Completed</TabsTrigger>
+                        <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+                    </TabsList>
     const dispatch = useDispatch()
     const { myBookings, loading, error } = useSelector((state) => state.booking)
     const { user } = useSelector((state) => state.auth)
@@ -87,7 +102,8 @@ const MyBookings = () => {
 
             <Footer />
         </div>
-    )
-}
+
+    </>)
+};
 
 export default MyBookings;

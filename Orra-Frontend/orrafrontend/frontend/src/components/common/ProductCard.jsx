@@ -9,7 +9,8 @@ import {
   removeFromWishlist,
   checkWishlist,
 } from "@/api/wishlist";
-
+import { useDispatch } from "react-redux";
+import { setSelectedProduct } from "@/redux/slices/productslices";
 import {
   Card,
   CardAction,
@@ -30,10 +31,12 @@ import {
   Heart,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import LazyImage from "./LazyImage";
 import { useSelector } from "react-redux";
 
 const ProductCard = ({ data }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   console.log("images →", data.images);
   const [liked, setLiked] = useState(false);
 
@@ -86,16 +89,16 @@ const ProductCard = ({ data }) => {
       <div className="relative ">
         <div className="absolute inset-0 z-10 aspect-video bg-black/35" />
 
-        <img
+        <LazyImage
           src={imageUrl}
-          // src="https://i.pravatar.cc/500"
-          // alt="Event cover"
+          alt={data.productName}
           className="relative z-20 aspect-[4/3] w-full object-cover brightness-60 dark:brightness-40"
         />
         <div
           className="btn flex pl-[10px] gap-[4px] w-[40%]  opacity-0 invisible group-hover:visible group-hover:opacity-100 transition duration-200  bg-white none absolute z-20 p-[2%] rounded-[19px] font-[12px] text-center bottom-[38%] left-[35%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)]  "
           onClick={(e) => {
             e.stopPropagation();
+            dispatch(setSelectedProduct(data));
             navigate(`/product/${data.productId}`);
           }}
         >

@@ -1,6 +1,7 @@
 import React from "react";
 import { Heart, MapPin, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import LazyImage from "./LazyImage";
 
 const WishlistCard = ({ data, onRemove }) => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const WishlistCard = ({ data, onRemove }) => {
       {/* Left Section */}
       <div className="flex items-center gap-5">
 
-        <img
+        <LazyImage
           src={imageUrl}
           alt={data.productName}
           className="w-36 h-36 rounded-xl object-cover"

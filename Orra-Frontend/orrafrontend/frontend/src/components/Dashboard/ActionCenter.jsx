@@ -17,22 +17,30 @@ const ActionCenter = () => {
   const [toShip, setToShip] = useState([]);
   const [shipLoading, setShipLoading] = useState(true);
 
-  useEffect(() => {
-    fetchIncomingRequests();
-    // fetchToShip();
-  }, [user]);
+useEffect(() => {
+  if (!user || !user.userId) {
+    setLoading(false);
+    return;
+  }
 
-  const fetchIncomingRequests = async () => {
-    try {
-      setLoading(true);
-      const response = await getIncomingRequests(user.userId);
-      setRequests(response.data);
-    } catch (error) {
-      console.error("Failed to fetch incoming requests:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  fetchIncomingRequests();
+}, [user]);
+
+const fetchIncomingRequests = async () => {
+  if (!user?.userId) return;
+
+  try {
+    setLoading(true);
+
+    const response = await getIncomingRequests(user.userId);
+
+    setRequests(response.data);
+  } catch (error) {
+    console.error("Failed to fetch incoming requests:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // const fetchToShip = async () => {
   //   try {

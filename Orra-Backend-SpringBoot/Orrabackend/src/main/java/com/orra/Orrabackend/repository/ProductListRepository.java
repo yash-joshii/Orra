@@ -22,8 +22,8 @@ public interface ProductListRepository extends JpaRepository<ProductList, Long> 
     List<CategoryCountProjection> getCategoryCounts();
 
     long countByOwnerId(Long ownerId);
-//    long countByOwner_IdAndIsActiveTrue(Long ownerId);
-
+    long countByOwner_IdAndIsActiveTrue(Long ownerId);
+    List<ProductList> findByOwner_IdAndIsActiveTrue(Long ownerId);
     long countByApprovalStatus(ListingStatus approvalStatus);                              // ADD
     Page<ProductList> findByApprovalStatus(ListingStatus approvalStatus, Pageable pageable); // ADD
 
@@ -33,10 +33,10 @@ public interface ProductListRepository extends JpaRepository<ProductList, Long> 
             "LOWER(p.brand) LIKE LOWER(CONCAT(:keyword, '%'))")
     List<ProductList> searchProducts(@Param("keyword") String keyword);
 
-    long countByOwner_IdAndIsActiveTrue(Long ownerId);
+//     long countByOwner_IdAndIsActiveTrue(Long ownerId);
 
     List<ProductList> findByIsAvailableTrueAndIsActiveTrue();
 
-    List<ProductList> findByOwner_IdAndIsActiveTrue(Long ownerId);
+//     List<ProductList> findByOwner_IdAndIsActiveTrue(Long ownerId);
 
 }

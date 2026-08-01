@@ -1,30 +1,43 @@
-import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
-// import { supabase } from "@/lib/supabaseclient";
+import React, { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
+
 import { clearCredentials, setCredentials } from "@/redux/slices/authslices";
 import { GetCurrentUser } from "@/api/authApi"; // add this import temporarily
 
 // Layout & Pages
 import Mainlayout from "@/layout/Mainlayout";
-import LandingPage from "@/pages/LandingPage";
-import BrowseDevices from "@/pages/BrowseDevices";
-import ListingDevice from "@/pages/ListingDevice";
-import Productpage from "@/pages/Productpage";
-import Categories from "@/pages/Categories";
-import SettingPage from "@/pages/SettingPage";
-import Dashboard from "@/pages/Dashboard";
-import Wishlist from "@/pages/Wishlist";
-import Signup from "@/pages/Signup";
-import Login from "@/pages/Login";
-
-// Booking & Cart Pages
-import Bookings from "@/pages/Bookings";
-import MyBookings from "@/pages/MyBookings";
-import Cart from "@/pages/Cart"; // 👈 1. Import Cart page
-
-import ProtectedRoute from "@/components/ProtectedRoute";
 import ProductCard from "@/components/common/ProductCard";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import LogoLoader from "@/components/common/LogoLoader";
+import AdminRoutes from "./AdminRoutes";
+
+
+const LandingPage = lazy(() => import("@/pages/LandingPage"));
+
+const BrowseDevices = lazy(() => import("@/pages/BrowseDevices"));
+
+const ListingDevice = lazy(() => import("@/pages/ListingDevice"));
+
+const Productpage = lazy(() => import("@/pages/Productpage"));
+
+const Wishlist = lazy(() => import("@/pages/Wishlist"));
+
+const Categories = lazy(() => import("@/pages/Categories"));
+
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+
+const SettingPage = lazy(() => import("@/pages/SettingPage"));
+
+const Signup = lazy(() => import("@/pages/Signup"));
+
+const Login = lazy(() => import("@/pages/Login"));
+
+const Bookings = lazy(() => import("@/pages/Bookings"));
+
+const MyBookings = lazy(() => import("@/pages/MyBookings"));
+
+const SearchResults = lazy(() => import("@/pages/SearchResults"));
+
 
 const AppRoutes = () => {
   const dispatch = useDispatch();
@@ -44,12 +57,14 @@ const AppRoutes = () => {
 }, [dispatch]);
 
   return (
+     <Suspense fallback={<LogoLoader />}>
     <Routes>
       <Route element={<Mainlayout />}>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/browserdevices" element={<BrowseDevices />} />
         <Route path="/listingdevice" element={<ListingDevice />} />
+        <Route path="/settings" element={<SettingPage />} />
         <Route path="/product/:id" element={<Productpage />} />
         <Route path="/categories" element={<Categories />} />
 
@@ -89,13 +104,13 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/mybookings"
           element={
             <ProtectedRoute>
               <MyBookings />
             </ProtectedRoute>
-          }
+          } */}
         />
         <Route
           path="/dashboard"
@@ -112,6 +127,7 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/product" element={<ProductCard />} />
     </Routes>
+</Suspense>
   );
 };
 

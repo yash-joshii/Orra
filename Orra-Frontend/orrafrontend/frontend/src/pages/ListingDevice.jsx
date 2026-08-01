@@ -1,14 +1,13 @@
-import { listdevice } from '@/api/ListingFormapi';
-import Availability from '@/components/StepperFormForListing/Availability';
-import BasicDetails from '@/components/StepperFormForListing/BasicDetails';
-import PricingDetails from '@/components/StepperFormForListing/PricingDetails';
-import ProductDetails from '@/components/StepperFormForListing/ProductDetails';
-import SpeacificationInForm from '@/components/StepperFormForListing/SpeacificationInForm';
-import UploadPhoto from '@/components/StepperFormForListing/UploadPhoto';
+import { listdevice } from "@/api/ListingFormapi";
+import Availability from "@/components/StepperFormForListing/Availability";
+import BasicDetails from "@/components/StepperFormForListing/BasicDetails";
+import PricingDetails from "@/components/StepperFormForListing/PricingDetails";
+import ProductDetails from "@/components/StepperFormForListing/ProductDetails";
+import SpeacificationInForm from "@/components/StepperFormForListing/SpeacificationInForm";
+import UploadPhoto from "@/components/StepperFormForListing/UploadPhoto";
 
-
-import React, { useState } from 'react'
-
+import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 const ListingDevice = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -52,7 +51,8 @@ const ListingDevice = () => {
     e.preventDefault();
 
     try {
-      const toNumber = (val) => (val === "" || val === null || val === undefined ? null : Number(val));
+      const toNumber = (val) =>
+        val === "" || val === null || val === undefined ? null : Number(val);
 
       const dto = {
         product: {
@@ -71,11 +71,11 @@ const ListingDevice = () => {
           dailyRate: toNumber(formData.pricing.rentalPrice),
 
           availableFrom: formData.availability.availableFrom
-            ? new Date(formData.availability.availableFrom).toISOString()
+            ? `${formData.availability.availableFrom}T00:00:00`
             : null,
 
           availableTo: formData.availability.availableTo
-            ? new Date(formData.availability.availableTo).toISOString()
+            ? `${formData.availability.availableTo}T00:00:00`
             : null,
 
           minimumRentalDays: toNumber(formData.availability.minimumRentalDays),
@@ -95,9 +95,10 @@ const ListingDevice = () => {
 
       const response = await listdevice(dto);
       console.log(response);
-
+      toast.success("Product is successfully added")
     } catch (error) {
       console.log(error);
+      toast.error("Product is failed to add")
     }
   };
 
@@ -156,8 +157,7 @@ const ListingDevice = () => {
         />
       )}
     </>
-
   );
-}
+};
 
-export default ListingDevice
+export default ListingDevice;
