@@ -4,7 +4,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 import com.orra.Orrabackend.dto.booking.BookingRequestDTO;
 import com.orra.Orrabackend.dto.booking.BookingResponseDTO;
-import com.orra.Orrabackend.dto.transaction.TransactionRequestDTO;
+//import com.orra.Orrabackend.dto.transaction.TransactionRequestDTO;
 import com.orra.Orrabackend.enums.BookingStatus;
 import com.orra.Orrabackend.model.Booking;
 import com.orra.Orrabackend.model.ProductList;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public class bookingService {
     private final BookingRepository bookingRepository;
     private final ProductListRepository productListRepository;
     private final UserRepository userRepository;
-    private final TransactionService transactionService;
+//    private final TransactionService transactionService;
     private final NotificationService notificationService;
 
     private static final long ACCEPT_TO_PAY_TIMEOUT_DAYS = 1;
@@ -35,16 +36,21 @@ public class bookingService {
 
     public BookingResponseDTO createBooking(BookingRequestDTO request) {
 
+        if (request.getListingId() == null || request.getRenterId() == null) {
+            throw new IllegalArgumentException("Listing ID and Renter ID must not be null.");
+        }
+
         ProductList listing = productListRepository.findById(request.getListingId())
                 .orElseThrow(() -> new RuntimeException("Listing Not Found"));
 
         User renter = userRepository.findById(request.getRenterId())
                 .orElseThrow(() -> new RuntimeException("Renter Not Found"));
 
-        // Owner cannot book own listing
-        if (listing.getOwner().getId().equals(renter.getId())) {
-            throw new IllegalStateException(
-                    "You cannot book your own product.");
+        // Null-safe owner check
+        if (listing.getOwner() != null && listing.getOwner().getId() != null) {
+            if (listing.getOwner().getId().equals(renter.getId())) {
+                throw new IllegalStateException("You cannot book your own product.");
+            }
         }
 
         // Listing must be active
@@ -59,16 +65,29 @@ public class bookingService {
                     "This product is currently unavailable.");
         }
 
+        // Ensure startDateTime & endDateTime are present
+        if (request.getStartDateTime() == null || request.getEndDateTime() == null) {
+            throw new IllegalArgumentException("Start date and End date must be provided.");
+        }
+
         // End date must be after start date
         if (!request.getEndDateTime().isAfter(request.getStartDateTime())) {
             throw new IllegalArgumentException(
                     "End date must be after start date.");
         }
 
-        long rentalDays = Duration.between(
+        long rentalDays = ChronoUnit.DAYS.between(
                 request.getStartDateTime(),
                 request.getEndDateTime()
-        ).toDays();
+        );
+
+        if (rentalDays == 0) {
+            rentalDays = 1;
+        }
+        // Prevent 0 days if dates are on the same day
+        if (rentalDays == 0) {
+            rentalDays = 1;
+        }
 
         // Booking cannot start before availableFrom
         if (request.getStartDateTime().isBefore(listing.getAvailableFrom())) {
@@ -185,7 +204,7 @@ public class bookingService {
         }
 
         // Update booking
-        booking.setStatus(BookingStatus.COMPLETED);
+        booking.setStatus(BookingStatus.ACTIVE);
         booking.setPaidAt(Instant.now());
 
         // Make listing unavailable

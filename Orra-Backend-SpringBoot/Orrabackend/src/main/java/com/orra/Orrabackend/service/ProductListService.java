@@ -30,7 +30,7 @@ public class ProductListService {
     }
 
     public List<ProductList> getAll() {
-        return repo.findAll();
+        return repo.findByIsAvailableTrueAndIsActiveTrue();
     }
 
     // SEARCH PRODUCTS

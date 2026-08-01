@@ -1,5 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+// import { supabase } from "@/lib/supabaseclient";
 import { Routes, Route } from "react-router-dom";
+import { clearCredentials, setCredentials } from "@/redux/slices/authslices";
+import { GetCurrentUser } from "@/api/authApi"; // add this import temporarily
 
 // Layout & Pages
 import Mainlayout from "@/layout/Mainlayout";
@@ -23,6 +27,22 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import ProductCard from "@/components/common/ProductCard";
 
 const AppRoutes = () => {
+  const dispatch = useDispatch();
+
+ useEffect(() => {
+  const rehydrateAuth = async () => {
+    try {
+      const response = await GetCurrentUser();
+      dispatch(setCredentials({
+        user: { userId: response.data.userId, roles: response.data.roles },
+      }));
+    } catch (err) {
+      dispatch(clearCredentials());
+    }
+  };
+  rehydrateAuth();
+}, [dispatch]);
+
   return (
     <Routes>
       <Route element={<Mainlayout />}>

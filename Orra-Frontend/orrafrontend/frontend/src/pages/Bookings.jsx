@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
 import { useRazorpay } from "react-razorpay";
-import { toast } from "sonner";
 
 // Shadcn Imports
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,7 +25,7 @@ import {
   setError,
 } from "@/redux/slices/productslices";
 import { useSelector, useDispatch } from "react-redux";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import { createOrder } from "@/api/paymentapi";
 
 // Sub-components
@@ -73,20 +71,39 @@ const Bookings = () => {
     }
   };
 
+
+  const formatLocalDate = (date) => {
+    if (!date) return null;
+
+    const d = date instanceof Date ? date : new Date(date);
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
   // Handler: Request Booking
   const handleRequestBooking = async () => {
+    if (!startDate || !endDate) {
+      toast.error("Please select both start and end dates.");
+      return;
+    }
+
     dispatch(setBookingLoading(true));
     try {
       const payload = {
-        listingId: product?.productId,
-        renterId: user?.userId,
-        startDateTime: startDate,
-        endDateTime: endDate,
+        listingId: product?.productId || product?.id,
+        renterId: user?.userId || user?.id,
+        startDateTime: formatLocalDate(startDate),
+        endDateTime: formatLocalDate(endDate),
       };
       const response = await createBooking(payload);
       dispatch(setCurrentBooking(response.data));
       toast.success("Booking requested successfully!");
     } catch (err) {
+      const serverMessage = err.response?.data?.message || err.message;
       dispatch(setBookingError(err.message));
       toast.error(err.message || "Failed to create booking.");
     } finally {
@@ -119,7 +136,7 @@ const Bookings = () => {
           toast.success("Payment received! Confirming your booking...");
           dispatch(setBookingLoading(false));
 
-          // Reset current booking state after successful payment -> triggers redirect to Cart page
+          // Reset current booking state after successful payment -> redirects to cart
           dispatch(setCurrentBooking(null));
         },
         modal: {
@@ -180,21 +197,19 @@ const Bookings = () => {
   // Pricing calculations
   const rentalDays =
     startDate && endDate
-      ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24))
+      ? Math.max(
+        1,
+        Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+      )
       : 0;
-  const totalRent = product ? rentalDays * product?.dailyRate : 0;
+  const totalRent = product ? rentalDays * (product?.dailyRate || 0) : 0;
   const platformFee = totalRent * 0.1;
   const estimatedTax = totalRent * 0.08;
   const grandTotal =
     totalRent + platformFee + estimatedTax + (product?.securityDeposit || 0);
 
-  // Check if an active/pending booking exists
-  const isBookingPendingPayment =
-    currentBooking &&
-    (currentBooking.status === "PENDING" || currentBooking.status === "ACCEPTED");
-
-  // If there is no active pending booking, redirect automatically to the cart page
-  if (!isBookingPendingPayment) {
+  // If there is no URL product ID and no active booking, navigate to cart
+  if (!id && !currentBooking) {
     return <Navigate to="/cart" replace />;
   }
 

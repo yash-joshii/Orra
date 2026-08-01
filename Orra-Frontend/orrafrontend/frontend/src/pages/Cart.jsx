@@ -1,26 +1,30 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
-import Bookings from '@/pages/Bookings'; // Adjust import path if needed
+import React from "react";
+import { useSelector } from "react-redux";
+import Bookings from "@/pages/Bookings"; // Adjust the import if needed
 
 const Cart = () => {
+  // Get the current booking from Redux
   const currentBooking = useSelector((state) => state.booking.currentBooking);
 
-  // Check if a booking exists and is pending or accepted (unpaid)
-  const hasPendingBooking =
-    currentBooking &&
-    (currentBooking.status === "PENDING" || currentBooking.status === "ACCEPTED");
+  // Show the booking page only when payment is pending
+  const hasPendingPayment =
+    currentBooking?.status === "ACCEPTED";
 
-  // 1. If there is a pending booking, show the Review & Bookings page
-  if (hasPendingBooking) {
+  // If there is an accepted booking awaiting payment
+  if (hasPendingPayment) {
     return <Bookings />;
   }
 
-  // 2. Otherwise, show the big centered empty state
+  // Otherwise show the empty state
   return (
     <div className="flex flex-col items-center justify-center min-h-[75vh] w-full px-4">
       <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 text-center tracking-tight">
-        No Recent Pending Booking
+        No Pending Payments
       </h1>
+
+      <p className="mt-4 text-lg text-gray-500 text-center max-w-md">
+        You don't have any bookings awaiting payment at the moment.
+      </p>
     </div>
   );
 };

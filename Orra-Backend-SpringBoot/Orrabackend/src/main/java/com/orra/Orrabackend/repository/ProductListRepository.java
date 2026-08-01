@@ -35,6 +35,8 @@ public interface ProductListRepository extends JpaRepository<ProductList, Long> 
 
     long countByOwner_IdAndIsActiveTrue(Long ownerId);
 
+    List<ProductList> findByIsAvailableTrueAndIsActiveTrue();
+
     List<ProductList> findByOwner_IdAndIsActiveTrue(Long ownerId);
 
 }

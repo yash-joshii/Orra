@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -34,7 +35,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     long countByRenterId(Long renterId);
 
-
+    List<Booking> findByStatusAndEndDateBefore(
+            BookingStatus status,
+            LocalDate endDate
+    );
     @Query("SELECT COALESCE(SUM(b.totalPrice), 0) FROM Booking b WHERE b.status = :status")
     BigDecimal sumTotalRevenueByStatus(@Param("status") BookingStatus status);
 }

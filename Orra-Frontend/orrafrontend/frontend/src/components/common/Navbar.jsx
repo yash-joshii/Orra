@@ -35,6 +35,7 @@ import logo from "../../assets/logo/orralogo.svg";
 import { setLoading, setUser } from "@/redux/slices/userprofileSlice";
 import { getUser } from "@/api/userApi";
 import { setError } from "@/redux/slices/productslices";
+import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -121,8 +122,7 @@ const Navbar = () => {
 
   // 2. Check if a booking is currently pending or accepted
   const isBookingPendingPayment =
-    currentBooking &&
-    (currentBooking.status === "PENDING" || currentBooking.status === "ACCEPTED");
+  currentBooking?.status === "ACCEPTED";
 
   // 3. Set the target destination dynamically
   const targetRoute = isBookingPendingPayment
@@ -212,11 +212,8 @@ const Navbar = () => {
 
           </div>
 
-          <button className="relative">
-            <Bell className="w-5 h-5 text-gray-600" />
-
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-teal-500 rounded-full"></span>
-          </button>
+            <NotificationBell />
+          
 
           <Link to={targetRoute} className="relative inline-block">
             <button className="relative p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer flex items-center justify-center">

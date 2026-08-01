@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/booking")
+@RequestMapping("/api/booking")
 @RequiredArgsConstructor
 public class BookingController {
     private final bookingService bookingService;
@@ -41,24 +41,12 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-//    @PatchMapping("/{bookingId}/ship")
-//    public ResponseEntity<BookingResponseDTO> shipBooking(@PathVariable Long bookingId){
-//        BookingResponseDTO response = bookingService.shipBooking(bookingId);
-//        return ResponseEntity.ok(response);
-//    }
-
     //Customer Side
     @PatchMapping("/{bookingId}/pay")
     public ResponseEntity<BookingResponseDTO> payForBooking(@PathVariable Long bookingId){
         BookingResponseDTO response = bookingService.payForBooking(bookingId);
         return ResponseEntity.ok(response);
     }
-
-//    @PatchMapping("/{bookingId}/confirm-receipt")
-//    public ResponseEntity<BookingResponseDTO> confirmReceipt(@PathVariable Long bookingId){
-//        BookingResponseDTO response = bookingService.confirmReceipt(bookingId);
-//        return ResponseEntity.ok(response);
-//    }
 
     //Renter - My Bookings
     @GetMapping("/renter/{renterId}")
@@ -85,11 +73,4 @@ public class BookingController {
         List<BookingResponseDTO> response = bookingService.getOwnerBookings(ownerId);
         return ResponseEntity.ok(response);
     }
-
-    //Orra Dashboard Panel
-//    @GetMapping("/admin/all")
-//    public ResponseEntity<List<BookingResponseDTO>> getAllBookingsForAdmin(
-//            @RequestParam(required = false) String status){
-//        return ResponseEntity.ok(bookingService.getAllBookingsForAdmin(status));
-//    }
 }

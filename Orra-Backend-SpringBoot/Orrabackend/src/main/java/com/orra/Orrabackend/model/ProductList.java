@@ -10,8 +10,9 @@ import lombok.Data;
 import org.hibernate.annotations.Type;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+//import java.time.Instant;
 //import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -76,11 +77,11 @@ public class ProductList {
 //    @Column(name = "product_condition")
 //    private ProductCondition productcondition;
 
-    @Column(name = "available_from")
-    private Instant availableFrom;
+//    @Column(name = "available_from")
+    private LocalDate availableFrom;
 
     @Column(name = "available_to")
-    private Instant availableTo;
+    private LocalDate availableTo;
 
     @Column(name = "minimum_rental_days")
     private Integer minimumRentalDays;

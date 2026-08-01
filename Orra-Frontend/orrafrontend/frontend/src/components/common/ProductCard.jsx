@@ -30,11 +30,15 @@ import {
   Heart,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const ProductCard = ({ data }) => {
   const navigate = useNavigate();
   console.log("images →", data.images);
   const [liked, setLiked] = useState(false);
+
+  const currentUserId = useSelector((state) => state.auth.user?.userId);
+  const isOwner = currentUserId === data.owner?.userId;
 
   // Temporary userId
   const userId = 1;
@@ -102,9 +106,8 @@ const ProductCard = ({ data }) => {
           className="btn bg-white absolute z-20 w-[9%] p-[1.5%] rounded-full font-medium text-center top-[2%] right-[2%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)] cursor-pointer flex items-center justify-center"
         >
           <Heart
-            className={`w-5 h-5 transition ${
-              liked ? "fill-red-500 text-red-500" : "text-gray-600"
-            }`}
+            className={`w-5 h-5 transition ${liked ? "fill-red-500 text-red-500" : "text-gray-600"
+              }`}
           />
         </div>
       </div>
@@ -145,17 +148,22 @@ const ProductCard = ({ data }) => {
             <span className="text-[10px] text-gray-300 mt-[16%]"> /day</span>
           </span>
         </div>
-        <div className="bookbtn mr-[2%]">
-          <button
-            onClick={() => navigate(`/booking/${data.productId}`)}
-            className="bg-black w-[100%] h-[10%] p-2 rounded-[12px] shadow-[rgba(50,50,93,0.25)_0px_2px_5px_-1px,rgba(0,0,0,0.3)_0px_1px_3px_-1px] cursor-pointer hover:bg-[#5650cc] "
-          >
-            {" "}
-            <Calendar className="text-white w-4 h-4" />{" "}
-          </button>
-        </div>
+        
+        {!isOwner && (
+          <div className="bookbtn mr-[2%]">
+            <button
+              onClick={() => navigate(`/booking/${data.productId}`)}
+              className="bg-black w-[100%] h-[10%] p-2 rounded-[12px] shadow-[rgba(50,50,93,0.25)_0px_2px_5px_-1px,rgba(0,0,0,0.3)_0px_1px_3px_-1px] cursor-pointer hover:bg-[#5650cc]"
+            >
+              <Calendar className="text-white w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+
       </div>
-    </Card>
+    {/* </div> */}
+    </Card >
   );
 };
 

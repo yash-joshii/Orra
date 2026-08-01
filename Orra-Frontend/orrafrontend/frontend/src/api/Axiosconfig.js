@@ -8,6 +8,22 @@ const axiosinstance = axios.create({
   },
 });
 
+
+axiosinstance.interceptors.request.use(
+  (config) => {
+    // Make sure the key matches where you store the token upon login (e.g., 'token', 'jwtToken', etc.)
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 const paymentAxios = axios.create({
   baseURL: import.meta.env.VITE_DOTNET_API_URL,
 });
