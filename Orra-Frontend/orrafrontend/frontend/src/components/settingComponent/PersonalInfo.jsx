@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import LazyImage from "../common/LazyImage";
 
 function PersonalInfo() {
   const dispatch = useDispatch();
@@ -140,7 +141,7 @@ function PersonalInfo() {
         <div className="flex items-center gap-4 mb-8">
           <div className="relative h-16 w-16 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0">
             {user.avatarUrl ? (
-              <img
+              <LazyImage
                 src={user.avatarUrl}
                 alt="Profile"
                 className="h-full w-full object-cover"

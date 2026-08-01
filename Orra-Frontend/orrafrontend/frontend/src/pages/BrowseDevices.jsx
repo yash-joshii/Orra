@@ -1,10 +1,11 @@
-import SearchBar from "@/components/common/SearchBar";
 import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { getAllProducts, searchProducts } from "@/api/listingApi";
+
+import SearchBar from "@/components/common/SearchBar";
 import FilterationSidebar from "@/components/common/FilterationSidebar";
 import ProductCard from "@/components/common/ProductCard";
-import { useDispatch, useSelector } from "react-redux";
+import LogoLoader from "@/components/common/LogoLoader";
+
+import { Button } from "@/components/ui/button";
 
 import {
   DropdownMenu,
@@ -14,12 +15,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-import {
-  setError,
-  setLoading,
-  setProducts,
-} from "@/redux/slices/productslices";
 
 import {
   Pagination,
@@ -32,83 +27,58 @@ import {
 } from "@/components/ui/pagination";
 
 import { useSearchParams } from "react-router-dom";
-import LogoLoader from "@/components/common/LogoLoader";
+import useProduct from "@/hooks/useProduct";
+import ProductCardSkeleton from "@/components/common/ProductCardSkeleton";
 
 const BrowseDevices = () => {
-  const dispatch = useDispatch();
-
-  const products = useSelector((state) => state.products.products);
-  const loading = useSelector((state) => state.products.loading);
+  const { products, loading, error } = useProduct();
 
   const [search, setSearch] = useState("");
+
   const [currentPage, setCurrentPage] = useState(1);
 
   const [searchParams] = useSearchParams();
+
   const categoryFilter = searchParams.get("category");
 
-  // ✅ Filter products
+  // Category Filter
   const filteredProducts = categoryFilter
-    ? products?.filter((p) => p.category === categoryFilter)
+    ? products.filter(
+        (item) =>
+          item.category?.toLowerCase() === categoryFilter.toLowerCase()
+      )
     : products;
 
-  // ✅ Fetch products
-  useEffect(() => {
-    fetchProduct();
-  }, []);
+  // Search Filter
+  const displayProducts = filteredProducts.filter((item) =>
+    item.productName?.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const fetchProduct = async () => {
-    try {
-      dispatch(setLoading(true));
-      const response = await getAllProducts();
-      dispatch(setProducts(response.data));
-    } catch (error) {
-      dispatch(setError(error.message));
-    } finally {
-      dispatch(setLoading(false));
-    }
-  };
-
-  // ✅ Search
-  const handleSearch = async (value) => {
-    setSearch(value);
-
-    try {
-      if (value.trim() === "") {
-        fetchProduct();
-        return;
-      }
-
-      const response = await searchProducts(value);
-      dispatch(setProducts(response.data));
-      setCurrentPage(1);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  // ✅ Reset page on filter change
   useEffect(() => {
     setCurrentPage(1);
-  }, [categoryFilter]);
+  }, [categoryFilter, search]);
 
-  // ✅ Pagination
+  // Pagination
   const ITEMS_PER_PAGE = 6;
 
-  const totalPages = Math.ceil(
-    (filteredProducts?.length || 0) / ITEMS_PER_PAGE,
-  );
+  const totalPages = Math.ceil(displayProducts.length / ITEMS_PER_PAGE);
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
 
-  const paginatedProducts = filteredProducts?.slice(
+  const paginatedProducts = displayProducts.slice(
     startIndex,
-    startIndex + ITEMS_PER_PAGE,
+    startIndex + ITEMS_PER_PAGE
   );
 
   const goToPage = (page) => {
     if (page < 1 || page > totalPages) return;
+
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   const getPageNumbers = () => {
@@ -129,40 +99,53 @@ const BrowseDevices = () => {
     return pages;
   };
 
-  // ✅ Loader
-  if (loading) return <LogoLoader />;
+  if (loading)   return (
+    <div className="bg-gray-200 py-8 px-6">
+      <div className="flex flex-wrap gap-[30px] justify-center">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <ProductCardSkeleton key={index} />
+        ))}
+      </div>
+    </div>
+  );
+
+  if (error)
+    return (
+      <div className="text-center text-red-500 py-10">{error}</div>
+    );
 
   return (
     <div className="w-full">
-      {/* 🔥 TOP SECTION */}
+      {/* Top */}
       <div className="w-full p-8 pl-[8.5%]">
         <h2 className="text-[40px] font-extrabold">Browse Devices</h2>
 
         <div className="flex gap-4 mt-5">
-          {/* Search */}
           <div className="w-[70%]">
             <SearchBar
               value={search}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               className="!w-full !p-[17px] !rounded-[10px] !text-[16px] !font-semibold"
-              placeholder="Search gear..."
+              placeholder="Search Devices..."
             />
           </div>
 
-          {/* Sort */}
           <div className="w-[30%]">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="w-full p-6">
-                  Sort By: Recommended
+                  Sort By : Recommended
                 </Button>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent>
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>Sort Options</DropdownMenuLabel>
-                  <DropdownMenuItem>Price: Low to High</DropdownMenuItem>
-                  <DropdownMenuItem>Price: High to Low</DropdownMenuItem>
+
+                  <DropdownMenuItem>Price : Low to High</DropdownMenuItem>
+
+                  <DropdownMenuItem>Price : High to Low</DropdownMenuItem>
+
                   <DropdownMenuItem>Highest Rated</DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
@@ -171,23 +154,22 @@ const BrowseDevices = () => {
         </div>
       </div>
 
-      {/* 🔥 MAIN SECTION */}
-      <div className="bg-gray-200 py-8 flex justify-center gap-6 px-6">
-        {/* Sidebar */}
+      {/* Body */}
+      <div className="bg-gray-200 py-8 flex gap-6 px-6">
         <div className="w-[25%]">
           <FilterationSidebar />
         </div>
 
-        {/* Products */}
         <div className="w-[75%]">
-          {/* Cards */}
           <div className="flex flex-wrap gap-[30px]">
-            {paginatedProducts?.map((item) => (
-              <ProductCard key={item.productId} data={item} />
+            {paginatedProducts.map((item, index) => (
+              <ProductCard
+                key={item.productId ?? `product-${startIndex + index}`}
+                data={item}
+              />
             ))}
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <Pagination className="mt-10">
               <PaginationContent>
@@ -200,9 +182,9 @@ const BrowseDevices = () => {
                   />
                 </PaginationItem>
 
-                {getPageNumbers().map((page, idx) =>
+                {getPageNumbers().map((page, index) =>
                   page === "ellipsis" ? (
-                    <PaginationItem key={`ellipsis-${idx}`}>
+                    <PaginationItem key={`ellipsis-${index}`}>
                       <PaginationEllipsis />
                     </PaginationItem>
                   ) : (
@@ -217,7 +199,7 @@ const BrowseDevices = () => {
                         {page}
                       </PaginationLink>
                     </PaginationItem>
-                  ),
+                  )
                 )}
 
                 <PaginationItem>

@@ -17,9 +17,10 @@ import {
     AvatarImage,
 } from "@/components/ui/avatar"
 import { Calendar, LocateFixedIcon, LocateIcon, Map, MapIcon, MapPinIcon, ArrowRight } from 'lucide-react'
+import LazyImage from '@/components/common/LazyImage'
 
 const MyBookings = () => {
-    return <>
+    return (<>
         {/* Shadcn - tabs, cards, button, badge, avatar, lucide icons */}
 
         {/* Bookings Body */}
@@ -38,7 +39,7 @@ const MyBookings = () => {
 
                         <Card className="relative mx-auto w-[800px] h-[200px] flex-row items-center justify-between border-black">
                             <div className="absolute inset-0 z-30 aspect-video" />
-                            <img
+                            <LazyImage
                                 src="/public/drone.avif"
                                 alt="Event cover"
                                 className="w-[240px] h-[130px] relative top-[0px] left-[38px] rounded-[20px]"
@@ -95,7 +96,7 @@ const MyBookings = () => {
 
                         <Card className="relative mx-auto w-[800px] h-[200px] flex-row items-center justify-between">
                             <div className="absolute inset-0 z-30 aspect-video" />
-                            <img
+                            <LazyImage
                                 src="/public/drone.avif"
                                 alt="Event cover"
                                 className="w-[240px] h-[130px] relative top-[0px] left-[38px] rounded-[20px]"
@@ -154,7 +155,7 @@ const MyBookings = () => {
             </div>
         </div>
 
-    </>
+    </>)
 };
 
 export default MyBookings;
