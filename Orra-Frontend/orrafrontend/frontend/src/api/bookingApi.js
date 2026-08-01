@@ -36,6 +36,6 @@ export const getOwnerBookings = (ownerId) => {
     return axiosinstance.get(`/booking/owner/${ownerId}`);
 };
 
-// export const shipBooking = (bookingId) => {
-//     return axiosinstance.patch(`/booking/${bookingId}/ship`);
-// };
+export const shipBooking = (bookingId) => {
+    return axiosinstance.patch(`/booking/${bookingId}/ship`);
+};

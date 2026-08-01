@@ -1,4 +1,5 @@
 import { getProductById } from "@/api/listingApi";
+import LogoLoader from "@/components/common/LogoLoader";
 import ProductDetails from "@/components/Productpagecomponent/ProductDetails";
 import ProductOwner from "@/components/Productpagecomponent/ProductOwner";
 import ProductSummary from "@/components/Productpagecomponent/ProductSummary";
@@ -37,7 +38,7 @@ const Productpage = () => {
 
   const product = products.find((p) => p.id === id) || products[0];
 
-  if (loading) return <div className="p-6 text-gray-500">Loading product…</div>;
+  if (loading) return <LogoLoader/>;
   if (error) return <div className="p-6 text-red-500">{error}</div>;
   if (!product)
     return <div className="p-6 text-gray-500">Product not found</div>;

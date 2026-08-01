@@ -1,24 +1,26 @@
 import SearchBar from "@/components/common/SearchBar";
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { getAllProducts, searchProducts } from "@/api/listingApi";
+import FilterationSidebar from "@/components/common/FilterationSidebar";
+import ProductCard from "@/components/common/ProductCard";
+import { useDispatch, useSelector } from "react-redux";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ProductCard from "@/components/common/ProductCard";
-import { useDispatch, useSelector } from "react-redux";
+
 import {
   setError,
   setLoading,
   setProducts,
 } from "@/redux/slices/productslices";
-import { getAllProducts } from "@/api/listingApi";
-import FilterationSidebar from "@/components/common/FilterationSidebar";
+
 import {
   Pagination,
   PaginationContent,
@@ -28,27 +30,28 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useNavigate, useSearchParams } from "react-router-dom";
+
+import { useSearchParams } from "react-router-dom";
+import LogoLoader from "@/components/common/LogoLoader";
 
 const BrowseDevices = () => {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const products = useSelector((state) => state.products.products);
-
   const loading = useSelector((state) => state.products.loading);
 
-  const error = useSelector((state) => state.products.error);
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [searchParams] = useSearchParams();
   const categoryFilter = searchParams.get("category");
 
-  const filteredProducts = categoryFilter 
+  // ✅ Filter products
+  const filteredProducts = categoryFilter
     ? products?.filter((p) => p.category === categoryFilter)
     : products;
 
-
-   console.log("products");
+  // ✅ Fetch products
   useEffect(() => {
     fetchProduct();
   }, []);
@@ -58,22 +61,45 @@ const BrowseDevices = () => {
       dispatch(setLoading(true));
       const response = await getAllProducts();
       dispatch(setProducts(response.data));
-      dispatch(setLoading(false));
     } catch (error) {
-      dispatch(setLoading(false));
       dispatch(setError(error.message));
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
+  // ✅ Search
+  const handleSearch = async (value) => {
+    setSearch(value);
+
+    try {
+      if (value.trim() === "") {
+        fetchProduct();
+        return;
+      }
+
+      const response = await searchProducts(value);
+      dispatch(setProducts(response.data));
+      setCurrentPage(1);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // ✅ Reset page on filter change
   useEffect(() => {
     setCurrentPage(1);
   }, [categoryFilter]);
 
+  // ✅ Pagination
   const ITEMS_PER_PAGE = 6;
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil((filteredProducts?.length || 0) / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(
+    (filteredProducts?.length || 0) / ITEMS_PER_PAGE,
+  );
+
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+
   const paginatedProducts = filteredProducts?.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE,
@@ -87,6 +113,7 @@ const BrowseDevices = () => {
 
   const getPageNumbers = () => {
     const pages = [];
+
     for (let i = 1; i <= totalPages; i++) {
       if (
         i === 1 ||
@@ -98,32 +125,44 @@ const BrowseDevices = () => {
         pages.push("ellipsis");
       }
     }
+
     return pages;
   };
 
+  // ✅ Loader
+  if (loading) return <LogoLoader />;
+
   return (
-    <div className="BrowseDevices-container w-full max-h-full">
-      <div className="upper-section-browdev w-full p-8 pl-[8.5%] h-[40%] ">
+    <div className="w-full">
+      {/* 🔥 TOP SECTION */}
+      <div className="w-full p-8 pl-[8.5%]">
         <h2 className="text-[40px] font-extrabold">Browse Devices</h2>
-        <div className="upper-sec-data flex flex-row justify-center ">
-          <div className="search-box mt-5 w-[70%]">
+
+        <div className="flex gap-4 mt-5">
+          {/* Search */}
+          <div className="w-[70%]">
             <SearchBar
-              className="!w-[97%] !p-[17px] !rounded-[10px] !text-[16px] !font-semibold "
-              placeholder="search for Drone or Mobile..."
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="!w-full !p-[17px] !rounded-[10px] !text-[16px] !font-semibold"
+              placeholder="Search gear..."
             />
           </div>
-          <div className="bd-filter  mt-5 w-[30%]">
+
+          {/* Sort */}
+          <div className="w-[30%]">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-[70%] p-7  ">
-                  SortBy: Recommanded
+                <Button variant="outline" className="w-full p-6">
+                  Sort By: Recommended
                 </Button>
               </DropdownMenuTrigger>
+
               <DropdownMenuContent>
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel>SortBy: Recommanded</DropdownMenuLabel>
+                  <DropdownMenuLabel>Sort Options</DropdownMenuLabel>
                   <DropdownMenuItem>Price: Low to High</DropdownMenuItem>
-                  <DropdownMenuItem>Price: high to low</DropdownMenuItem>
+                  <DropdownMenuItem>Price: High to Low</DropdownMenuItem>
                   <DropdownMenuItem>Highest Rated</DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
@@ -131,34 +170,33 @@ const BrowseDevices = () => {
           </div>
         </div>
       </div>
-      <div className="lower-section-browdev bg-gray-200 pt-8 pb-8 flex flex-row justify-center">
-        <div className="left-browdev w-[50%] pr-[2%]">
+
+      {/* 🔥 MAIN SECTION */}
+      <div className="bg-gray-200 py-8 flex justify-center gap-6 px-6">
+        {/* Sidebar */}
+        <div className="w-[25%]">
           <FilterationSidebar />
         </div>
-        <div className="rightbrowdev w-full min-h-full">
-          <div className="flex flex-wrap gap-[36px]">
+
+        {/* Products */}
+        <div className="w-[75%]">
+          {/* Cards */}
+          <div className="flex flex-wrap gap-[30px]">
             {paginatedProducts?.map((item) => (
-              <ProductCard
-                key={item.productId}
-                data={item}
-               
-              />
+              <ProductCard key={item.productId} data={item} />
             ))}
           </div>
 
+          {/* Pagination */}
           {totalPages > 1 && (
             <Pagination className="mt-10">
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious
-                    href="#"
                     onClick={(e) => {
                       e.preventDefault();
                       goToPage(currentPage - 1);
                     }}
-                    className={
-                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                    }
                   />
                 </PaginationItem>
 
@@ -168,9 +206,8 @@ const BrowseDevices = () => {
                       <PaginationEllipsis />
                     </PaginationItem>
                   ) : (
-                    <PaginationItem key={page}>
+                    <PaginationItem key={`page-${page}`}>
                       <PaginationLink
-                        href="#"
                         isActive={page === currentPage}
                         onClick={(e) => {
                           e.preventDefault();
@@ -185,16 +222,10 @@ const BrowseDevices = () => {
 
                 <PaginationItem>
                   <PaginationNext
-                    href="#"
                     onClick={(e) => {
                       e.preventDefault();
                       goToPage(currentPage + 1);
                     }}
-                    className={
-                      currentPage === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : ""
-                    }
                   />
                 </PaginationItem>
               </PaginationContent>

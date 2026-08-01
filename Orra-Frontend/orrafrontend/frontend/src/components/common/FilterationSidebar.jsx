@@ -100,10 +100,10 @@ const FilterationSidebar = () => {
         </div>
       </div>
 
-      <div className="h-[1px] bg-[#F3F4F6] my-6" />
+      {/* <div className="h-[1px] bg-[#F3F4F6] my-6" /> */}
 
       {/* Minimum Rating */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <p className="text-[12px] font-bold tracking-wide text-[#111827] mb-4">
           MINIMUM RATING
         </p>
@@ -141,12 +141,12 @@ const FilterationSidebar = () => {
             </label>
           ))}
         </div>
-      </div>
+      </div> */}
 
-      <div className="h-[1px] bg-[#F3F4F6] my-6" />
+      {/* <div className="h-[1px] bg-[#F3F4F6] my-6" /> */}
 
       {/* Availability */}
-      <div>
+      {/* <div>
         <p className="text-[12px] font-bold tracking-wide text-[#111827] mb-4">
           AVAILABILITY
         </p>
@@ -159,7 +159,7 @@ const FilterationSidebar = () => {
           />
           <span className="text-[14px] text-[#374151]">Show only available</span>
         </label>
-      </div>
+      </div> */}
     </div>
   );
 }

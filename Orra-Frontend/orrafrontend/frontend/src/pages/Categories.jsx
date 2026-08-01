@@ -17,6 +17,7 @@ import { getCategorySummary } from "@/api/listingApi";
 
 // Presentation helpers
 import { getCategoryStyle, formatCategoryLabel } from "@/constants/categoryStyle";
+import LogoLoader from "@/components/common/LogoLoader";
 
 const Categories = () => {
   // ---- Redux state ----
@@ -60,7 +61,7 @@ const Categories = () => {
 
         {/* Status states */}
         {loading && (
-          <p className="text-center text-slate-500">Loading categories...</p>
+       <LogoLoader/>
         )}
         {error && <p className="text-center text-red-500">{error}</p>}
 

@@ -1,6 +1,8 @@
-
 import { useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
+import { searchProducts } from "@/api/listingApi";
+import { NavLink, useNavigate } from "react-router-dom";
+
 import { useDispatch } from "react-redux";
 import { logout } from "@/redux/slices/authslices";
 import { Logout } from "@/api/authApi";
@@ -18,8 +20,9 @@ import {
   SettingsIcon,
   UserIcon,
 } from "lucide-react";
-import { NavLink, useNavigate } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,34 +30,82 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
 import logo from "../../assets/logo/orralogo.svg";
+import { setLoading, setUser } from "@/redux/slices/userprofileSlice";
+import { getUser } from "@/api/userApi";
+import { setError } from "@/redux/slices/productslices";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
   const [scrolled, setScrolled] = useState(false);
+  const dispatch = useDispatch();
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState([]);
 
-const navigate = useNavigate();
-const dispatch = useDispatch();
+  const handleSearch = async (e) => {
+    const value = e.target.value;
 
-const { user } = useSelector((state) => state.auth);
+    setSearch(value);
 
+    if (value.trim() === "") {
+      setResults([]);
+      return;
+    }
+
+    try {
+      const response = await searchProducts(value);
+
+      setResults(response.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+
+
+  const user = useSelector((state) => state.auth.user);
+  const userprofile = useSelector((state) => state.userProfile.user);
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
+
     window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = async () => {
-  try {
-    await Logout;
+    try {
+      await Logout();
 
-    dispatch(logout());
+      dispatch(logout());
 
-    navigate("/login");
-  } catch (error) {
-    console.error("Logout failed:", error);
-  }
-};
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (user && !userprofile) {
+      fetchUserProfile();
+    }
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    try {
+      dispatch(setLoading(true));
+      const response = await getUser();
+      dispatch(setUser(response.data));
+      dispatch(setLoading(false));
+    } catch (err) {
+      dispatch(setLoading(false));
+      dispatch(setError(err.message));
+    }
+  };
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -71,14 +122,17 @@ const { user } = useSelector((state) => state.auth);
         scrolled ? "bg-white shadow-md" : "bg-white/30 backdrop-blur-md"
       }`}
     >
-      <div className="flex items-center justify-center p-[2.2rem] h-16">
+      <div className="flex items-center justify-center p-[2.2rem] h-16 relative">
         <div className="flex items-center gap-8">
+
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 flex items-center justify-center rounded-full bg-transparent text-white font-bold">
-              <img src={logo} className="text-#4F46E5" />
+            <div className="w-9 h-9 flex items-center justify-center">
+              <img src={logo} alt="logo" />
             </div>
 
-            <span className="text-xl font-semibold">ORRA</span>
+            <span className="text-xl font-semibold">
+              ORRA
+            </span>
           </div>
 
           <nav className="hidden md:flex items-center font-semibold text-gray-600 text-[14px] gap-[43px]">
@@ -96,17 +150,54 @@ const { user } = useSelector((state) => state.auth);
               </NavLink>
             ))}
           </nav>
+
         </div>
 
         <div className="flex items-center gap-[25px] ml-[2%]">
-          <div className="hidden lg:flex items-center bg-gray-100 w-[90%] rounded-full px-3 py-2 border border-[#e2e8f0]">
-            <Search className="w-4 h-4 text-gray-500" />
 
-            <input
-              type="text"
-              placeholder="Search gear..."
-              className="bg-transparent outline-none ml-2 text-sm w-full"
-            />
+          {/* SEARCH */}
+          <div className="relative hidden lg:block w-[320px]">
+
+            <div className="flex items-center bg-gray-100 rounded-full px-3 py-2 border border-[#e2e8f0]">
+
+              <Search className="w-4 h-4 text-gray-500" />
+
+              <input
+                type="text"
+                value={search}
+                onChange={handleSearch}
+                placeholder="Search gear..."
+                className="bg-transparent outline-none ml-2 text-sm w-full"
+              />
+
+            </div>
+
+            {results.length > 0 && (
+              <div className="absolute top-12 left-0 w-full bg-white rounded-xl shadow-xl border z-50 max-h-80 overflow-y-auto">
+
+                {results.map((item) => (
+                  <div
+                    key={item.productId}
+                    className="p-3 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      navigate(`/product/${item.productId}`);
+                      setSearch("");
+                      setResults([]);
+                    }}
+                  >
+                    <p className="font-semibold">
+                      {item.productName}
+                    </p>
+
+                    <p className="text-sm text-gray-500">
+                      {item.brand}
+                    </p>
+                  </div>
+                ))}
+
+              </div>
+            )}
+
           </div>
 
           <button className="relative">
@@ -124,74 +215,93 @@ const { user } = useSelector((state) => state.auth);
           </button>
 
           {user ? (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button className="flex items-center gap-2 p-6 bg-transparent border-none hover:rounded-[40px] hover:border-gray-300 hover:border hover:bg-gray-100 transition duration-200 focus:bg-background focus:border-none">
-        <img
-          src="https://i.pravatar.cc/40"
-          alt="profile"
-          className="w-8 h-8 rounded-full"
-        />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="flex  items-center gap-2 p-0 bg-transparent border-none hover:rounded-[40px] hover:border-gray-300 hover:border hover:bg-gray-100 transition duration-200 focus:bg-background focus:border-none">
+                  {userprofile?.avatarUrl ? (
+                    <img
+                      src={userprofile.avatarUrl}
+                      alt="profile"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-semibold text-indigo-600">
+                      {(userprofile?.firstName?.[0] || "") +
+                        (userprofile?.lastName?.[0] || "") || "U"}
+                    </div>
+                  )}
+                  <ChevronDown className="w-4 h-4 text-gray-600" />
+                </Button>
+              </DropdownMenuTrigger>
 
-        <ChevronDown className="w-4 h-4 text-gray-600" />
-      </Button>
-    </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-50 p-3 absolute -right-40  top-2.5">
+                <div className="flex flex-col space-y-1 m-2 mb-3">
+                  <p className="text-sm font-semibold leading-none mb-2 ">
+                    Hello, {userprofile?.firstName || "there"}!
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {userprofile?.email}
+                  </p>
+                </div>
 
-    <DropdownMenuContent className="w-[220px] p-3">
-      <DropdownMenuSeparator />
+                <DropdownMenuSeparator />
 
-      <DropdownMenuItem>
-        <UserIcon className="mr-2 h-4 w-4" />
-        Profile
-      </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  Profile
+                </DropdownMenuItem>
 
-      <DropdownMenuItem>
-        <Package className="mr-2 h-4 w-4" />
-        My Products
-      </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Package className="mr-2 h-4 w-4" />
+                  My Products
+                </DropdownMenuItem>
 
-      <DropdownMenuItem>
-        <LayoutDashboardIcon className="mr-2 h-4 w-4" />
-        My Bookings
-      </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <LayoutDashboardIcon className="mr-2 h-4 w-4" />
+                  My Bookings
+                </DropdownMenuItem>
 
-      <DropdownMenuItem>
-        <Heart className="mr-2 h-4 w-4" />
-        Wishlist
-      </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Heart className="mr-2 h-4 w-4" />
+                  Wishlist
+                </DropdownMenuItem>
 
-      <DropdownMenuSeparator />
+                <DropdownMenuSeparator />
 
-      <DropdownMenuItem onClick={() => navigate("/settings")}>
-        <SettingsIcon className="mr-2 h-4 w-4" />
-        Settings
-      </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/settings")}>
+                  <SettingsIcon className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
 
-      <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
-        <LogOutIcon className="mr-2 h-4 w-4" />
-        Log out
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-) : (
-  <div className="flex items-center gap-3">
-    <Button
-      variant="outline"
-      className="rounded-full px-6"
-      onClick={() => navigate("/login")}
-    >
-      Login
-    </Button>
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onClick={handleLogout}
+                >
+                  <LogOutIcon className="mr-2 h-4 w-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                className="rounded-full px-6"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Button>
 
-    <Button
-      className="rounded-full px-6 bg-indigo-600 hover:bg-indigo-700"
-      onClick={() => navigate("/signup")}
-    >
-      Sign Up
-    </Button>
-  </div>
-)}
+              <Button
+                className="rounded-full px-6 bg-indigo-600 hover:bg-indigo-700"
+                onClick={() => navigate("/signup")}
+              >
+                Sign Up
+              </Button>
+            </div>
+          )}
         </div>
+
       </div>
     </header>
   );

@@ -10,6 +10,12 @@ import {
   updateUser,
 } from "@/redux/slices/userprofileSlice";
 
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+
 function PersonalInfo() {
   const dispatch = useDispatch();
 
@@ -47,31 +53,75 @@ function PersonalInfo() {
     );
   };
 
- const handleSave = async () => {
-  try {
-    dispatch(setLoading(true));
+  const handleSave = async () => {
+    try {
+      dispatch(setLoading(true));
 
-    const response = await updateUserProfile(user);
+      const response = await updateUserProfile(user);
 
-    dispatch(setUser(response.data));
+      dispatch(setUser(response.data));
 
-    dispatch(setLoading(false));
+      dispatch(setLoading(false));
 
-    alert("Profile updated successfully!");
+      alert("Profile updated successfully!");
 
-    setIsEditing(false);
+      setIsEditing(false);
+    } catch (err) {
+      dispatch(setLoading(false));
 
-  } catch (err) {
-    dispatch(setLoading(false));
+      dispatch(setError(error.message));
 
-    dispatch(setError(error.message));
-
-    alert("Failed to update profile");
-  }
-};
+      alert("Failed to update profile");
+    }
+  };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Card className="max-w-2xl">
+        <CardContent className="p-8">
+          <Skeleton className="h-8 w-56 mb-8" />
+
+          <div className="flex items-center gap-4 mb-8">
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-3 w-56" />
+              <Skeleton className="h-8 w-28 mt-2" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="space-y-2">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-11 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-11 w-full" />
+            </div>
+          </div>
+
+          <div className="space-y-2 mb-4">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-11 w-full" />
+          </div>
+
+          <div className="space-y-2 mb-4">
+            <Skeleton className="h-3 w-28" />
+            <Skeleton className="h-11 w-full" />
+          </div>
+
+          <div className="space-y-2 mb-6">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-11 w-full" />
+          </div>
+
+          <div className="flex justify-end">
+            <Skeleton className="h-11 w-36" />
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (error) {
@@ -83,105 +133,116 @@ function PersonalInfo() {
   }
 
   return (
-    <div>
-      <h2 className="text-3xl font-semibold mb-8">Personal Information</h2>
+    <Card className="w-[64%]">
+      <CardContent className="p-8">
+        <h2 className="text-2xl font-bold mb-8">Personal Information</h2>
 
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <label className="block mb-2">First Name</label>
+        <div className="flex items-center gap-4 mb-8">
+          <div className="relative h-16 w-16 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0">
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt="Profile"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="text-lg font-semibold text-muted-foreground">
+                {(user.firstName?.[0] || "") + (user.lastName?.[0] || "")}
+              </span>
+            )}
+          </div>
 
-          <input
+          <div>
+            <p className="font-semibold text-indigo-600">Profile Photo</p>
+            <p className="text-sm text-muted-foreground mb-2">
+              Upload a professional photo to build trust.
+            </p>
+            <Button type="button" variant="outline" size="sm">
+              Change Photo
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <Label className="mb-2 block">First Name</Label>
+            <Input
+              disabled={!isEditing}
+              type="text"
+              name="firstName"
+              value={user.firstName || ""}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div>
+            <Label className="mb-2 block">Last Name</Label>
+            <Input
+              disabled={!isEditing}
+              type="text"
+              name="lastName"
+              value={user.lastName || ""}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <Label className="mb-2 block">Email Address</Label>
+          <div className="flex gap-2">
+            <Input
+              disabled={!isEditing}
+              type="email"
+              name="email"
+              value={user.email || ""}
+              onChange={handleChange}
+              className="flex-1"
+            />
+            <Button type="button" variant="outline">
+              Verify
+            </Button>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <Label className="mb-2 block">Phone Number</Label>
+          <Input
             disabled={!isEditing}
             type="text"
-            name="firstName"
-            value={user.firstName || ""}
+            name="phone"
+            value={user.phone || ""}
             onChange={handleChange}
-            className="w-full border rounded-lg p-3"
           />
         </div>
 
-        <div>
-          <label className="block mb-2">Last Name</label>
-
-          <input
+        <div className="mb-6">
+          <Label className="mb-2 block">Location</Label>
+          <Input
             disabled={!isEditing}
             type="text"
-            name="lastName"
-            value={user.lastName || ""}
+            name="location"
+            value={user.location || ""}
             onChange={handleChange}
-            className="w-full border rounded-lg p-3"
           />
         </div>
-      </div>
 
-      <div className="mb-4">
-        <label className="block mb-2">Email Address</label>
-
-        <input
-          disabled={!isEditing}
-          type="email"
-          name="email"
-          value={user.email || ""}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-3"
-        />
-      </div>
-
-      <div className="mb-4">
-        <label className="block mb-2">Phone Number</label>
-
-        <input
-          disabled={!isEditing}
-          type="text"
-          name="phone"
-          value={user.phone || ""}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-3"
-        />
-      </div>
-
-      <div className="mb-4">
-        <label className="block mb-2">Location</label>
-
-        <input
-          disabled={!isEditing}
-          type="text"
-          name="location"
-          value={user.location || ""}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-3"
-        />
-      </div>
-
-      <div className="mb-6">
-        <label className="block mb-2">Bio</label>
-
-        <textarea
-          disabled={!isEditing}
-          rows="4"
-          name="bio"
-          value={user.bio || ""}
-          onChange={handleChange}
-          className="w-full border rounded-lg p-3"
-        />
-      </div>
-
-      <button
-        onClick={() => setIsEditing(true)}
-        className="px-5 py-2 border rounded-lg"
-      >
-        Edit
-      </button>
-
-      {isEditing && (
-        <button
-          onClick={handleSave}
-          className="bg-purple-600 text-white px-6 py-3 rounded-lg"
-        >
-          Save Changes
-        </button>
-      )}
-    </div>
+        <div className="flex justify-end gap-3">
+          {!isEditing ? (
+            <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>
+              Edit
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={handleSave}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            >
+              Save Changes
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

@@ -3,7 +3,7 @@ import { setError, setLoading, setUser } from "@/redux/slices/authslices";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [formData, setFormdata] = useState({

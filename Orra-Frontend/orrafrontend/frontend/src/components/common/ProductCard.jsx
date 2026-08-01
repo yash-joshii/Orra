@@ -5,6 +5,12 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
+  addToWishlist,
+  removeFromWishlist,
+  checkWishlist,
+} from "@/api/wishlist";
+
+import {
   Card,
   CardAction,
   CardContent,
@@ -21,7 +27,7 @@ import {
   Verified,
   VerifiedIcon,
   Eye,
-  Heart
+  Heart,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -29,10 +35,48 @@ const ProductCard = ({ data }) => {
   const navigate = useNavigate();
   console.log("images →", data.images);
   const [liked, setLiked] = useState(false);
+
+  // Temporary userId
+  const userId = 1;
+  useEffect(() => {
+    const fetchWishlistStatus = async () => {
+      try {
+        const response = await checkWishlist(userId, data.productId);
+        setLiked(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    if (data?.productId) {
+      fetchWishlistStatus();
+    }
+  }, [data]);
   const imageUrl =
     data.images && data.images.length > 0
-      ? data.images[0].imageBase64 ?? data.images[0]  // handles both cases
+      ? (data.images[0].imageBase64 ?? data.images[0]) // handles both cases
       : "https://placehold.co/400x200?text=No+Image";
+
+  const handleWishlist = async (e) => {
+    e.stopPropagation();
+
+    console.log("Heart clicked");
+    console.log("Product ID:", data.productId);
+
+    try {
+      if (liked) {
+        await removeFromWishlist(userId, data.productId);
+        setLiked(false);
+        console.log("Removed from wishlist");
+      } else {
+        await addToWishlist(userId, data.productId);
+        setLiked(true);
+        console.log("Added to wishlist");
+      }
+    } catch (error) {
+      console.error("Wishlist Error:", error.response?.data || error.message);
+    }
+  };
   return (
     <Card className="relative group w-[30%] h-[50%] rounded-[25px]  pt-0 shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-y-1 hover:shadow-xl hover:cursor-pointer">
       <div className="relative ">
@@ -54,7 +98,7 @@ const ProductCard = ({ data }) => {
           <Eye className="w-4 h-4 text-center mt-[2px]" /> Quick view
         </div>
         <div
-          onClick={() => setLiked(!liked)}
+          onClick={handleWishlist}
           className="btn bg-white absolute z-20 w-[9%] p-[1.5%] rounded-full font-medium text-center top-[2%] right-[2%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)] cursor-pointer flex items-center justify-center"
         >
           <Heart
@@ -88,7 +132,7 @@ const ProductCard = ({ data }) => {
         />
         <div className="ownername">
           <span className="flex gap-[7px] text-[13px] text-gray-500 font-medium items-center">
-          {data.owner?.name || "Unknown Owner"}
+            {data.owner?.name || "Unknown Owner"}
             <CheckCircle2 className="w-3.5 h-3.5 !text-green-500" />
           </span>
         </div>
@@ -102,8 +146,10 @@ const ProductCard = ({ data }) => {
           </span>
         </div>
         <div className="bookbtn mr-[2%]">
-          <button onClick={() => navigate(`/booking/${data.productId}`)}
-          className="bg-black w-[100%] h-[10%] p-2 rounded-[12px] shadow-[rgba(50,50,93,0.25)_0px_2px_5px_-1px,rgba(0,0,0,0.3)_0px_1px_3px_-1px] cursor-pointer hover:bg-[#5650cc] ">
+          <button
+            onClick={() => navigate(`/booking/${data.productId}`)}
+            className="bg-black w-[100%] h-[10%] p-2 rounded-[12px] shadow-[rgba(50,50,93,0.25)_0px_2px_5px_-1px,rgba(0,0,0,0.3)_0px_1px_3px_-1px] cursor-pointer hover:bg-[#5650cc] "
+          >
             {" "}
             <Calendar className="text-white w-4 h-4" />{" "}
           </button>
