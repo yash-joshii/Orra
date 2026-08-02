@@ -14,8 +14,8 @@ public class Productimage {
     @Column(name = "image_id")  // fix — actual PK column
     private Long id;
 
-    @Column(name = "image_data", columnDefinition = "TEXT")
-    private String imageBase64;
+    @Column(name = "image_url", columnDefinition = "TEXT")
+    private String imageUrl;
 
     @Column(name = "is_cover")
     private Boolean isCover = false;
