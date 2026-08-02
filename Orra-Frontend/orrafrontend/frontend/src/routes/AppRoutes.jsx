@@ -10,6 +10,7 @@ import Mainlayout from "@/layout/Mainlayout";
 import ProductCard from "@/components/common/ProductCard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoLoader from "@/components/common/LogoLoader";
+import AdminRoutes from "./AdminRoutes";
 import Cart from "@/pages/Cart";
 // import AdminRoutes from "./AdminRoutes";
 
@@ -123,6 +124,12 @@ const AppRoutes = () => {
           }
         />
       </Route>
+      {AdminRoutes}
+      <Route path="/mybookings" element={
+        <ProtectedRoute>
+          <MyBookings />
+        </ProtectedRoute>
+      } />
 
       {/* Auth Routes outside MainLayout */}
       <Route path="/signup" element={<Signup />} />
