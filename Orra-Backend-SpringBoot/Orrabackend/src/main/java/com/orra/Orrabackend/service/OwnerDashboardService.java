@@ -107,12 +107,19 @@ public class OwnerDashboardService {
 
         for (ProductList product : listings) {
 
-            OwnerActiveListingDTO dto =
-                    new OwnerActiveListingDTO();
+            OwnerActiveListingDTO dto = new OwnerActiveListingDTO();
+
+            dto.setListingId(product.getProductId());
 
             dto.setTitle(product.getProductName());
 
             dto.setCategory(product.getCategory().name());
+
+            dto.setPricePerDay(product.getDailyRate());
+
+            if (product.getImages() != null && !product.getImages().isEmpty()) {
+                dto.setImageUrl(product.getImages().get(0).getImageBase64());
+            }
 
             activeListings.add(dto);
         }
