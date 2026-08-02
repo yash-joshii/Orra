@@ -98,22 +98,22 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/mybooking/:id"
           element={
             <ProtectedRoute>
               <MyBookings />
             </ProtectedRoute>
           }
-        />
-        {/* <Route
+        /> */}
+        <Route
           path="/mybookings"
           element={
             <ProtectedRoute>
               <MyBookings />
             </ProtectedRoute>
           } 
-        />*/}
+        />
         <Route
           path="/dashboard"
           element={

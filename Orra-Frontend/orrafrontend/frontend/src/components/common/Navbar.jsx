@@ -114,7 +114,7 @@ const Navbar = () => {
   { name: "Home", path: "/" },
   { name: "Browse Devices", path: "/browserdevices" },
   { name: "Categories", path: "/categories" },
-  { name: "My Bookings", path: "/bookings" },
+  { name: "My Bookings", path: "/mybookings" },
   { name: "Wishlist", path: "/wishlist" },
 
   ...(isOwner

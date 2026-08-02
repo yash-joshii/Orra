@@ -43,7 +43,7 @@ const MyBookings = () => {
 
     return (
         <div className="flex flex-col min-h-screen">
-            <Navbar />
+            {/* <Navbar /> */}
 
             <main className="flex-grow max-w-[1200px] w-full mx-auto px-6 py-8">
                 <h1 className="font-bold text-[30px] mb-6">My Bookings</h1>
@@ -85,7 +85,7 @@ const MyBookings = () => {
                 </div>
             </main>
 
-            <Footer />
+            {/* <Footer /> */}
         </div>
     )
 };
