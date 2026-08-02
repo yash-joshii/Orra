@@ -1,4 +1,5 @@
 import React from "react";
+import ActiveListingCard from "./ActiveListingCard";
 
 const DashboardDetailModal = ({
   isOpen,
@@ -25,108 +26,90 @@ const DashboardDetailModal = ({
         </div>
 
         <div className="p-6 max-h-[500px] overflow-y-auto">
-  {loading ? (
-    <div className="text-center py-10 text-gray-500">
-      Loading...
-    </div>
-  ) : data.length === 0 ? (
-    <div className="text-center py-10 text-gray-500">
-      No data available.
-    </div>
-  ) : (
-    <>
-      {selectedCard === "earnings" && (
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b bg-gray-100">
-              <th className="text-left p-3">Booking ID</th>
-              <th className="text-left p-3">Listing</th>
-              <th className="text-left p-3">Amount</th>
-              <th className="text-left p-3">Date</th>
-            </tr>
-          </thead>
+          {loading ? (
+            <div className="text-center py-10 text-gray-500">Loading...</div>
+          ) : data.length === 0 ? (
+            <div className="text-center py-10 text-gray-500">
+              No data available.
+            </div>
+          ) : (
+            <>
+              {selectedCard === "earnings" && (
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b bg-gray-100">
+                      <th className="text-left p-3">Booking ID</th>
+                      <th className="text-left p-3">Listing</th>
+                      <th className="text-left p-3">Amount</th>
+                      <th className="text-left p-3">Date</th>
+                    </tr>
+                  </thead>
 
-          <tbody>
-            {data.map((item) => (
-              <tr
-                key={item.bookingId}
-                className="border-b hover:bg-gray-50"
-              >
-                <td className="p-3">{item.bookingId}</td>
-                <td className="p-3">{item.listingTitle}</td>
-                <td className="p-3 font-semibold text-green-600">
-                  ₹{item.amount}
-                </td>
-                <td className="p-3">
-                  {new Date(item.createdAt).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+                  <tbody>
+                    {data.map((item) => (
+                      <tr
+                        key={item.bookingId}
+                        className="border-b hover:bg-gray-50"
+                      >
+                        <td className="p-3">{item.bookingId}</td>
+                        <td className="p-3">{item.listingTitle}</td>
+                        <td className="p-3 font-semibold text-green-600">
+                          ₹{item.amount}
+                        </td>
+                        <td className="p-3">
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
 
-      {selectedCard === "listings" && (
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b bg-gray-100">
-              <th className="text-left p-3">Title</th>
-              <th className="text-left p-3">Category</th>
-            </tr>
-          </thead>
+              {selectedCard === "listings" && (
+                <div className="space-y-5">
+                  {data.map((listing) => (
+                    <ActiveListingCard
+                      key={listing.listingId}
+                      listing={listing}
+                    />
+                  ))}
+                </div>
+              )}
 
-          <tbody>
-            {data.map((item, index) => (
-              <tr
-                key={index}
-                className="border-b hover:bg-gray-50"
-              >
-                <td className="p-3">{item.title}</td>
-                <td className="p-3">{item.category}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+              {selectedCard === "completed" && (
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b bg-gray-100">
+                      <th className="text-left p-3">Booking ID</th>
+                      <th className="text-left p-3">Listing</th>
+                      <th className="text-left p-3">Renter</th>
+                      <th className="text-left p-3">Completed</th>
+                    </tr>
+                  </thead>
 
-      {selectedCard === "completed" && (
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b bg-gray-100">
-              <th className="text-left p-3">Booking ID</th>
-              <th className="text-left p-3">Listing</th>
-              <th className="text-left p-3">Renter</th>
-              <th className="text-left p-3">Completed</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {data.map((item) => (
-              <tr
-                key={item.bookingId}
-                className="border-b hover:bg-gray-50"
-              >
-                <td className="p-3">{item.bookingId}</td>
-                <td className="p-3">{item.listingTitle}</td>
-                <td className="p-3">{item.renterName}</td>
-                <td className="p-3">
-                  {new Date(item.completedDate).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </>
-  )}
-</div>
-
-
+                  <tbody>
+                    {data.map((item) => (
+                      <tr
+                        key={item.bookingId}
+                        className="border-b hover:bg-gray-50"
+                      >
+                        <td className="p-3">{item.bookingId}</td>
+                        <td className="p-3">{item.listingTitle}</td>
+                        <td className="p-3">{item.renterName}</td>
+                        <td className="p-3">
+                          {new Date(item.completedDate).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </>
+          )}
         </div>
       </div>
+    </div>
   );
 };
 
 export default DashboardDetailModal;
-
-

@@ -3,8 +3,22 @@ import React from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { FaInstagram, FaLinkedin, FaXTwitter } from "react-icons/fa6";
-import logo from '../../assets/logo/orralogo.svg'
+import logo from "../../assets/logo/orralogo.svg";
+import { subscribe } from "@/api/subscribeApi";
+
 const Footer = () => {
+  const handleSubscribe = async () => {
+    try {
+      const response = await subscribe();
+
+      alert(response.data);
+    } catch (error) {
+      console.error(error);
+
+      alert("Failed to subscribe.");
+    }
+  };
+
   return (
     <div className="bg-[#f5f5f5] py-16 px-8 md:px-20">
       <div className="max-w-7xl mx-auto">
@@ -12,7 +26,7 @@ const Footer = () => {
           <div className="space-y-6">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 flex items-center justify-center rounded-full text-white bg-[#f5f5f5] font-bold">
-                <img src={logo}  />
+                <img src={logo} />
               </div>
               <h2 className="text-3xl font-bold text-gray-900">ORRA</h2>
             </div>
@@ -74,7 +88,10 @@ const Footer = () => {
                 className="h-14 rounded-2xl bg-white border-gray-200"
               />
 
-              <Button className="w-full h-14 rounded-2xl bg-[#F61067] text-white text-lg font-medium">
+              <Button
+                className="w-full h-14 rounded-2xl bg-[#F61067] text-white text-lg font-medium"
+                onClick={handleSubscribe}
+              >
                 Subscribe
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
