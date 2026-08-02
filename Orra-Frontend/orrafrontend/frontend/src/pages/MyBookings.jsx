@@ -12,20 +12,6 @@ import LazyImage from '@/components/common/LazyImage'
 import MyBookingsCard from "@/components/common/MyBookingsCard"
 
 const MyBookings = () => {
-    return (<>
-        {/* Shadcn - tabs, cards, button, badge, avatar, lucide icons */}
-
-        {/* Bookings Body */}
-        <div className = "bookings-body">
-            <h1 className = "absolute top-[80px] left-[390px] font-bold text-[30px]">My Bookings</h1>
-            <div className = "tabs-change-container absolute top-[150px] left-[385px] text-[#5650cc]">
-                <Tabs defaultValue="overview">
-                    <TabsList variant="line">
-                        <TabsTrigger value="active&upcoming">Active & Upcoming</TabsTrigger>
-                        <TabsTrigger value="AwaitingOwner">Awaiting Owner</TabsTrigger>
-                        <TabsTrigger value="completed">Completed</TabsTrigger>
-                        <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-                    </TabsList>
     const dispatch = useDispatch()
     const { myBookings, loading, error } = useSelector((state) => state.booking)
     const { user } = useSelector((state) => state.auth)
@@ -58,8 +44,7 @@ const MyBookings = () => {
     return (
         <div className="flex flex-col min-h-screen">
             <Navbar />
-            
-            {/* Main Content Area */}
+
             <main className="flex-grow max-w-[1200px] w-full mx-auto px-6 py-8">
                 <h1 className="font-bold text-[30px] mb-6">My Bookings</h1>
 
@@ -102,8 +87,7 @@ const MyBookings = () => {
 
             <Footer />
         </div>
-
-    </>)
+    )
 };
 
 export default MyBookings;
