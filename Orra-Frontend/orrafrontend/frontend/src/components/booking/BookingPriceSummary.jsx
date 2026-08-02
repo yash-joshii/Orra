@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -7,7 +8,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Lock } from "lucide-react";
 
-const PriceSummary = ({
+const BookingPriceSummary = ({
   product,
   rentalDays,
   totalRent,
@@ -22,10 +23,10 @@ const PriceSummary = ({
       <div className="space-y-3.5 pt-1">
         <div className="days-calculation flex justify-between items-center text-sm font-medium text-slate-500">
           <span>
-            $ {product?.dailyRate || 0} × {rentalDays} days
+            ${product?.dailyRate || 0} × {rentalDays} days
           </span>
           <span className="font-semibold text-slate-800">
-            $ {totalRent.toFixed(2)}
+            ${totalRent.toFixed(2)}
           </span>
         </div>
 
@@ -79,4 +80,4 @@ const PriceSummary = ({
   );
 };
 
-export default PriceSummary;
+export default BookingPriceSummary;
