@@ -139,6 +139,7 @@ public class bookingService {
     }
 
     @Transactional
+
     public BookingResponseDTO acceptBooking(Long bookingId) {
 
         Booking booking = bookingRepository.findById(bookingId)

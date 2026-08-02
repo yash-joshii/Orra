@@ -14,31 +14,32 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByRenter_Id(Long renterId);
 
-    // Used by Action Center
     List<Booking> findByListing_OwnerIdAndStatus(
             Long ownerId,
             BookingStatus status
     );
 
-    // Used to get all bookings
     List<Booking> findByListing_OwnerId(Long ownerId);
 
-    // Used only by Dashboard Statistics
     long countByListing_OwnerIdAndStatus(
             Long ownerId,
             BookingStatus status
     );
+
     List<Booking> findByListing_ProductIdAndStatus(
             Long productId,
-            BookingStatus status);
+            BookingStatus status
+    );
+
     List<Booking> findByStatus(BookingStatus status);
 
     long countByRenterId(Long renterId);
 
-    List<Booking> findByStatusAndEndDateBefore(
+    List<Booking> findByStatusAndEndDateTimeBefore(
             BookingStatus status,
-            LocalDate endDate
+            LocalDate date
     );
+
     @Query("SELECT COALESCE(SUM(b.totalPrice), 0) FROM Booking b WHERE b.status = :status")
     BigDecimal sumTotalRevenueByStatus(@Param("status") BookingStatus status);
 }
