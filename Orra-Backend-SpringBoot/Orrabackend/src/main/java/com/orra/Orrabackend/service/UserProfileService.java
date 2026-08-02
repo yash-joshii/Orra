@@ -38,7 +38,8 @@ public class UserProfileService {
                 firstName,
                 lastName,
                 user.getEmail(),
-                user.getPhone()
+                user.getPhone(),
+                user.getRoles()
         );
     }
 

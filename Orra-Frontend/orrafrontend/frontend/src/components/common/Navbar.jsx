@@ -38,6 +38,7 @@ import { setError } from "@/redux/slices/productslices";
 import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
+  
   const navigate = useNavigate();
 
   const [scrolled, setScrolled] = useState(false);
@@ -68,6 +69,7 @@ const Navbar = () => {
 
   const user = useSelector((state) => state.auth.user);
   const userprofile = useSelector((state) => state.userProfile.user);
+  const isOwner = userprofile?.roles?.includes("OWNER");
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -109,13 +111,16 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Browse Devices", path: "/browserdevices" },
-    { name: "Categories", path: "/categories" },
-    { name: "My Bookings", path: "/mybookings" },
-    { name: "Wishlist", path: "/wishlist" },
-    { name: "Dashboard", path: "/dashboard" },
-  ];
+  { name: "Home", path: "/" },
+  { name: "Browse Devices", path: "/browserdevices" },
+  { name: "Categories", path: "/categories" },
+  { name: "My Bookings", path: "/bookings" },
+  { name: "Wishlist", path: "/wishlist" },
+
+  ...(isOwner
+    ? [{ name: "Dashboard", path: "/dashboard" }]
+    : []),
+];
 
   // 1. Get the current booking state from Redux
   const currentBooking = useSelector((state) => state.booking.currentBooking);
