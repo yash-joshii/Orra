@@ -118,7 +118,7 @@ public class OwnerDashboardService {
             dto.setPricePerDay(product.getDailyRate());
 
             if (product.getImages() != null && !product.getImages().isEmpty()) {
-                dto.setImageUrl(product.getImages().get(0).getImageBase64());
+                dto.setImageUrl(product.getImages().get(0).getImageUrl());
             }
 
             activeListings.add(dto);

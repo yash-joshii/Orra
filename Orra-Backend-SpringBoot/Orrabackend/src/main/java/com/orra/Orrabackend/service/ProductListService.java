@@ -7,6 +7,7 @@ import com.orra.Orrabackend.model.User;
 import com.orra.Orrabackend.repository.CategoryCountProjection;
 import com.orra.Orrabackend.repository.ProductListImageRepository;
 import com.orra.Orrabackend.repository.ProductListRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,20 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@AllArgsConstructor
 @Service
 public class ProductListService {
 
     private final ProductListRepository repo;
     private final ProductListImageRepository repoImage;
     private final UserService userService;
-
-    public ProductListService(ProductListRepository repo,
-                              ProductListImageRepository repoImage,
-                              UserService userService) {
-        this.repo = repo;
-        this.repoImage = repoImage;
-        this.userService = userService;
-    }
+    private final SupabaseStorageService storageService;
 
     public List<ProductList> getAll() {
         return repo.findByIsAvailableTrueAndIsActiveTrue();
@@ -126,15 +121,23 @@ public class ProductListService {
         if (images != null && !images.isEmpty()) {
 
             List<Productimage> imagelist = images.stream()
-                    .map(img -> {
+                    .map(base64 -> {
+
+                        String imageUrl = storageService.uploadBase64Image(base64);
+
                         Productimage prodimg = new Productimage();
-                        prodimg.setImageBase64(img);
+
+                        prodimg.setImageUrl(imageUrl);
+
                         prodimg.setProduct(saved);
+
                         return prodimg;
+
                     })
                     .collect(Collectors.toList());
 
             repoImage.saveAll(imagelist);
+            saved.setImages(imagelist);
         }
 
         return saved;
