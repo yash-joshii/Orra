@@ -1,5 +1,6 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
 import { clearCredentials, setCredentials } from "@/redux/slices/authslices";
 import { GetCurrentUser } from "@/api/authApi"; // add this import temporarily
@@ -9,7 +10,8 @@ import Mainlayout from "@/layout/Mainlayout";
 import ProductCard from "@/components/common/ProductCard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoLoader from "@/components/common/LogoLoader";
-import AdminRoutes from "./AdminRoutes";
+import Cart from "@/pages/Cart";
+// import AdminRoutes from "./AdminRoutes";
 
 
 const LandingPage = lazy(() => import("@/pages/LandingPage"));
