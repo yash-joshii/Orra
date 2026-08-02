@@ -1,11 +1,18 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
+import { useDispatch } from "react-redux";
 
+import { clearCredentials, setCredentials } from "@/redux/slices/authslices";
+import { GetCurrentUser } from "@/api/authApi"; // add this import temporarily
+
+// Layout & Pages
 import Mainlayout from "@/layout/Mainlayout";
-import ProtectedRoute from "@/components/ProtectedRoute";
 import ProductCard from "@/components/common/ProductCard";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoLoader from "@/components/common/LogoLoader";
 import AdminRoutes from "./AdminRoutes";
+import Cart from "@/pages/Cart";
+// import AdminRoutes from "./AdminRoutes";
 
 
 const LandingPage = lazy(() => import("@/pages/LandingPage"));
@@ -34,32 +41,88 @@ const MyBookings = lazy(() => import("@/pages/MyBookings"));
 
 const SearchResults = lazy(() => import("@/pages/SearchResults"));
 
+
 const AppRoutes = () => {
+  const dispatch = useDispatch();
+
+ useEffect(() => {
+  const rehydrateAuth = async () => {
+    try {
+      const response = await GetCurrentUser();
+      dispatch(setCredentials({
+        user: { userId: response.data.userId, roles: response.data.roles },
+      }));
+    } catch (err) {
+      dispatch(clearCredentials());
+    }
+  };
+  rehydrateAuth();
+}, [dispatch]);
+
   return (
      <Suspense fallback={<LogoLoader />}>
     <Routes>
       <Route element={<Mainlayout />}>
+        {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/browserdevices" element={<BrowseDevices />}
-        />
+        <Route path="/browserdevices" element={<BrowseDevices />} />
         <Route path="/listingdevice" element={<ListingDevice />} />
         <Route path="/settings" element={<SettingPage />} />
         <Route path="/product/:id" element={<Productpage />} />
         <Route path="/categories" element={<Categories />} />
-        <Route path="/booking/:id" element={
-          <ProtectedRoute>
-            <Bookings />
-          </ProtectedRoute>
-        } />
 
-        {/* <Route path="/mybookings" element={
-          <ProtectedRoute>
-        <MyBookings/>
-          </ProtectedRoute>
-          } /> */}
+        {/* Cart Page Route */}
+        <Route path="/cart" element={<Cart />} /> {/* 👈 2. Add Cart Route */}
 
-        <Route path="/dashboard" element={<Dashboard />} />
+        {/* Protected User Routes */}
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute>
+              <Wishlist />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/booking/:id"
+          element={
+            <ProtectedRoute>
+              <Bookings />
+            </ProtectedRoute>
+          }
+        />
+        {/* <Route
+          path="/mybooking/:id"
+          element={
+            <ProtectedRoute>
+              <MyBookings />
+            </ProtectedRoute>
+          }
+        /> */}
+        <Route
+          path="/mybookings"
+          element={
+            <ProtectedRoute>
+              <MyBookings />
+            </ProtectedRoute>
+          } 
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
       </Route>
       {AdminRoutes}
       <Route path="/mybookings" element={
@@ -67,6 +130,8 @@ const AppRoutes = () => {
           <MyBookings />
         </ProtectedRoute>
       } />
+
+      {/* Auth Routes outside MainLayout */}
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
       <Route path="/product" element={<ProductCard />} />

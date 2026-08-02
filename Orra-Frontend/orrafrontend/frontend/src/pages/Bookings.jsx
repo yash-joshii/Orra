@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
+import { useRazorpay } from "react-razorpay";
 
-//Shadcn Imports
+// Shadcn Imports
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 
-//Redux Imports
+// Redux Imports & API Actions
 import { getProductById } from "@/api/listingApi";
 import {
   cancelBooking,
   createBooking,
-  payForBooking,
   getBookingById,
 } from "@/api/bookingApi";
 import {
@@ -25,36 +25,38 @@ import {
   setSelectedProduct,
 } from "@/redux/slices/productslices";
 import { useSelector, useDispatch } from "react-redux";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
+import { createOrder } from "@/api/paymentapi";
 
-// Split-out booking components
+// Sub-components
 import BookingBreadcrumb from "../components/booking/BookingBreadcrumb";
 import ProductSummaryCard from "../components/booking/ProductSummaryCard";
 import RentalDatePicker from "../components/booking/RentalDatePicker";
 import PriceSummary from "../components/booking/PriceSummary";
 import BookingActionButtons from "../components/booking/BookingActionButtons";
 import TrustBadges from "../components/booking/TrustBadges";
-import { useRazorpay } from "react-razorpay";
-import { createOrder } from "@/api/paymentapi";
 
 const Bookings = () => {
   const { Razorpay } = useRazorpay();
+  const dispatch = useDispatch();
+  const { id } = useParams();
+
+  // Component states
   const [startOpen, setStartOpen] = useState(false);
   const [endOpen, setEndOpen] = useState(false);
-
   const [startDate, setStartDate] = useState();
   const [endDate, setEndDate] = useState();
 
+  // Redux Selectors
   const product = useSelector((state) => state.products.selectedProduct);
   const user = useSelector((state) => state.auth.user);
   const currentBooking = useSelector((state) => state.booking.currentBooking);
-  const dispatch = useDispatch();
 
-  const { id } = useParams();
-
+  // Fetch product if an ID is present in the URL
   useEffect(() => {
-    console.log("Product ID:", id);
-    fetchProduct();
+    if (id) {
+      fetchProduct();
+    }
   }, [id]);
 
   const fetchProduct = async () => {
@@ -69,38 +71,60 @@ const Bookings = () => {
     }
   };
 
+
+  const formatLocalDate = (date) => {
+    if (!date) return null;
+
+    const d = date instanceof Date ? date : new Date(date);
+
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  };
+
+  // Handler: Request Booking
   const handleRequestBooking = async () => {
+    if (!startDate || !endDate) {
+      toast.error("Please select both start and end dates.");
+      return;
+    }
+
     dispatch(setBookingLoading(true));
     try {
       const payload = {
-        listingId: product.productId,
-        renterId: user.userId,
-        startDateTime: startDate,
-        endDateTime: endDate,
+        listingId: product?.productId || product?.id,
+        renterId: user?.userId || user?.id,
+        startDateTime: formatLocalDate(startDate),
+        endDateTime: formatLocalDate(endDate),
       };
-      console.log("user object:", user);
-      console.log("payload being sent:", payload);
       const response = await createBooking(payload);
       dispatch(setCurrentBooking(response.data));
+      toast.success("Booking requested successfully!");
     } catch (err) {
+      const serverMessage = err.response?.data?.message || err.message;
       dispatch(setBookingError(err.message));
+      toast.error(err.message || "Failed to create booking.");
     } finally {
       dispatch(setBookingLoading(false));
     }
   };
+
+  // Handler: Razorpay Payment
   const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
-  console.log("Razorpay Key:", import.meta.env.VITE_RAZORPAY_KEY_ID);
+
   const handlePayForBooking = async () => {
     dispatch(setBookingLoading(true));
     try {
-      // Step 1: create order via .NET API
+      // 1. Create payment order
       const orderResponse = await createOrder(
         grandTotal,
-        currentBooking.bookingId,
+        currentBooking.bookingId
       );
       const order = orderResponse.data;
 
-      // Step 2: open Razorpay checkout using the hook
+      // 2. Open Razorpay modal
       const options = {
         key: RAZORPAY_KEY_ID,
         amount: order.amount * 100,
@@ -111,6 +135,9 @@ const Bookings = () => {
         handler: function (response) {
           toast.success("Payment received! Confirming your booking...");
           dispatch(setBookingLoading(false));
+
+          // Reset current booking state after successful payment -> redirects to cart
+          dispatch(setCurrentBooking(null));
         },
         modal: {
           ondismiss: function () {
@@ -130,14 +157,13 @@ const Bookings = () => {
     }
   };
 
+  // Handler: Cancel Booking
   const handleCancelBooking = async () => {
     dispatch(setBookingLoading(true));
     try {
-      const response = await cancelBooking(
-        currentBooking.bookingId,
-        user.userId,
-      );
-      dispatch(setCurrentBooking(response.data));
+      await cancelBooking(currentBooking.bookingId, user.userId);
+      dispatch(setCurrentBooking(null));
+      toast.success("Booking cancelled.");
     } catch (err) {
       dispatch(setBookingError(err.message));
     } finally {
@@ -145,6 +171,7 @@ const Bookings = () => {
     }
   };
 
+  // Polling for booking status changes
   useEffect(() => {
     if (!currentBooking) return;
     if (
@@ -159,24 +186,35 @@ const Bookings = () => {
         dispatch(setCurrentBooking(response.data));
       } catch (error) {
         console.error("Polling error:", error);
+        toast.error("This booking request was declined by the owner.");
+        dispatch(setCurrentBooking(null));
       }
     }, 5000);
 
     return () => clearInterval(intervalId);
   }, [currentBooking?.bookingId, currentBooking?.status]);
 
+  // Pricing calculations
   const rentalDays =
     startDate && endDate
-      ? Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24))
+      ? Math.max(
+        1,
+        Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
+      )
       : 0;
-  const totalRent = product ? rentalDays * product?.dailyRate : 0;
+  const totalRent = product ? rentalDays * (product?.dailyRate || 0) : 0;
   const platformFee = totalRent * 0.1;
   const estimatedTax = totalRent * 0.08;
   const grandTotal =
     totalRent + platformFee + estimatedTax + (product?.securityDeposit || 0);
 
+  // If there is no URL product ID and no active booking, navigate to cart
+  if (!id && !currentBooking) {
+    return <Navigate to="/cart" replace />;
+  }
+
   return (
-    <div className="parent px-25 py-8 space-y-8">
+    <div className="parent max-w-[1280px] mx-auto px-6 py-8 space-y-8">
       <BookingBreadcrumb />
 
       <div className="heading-detail text-2xl">
@@ -189,7 +227,7 @@ const Bookings = () => {
       <hr className="border-t border-slate-200 my-6" />
 
       <TooltipProvider>
-        <div className="booking-detail w-[1140px] mx-auto flex flex-row items-start p-12 gap-8 justify-center bg-slate-50/50 min-h-screen">
+        <div className="booking-detail flex flex-row items-start justify-center gap-8 p-12 bg-slate-50/50 rounded-3xl min-h-[600px]">
           {/* Left Side: Product & Rental Details */}
           <div className="product-detail w-[660px] bg-white border border-slate-100 rounded-3xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.04)] flex flex-col gap-6">
             <ProductSummaryCard product={product} />

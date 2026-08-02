@@ -20,6 +20,9 @@ const ProductSummary = ({ data }) => {
   const pricePerDay = data?.pricePerDay || 0;
   const securityDeposit = data?.securityDeposit || 0;
 
+  const currentUserId = useSelector((state) => state.auth.user);
+  const isOwner = currentUserId === data.owner?.userId;
+
   const days = useMemo(
     () => daysBetween(pickupDate, returnDate),
     [pickupDate, returnDate],
@@ -75,13 +78,15 @@ const ProductSummary = ({ data }) => {
         </div>
 
         {/* CTA */}
-        <Button
-          className="w-full h-12 rounded-xl text-base font-semibold
-                     bg-gradient-to-r from-indigo-500 to-indigo-700
-                     hover:from-indigo-600 hover:to-indigo-800 text-white"
-        >
-          Request to Book
-        </Button>
+        {!isOwner && (
+          <Button
+            className="w-full h-12 rounded-xl text-base font-semibold
+               bg-gradient-to-r from-indigo-500 to-indigo-700
+               hover:from-indigo-600 hover:to-indigo-800 text-white"
+          >
+            Request to Book
+          </Button>
+        )}
 
         <p className="text-center text-sm text-gray-500">
           You won't be charged yet

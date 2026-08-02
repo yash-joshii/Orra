@@ -18,6 +18,7 @@ export const CreateSession = async (token) => {
 };
 
 export const Logout = async () => {
+   await supabase.auth.signOut();
   return await axiosinstance.post("/api/auth/logout", {}, { withCredentials: true });
 };
 

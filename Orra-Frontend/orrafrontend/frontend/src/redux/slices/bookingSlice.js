@@ -1,10 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 // import { setError } from "./authslices";
-import MyBookings from "@/pages/MyBookings";
+// import myBookings from "@/pages/MyBookings";
 
 const initialState = {
     currentBooking : null,
-    MyBookings: [],
+    myBookings: [],
     ownerIncomingRequests: [],
     loading : false,
     error : null 
@@ -23,12 +23,15 @@ const bookingSlice = createSlice({
         setOwnerIncomingRequests: (state, action) => {
             state.ownerIncomingRequests = action.payload;
         },
+        setMyBookings: (state, action) => {
+            state.myBookings = action.payload;
+        },
         setError: (state, action) => {
             state.error = action.payload;
         },
     },
 });
 
-export const {setLoading, setCurrentBooking, setError} = bookingSlice.actions;
+export const {setLoading, setCurrentBooking, setMyBookings, setOwnerIncomingRequests, setError} = bookingSlice.actions;
 
 export default bookingSlice.reducer;
