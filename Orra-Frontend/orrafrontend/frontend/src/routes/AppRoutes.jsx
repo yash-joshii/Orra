@@ -5,6 +5,7 @@ import Mainlayout from "@/layout/Mainlayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ProductCard from "@/components/common/ProductCard";
 import LogoLoader from "@/components/common/LogoLoader";
+import AdminRoutes from "./AdminRoutes";
 
 
 const LandingPage = lazy(() => import("@/pages/LandingPage"));
@@ -60,6 +61,7 @@ const AppRoutes = () => {
 
         <Route path="/dashboard" element={<Dashboard />} />
       </Route>
+      {AdminRoutes}
       <Route path="/mybookings" element={
         <ProtectedRoute>
           <MyBookings />
