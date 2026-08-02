@@ -28,14 +28,14 @@ const ProductDetails = ({ data, loading }) => {
   }, [data]);
   const userId = 1;
 
-  const images =
-    data?.images?.length > 0
-      ? data.images
-      : [
-          {
-            imageBase64: "https://placehold.co/800x500?text=No+Image",
-          },
-        ];
+ const images =
+  data?.images?.length > 0
+    ? data.images
+    : [
+        {
+          imageUrl: "https://placehold.co/800x500?text=No+Image",
+        },
+      ];
 
   const includedItems = data?.productspec || [
     "Camera Body",
@@ -83,7 +83,7 @@ const ProductDetails = ({ data, loading }) => {
       {/* Image */}
       <div className="relative">
         <LazyImage
-          src={images[selectedImage]?.imageBase64}
+          src={images[selectedImage]?.imageUrl}
           alt={data?.productName}
           className="w-full h-[500px] rounded-3xl object-cover"
         />
@@ -112,7 +112,7 @@ const ProductDetails = ({ data, loading }) => {
         {images.map((img, index) => (
           <LazyImage
             key={img.id ?? index}
-            src={img.imageBase64}
+            src={img.imageUrl}
             alt=""
             onClick={() => setSelectedImage(index)}
             className={`w-20 h-20 rounded-xl object-cover cursor-pointer border-2 transition ${

@@ -59,10 +59,10 @@ const ProductCard = ({ data }) => {
       fetchWishlistStatus();
     }
   }, [data]);
-  const imageUrl =
-    data.images && data.images.length > 0
-      ? (data.images[0].imageBase64 ?? data.images[0]) // handles both cases
-      : "https://placehold.co/400x200?text=No+Image";
+const imageUrl =
+  data.images && data.images.length > 0
+    ? data.images[0].imageUrl
+    : "https://placehold.co/400x200?text=No+Image";
 
   const handleWishlist = async (e) => {
     e.stopPropagation();

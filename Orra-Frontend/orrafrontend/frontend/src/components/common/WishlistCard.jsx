@@ -6,10 +6,9 @@ import LazyImage from "./LazyImage";
 const WishlistCard = ({ data, onRemove }) => {
   const navigate = useNavigate();
 
-  const imageUrl =
-    data.images?.length > 0
-      ? data.images[0].imageBase64
-      : "https://placehold.co/180x180?text=No+Image";
+ const imageUrl =
+  data.images?.[0]?.imageUrl ||
+  "https://placehold.co/180x180?text=No+Image";
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-5 flex items-center justify-between hover:shadow-lg transition">
