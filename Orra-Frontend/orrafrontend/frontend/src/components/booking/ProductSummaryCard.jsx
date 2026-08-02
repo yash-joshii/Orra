@@ -3,20 +3,20 @@ import { Star, CheckCircle2 } from "lucide-react";
 import LazyImage from "../common/LazyImage";
 
 const ProductSummaryCard = ({ product }) => {
-  const imageUrl =
-    product?.imageUrl?.length > 0
-      ? product.imageUrl
-      : [
-          {
-            imageBase64: "https://placehold.co/800x500?text=No+Image",
-          },
-        ];
+
+  // Extract the string image URL accurately using the same structure as ProductCard
+  const rawImage = product?.images?.[0] || product?.imageUrl?.[0] || product?.imageUrl;
+
+const imageUrl =
+    typeof rawImage === "string"
+      ? rawImage
+      : rawImage?.imageBase64 || "https://placehold.co/800x500?text=No+Image";
   return (
     <div className="product-image-description flex flex-row gap-6">
       <div className="image w-40 h-40 bg-slate-900 rounded-2xl overflow-hidden shrink-0">
         <LazyImage
           src={imageUrl}
-          alt="Sony A7 IV"
+          alt={product?.productName || "Product image"}
           className="w-full h-full object-cover"
         />
       </div>
