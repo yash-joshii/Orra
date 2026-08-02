@@ -5,7 +5,7 @@ const BookingActionButtons = ({ currentBooking, grandTotal, onRequestBooking, on
 
   return (
     <div className="button flex flex-col gap-2.5 pt-2">
-      {!currentBooking || currentBooking.status === "REJECTED" ? (
+      {!currentBooking ? (
         <Button onClick={onRequestBooking} className={baseBtn}>
           Request to Book <span className="text-base font-normal">→</span>
         </Button>

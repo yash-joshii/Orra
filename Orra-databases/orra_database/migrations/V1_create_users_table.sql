@@ -3,11 +3,11 @@ CREATE TABLE users (
 
     fullname VARCHAR(100) NOT NULL,
 
-    username VARCHAR(100) NOT NULL,
+    username VARCHAR(100) NOT NULL UNIQUE,
 
     email VARCHAR(150) UNIQUE NOT NULL,
 
-    phone VARCHAR(15),
+    phone VARCHAR(15) UNIQUE,
 
     password VARCHAR(255) NOT NULL,
 
@@ -15,34 +15,37 @@ CREATE TABLE users (
 
     address TEXT,
 
-    roles TEXT[] NOT NULL DEFAULT ARRAY['BUYER'],
+    -- Supabase Auth User ID
+    supabase_id UUID UNIQUE NOT NULL,
 
     id_proof id_proof_enum NOT NULL,
 
-    -- Actual ID numbers
     pan_number VARCHAR(20),
+
     aadhaar_number VARCHAR(20),
 
-    is_verified BOOLEAN DEFAULT FALSE,
+    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    -- Validation logic (unchanged)
-    CHECK (
+    CONSTRAINT id_proof_validation CHECK (
         (id_proof = 'PAN' AND pan_number IS NOT NULL AND aadhaar_number IS NULL)
         OR
         (id_proof = 'AADHAAR' AND aadhaar_number IS NOT NULL AND pan_number IS NULL)
         OR
-        (id_proof = 'both' AND pan_number IS NOT NULL AND aadhaar_number IS NOT NULL)
-    ),
+        (id_proof = 'BOTH' AND pan_number IS NOT NULL AND aadhaar_number IS NOT NULL)
+    )
+);
 
-    -- Roles array constraints
-    CONSTRAINT roles_not_empty 
-        CHECK (array_length(roles, 1) > 0),
 
-    CONSTRAINT roles_valid_values 
-        CHECK (roles <@ ARRAY['BUYER','OWNER','ADMIN']::text[]),
+CREATE TABLE user_roles (
+    user_id BIGINT NOT NULL,
+    role app_user_role_enum NOT NULL,
 
-    CONSTRAINT roles_must_include_buyer 
-        CHECK ('BUYER' = ANY(roles))
+    PRIMARY KEY (user_id, role),
+
+    CONSTRAINT fk_user_roles_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
 );

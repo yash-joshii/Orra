@@ -32,4 +32,11 @@ public interface ProductListRepository extends JpaRepository<ProductList, Long> 
             "LOWER(p.category) LIKE LOWER(CONCAT(:keyword, '%')) OR " +
             "LOWER(p.brand) LIKE LOWER(CONCAT(:keyword, '%'))")
     List<ProductList> searchProducts(@Param("keyword") String keyword);
+
+//     long countByOwner_IdAndIsActiveTrue(Long ownerId);
+
+    List<ProductList> findByIsAvailableTrueAndIsActiveTrue();
+
+//     List<ProductList> findByOwner_IdAndIsActiveTrue(Long ownerId);
+
 }

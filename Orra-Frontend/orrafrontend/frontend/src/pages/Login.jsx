@@ -1,9 +1,12 @@
 import { GetCurrentUser, SignIn } from "@/api/authApi";
-import { setError, setLoading, setUser } from "@/redux/slices/authslices";
+// import { setError, setLoading, setUser } from "@/redux/slices/authslices";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from 'react-toastify';
+// import { GetCurrentUser, SignIn } from "@/api/authApi";
+import { setError, setLoading, setCredentials } from "@/redux/slices/authslices";
+// import { toast } from "sonner";
 
 const Login = () => {
   const [formData, setFormdata] = useState({
@@ -15,33 +18,32 @@ const Login = () => {
   const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  console.log(formData);
+    console.log(formData);
 
-  try {
-    dispatch(setLoading(true));
+    try {
+      dispatch(setLoading(true));
 
-    await SignIn(formData);
+      await SignIn(formData);
 
-    const meResponse = await GetCurrentUser();
-    dispatch(setUser(meResponse.data));
+      const meResponse = await GetCurrentUser();
+      dispatch(setCredentials({ user: meResponse.data }));
+      dispatch(setLoading(false));
 
-    dispatch(setLoading(false));
+      toast.success("Login Successful");
 
-    toast.success("Login Successful");
+      navigate("/");
+    } catch (error) {
+      dispatch(setLoading(false));
 
-    navigate("/");
-  } catch (error) {
-    dispatch(setLoading(false));
+      dispatch(setError(error.message));
 
-    dispatch(setError(error.message));
+      toast.error("Invalid Email or Password");
 
-    toast.error("Invalid Email or Password");
-
-    console.log(error);
-  }
-};
+      console.log(error);
+    }
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -147,9 +149,11 @@ const Login = () => {
 
           <p className="text-center mt-6 text-gray-500">
             Don't have an account?{" "}
-            <span className="text-[#544be9] font-medium cursor-pointer">
+            <Link
+              to="/signup"
+              className="text-[#544be9] font-medium cursor-pointer">
               Sign up
-            </span>
+            </Link>
           </p>
 
         </div>

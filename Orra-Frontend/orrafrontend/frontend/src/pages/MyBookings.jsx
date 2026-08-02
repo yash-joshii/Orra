@@ -1,161 +1,93 @@
-import React from 'react'
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-    Card,
-    CardAction,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { setMyBookings, setLoading, setError } from "@/redux/slices/bookingSlice"
+import { getMyBookings } from "@/api/bookingApi"
+
+import Navbar from "@/components/common/Navbar"
+import Footer from "@/components/common/Footer"
+import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-    Avatar,
-    AvatarBadge,
-    AvatarFallback,
-    AvatarImage,
-} from "@/components/ui/avatar"
-import { Calendar, LocateFixedIcon, LocateIcon, Map, MapIcon, MapPinIcon, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import LazyImage from '@/components/common/LazyImage'
+import MyBookingsCard from "@/components/common/MyBookingsCard"
 
 const MyBookings = () => {
-    return (<>
-        {/* Shadcn - tabs, cards, button, badge, avatar, lucide icons */}
+    const dispatch = useDispatch()
+    const { myBookings, loading, error } = useSelector((state) => state.booking)
+    const { user } = useSelector((state) => state.auth)
 
-        {/* Bookings Body */}
-        <div className = "bookings-body">
-            <h1 className = "absolute top-[80px] left-[390px] font-bold text-[30px]">My Bookings</h1>
-            <div className = "tabs-change-container absolute top-[150px] left-[385px] text-[#5650cc]">
-                <Tabs defaultValue="overview">
-                    <TabsList variant="line">
-                        <TabsTrigger value="active&upcoming">Active & Upcoming</TabsTrigger>
-                        <TabsTrigger value="AwaitingOwner">Awaiting Owner</TabsTrigger>
-                        <TabsTrigger value="completed">Completed</TabsTrigger>
-                        <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-                    </TabsList>
+    useEffect(() => {
+        if (!user?.id) return
 
-                    <TabsContent value="active&upcoming" className="flex flex-col mt-[20px] gap-[24px]">
+        const fetchBookings = async () => {
+            dispatch(setLoading(true))
+            try {
+                const response = await getMyBookings(user.id)
+                dispatch(setMyBookings(response.data))
+            } catch (err) {
+                dispatch(setError(err.message))
+            } finally {
+                dispatch(setLoading(false))
+            }
+        }
 
-                        <Card className="relative mx-auto w-[800px] h-[200px] flex-row items-center justify-between border-black">
-                            <div className="absolute inset-0 z-30 aspect-video" />
-                            <LazyImage
-                                src="/public/drone.avif"
-                                alt="Event cover"
-                                className="w-[240px] h-[130px] relative top-[0px] left-[38px] rounded-[20px]"
-                            />
-                            <CardHeader className="w-[500px] flex-col relative left-[35px] bottom-[0px] gap-[20px]">
-                                <div className="upcoming-currently-rented-unavailable">
-                                    {/* 
-                                        <Badge className="bg-blue-50 text-blue-700 dark:bg-blue-950 
-                                                    dark:text-blue-300 text-[15px] font-bold">
-                                            Upcoming
-                                        </Badge> 
-                                    */}
-                                    
-                                    <Badge className="bg-green-50 text-green-700 dark:bg-green-950 
-                                        dark:text-green-300 text-[15px] font-bold">
-                                        Currently Rented
-                                    </Badge>
-                                    {/* 
-                                        <Badge className="bg-red-50 text-red-700 dark:bg-red-950 
-                                            dark:text-red-300 text-[15px] font-bold">
-                                            Unavailable
-                                        </Badge> 
-                                    */}
-                                    
-                                </div>
+        fetchBookings()
+    }, [user?.id, dispatch])
 
-                                <div className="product-name-location-date">
-                                    <span className="text-[20px] font-bold">DJI Mavic 3 Pro Cinematic</span>
-                                    <div className="product-location-date flex justify-around align-baseline flex-row">
-                                        <span name="date !flex !flex-row !gap-2.5 !items-center !justify-center"> <Calendar className="w-3 h-3" /> Oct 12 - Oct, 2026</span>
-                                        <span name="location !flex !flex-row !gap-2.5 !items-center !justify-center"><MapPinIcon className="w-3 h-3" />  Pune, Maharashtra</span>
-                                    </div>
-                                </div>
+    const active = myBookings.filter(b => b.displayStatus === "ACTIVE")
+    const awaitingOwner = myBookings.filter(b => b.displayStatus === "PENDING")
+    const completed = myBookings.filter(b => b.displayStatus === "COMPLETED")
 
-                                <div className="owner-detail">
-                                    <div className="flex items-center gap-2 ">
-                                        <Avatar>
-                                            <AvatarImage src="/public/profile1.avif" alt="@shadcn" />
-                                        </Avatar>
-                                        <span>Rented from Alex D.</span>
-                                    </div>
-                                </div>
+    if (loading) return <p className="text-center py-10">Loading your bookings...</p>
+    if (error) return <p className="text-center py-10">Something went wrong: {error}</p>
 
-                            </CardHeader>
+    return (
+        <div className="flex flex-col min-h-screen">
+            {/* <Navbar /> */}
 
-                            <div className="flex-col mr-[25px] w-[260px]">
-                                <Button className="w-full h-[40px] rounded-[16px] bg-[#6a61fd]">Return Instructions</Button>
-                                <Button className="w-full h-[40px] rounded-[16px] mt-[10px] bg-[#fff] text-black border
-                                 border-slate-300">
-                                    Message Owner</Button>
-                            </div>
+            <main className="flex-grow max-w-[1200px] w-full mx-auto px-6 py-8">
+                <h1 className="font-bold text-[30px] mb-6">My Bookings</h1>
 
-                        </Card>
+                <div className="tabs-change-container text-[#5650cc]">
+                    <Tabs defaultValue="active_upcoming">
+                        <TabsList variant="line">
+                            <TabsTrigger value="active_upcoming">Active</TabsTrigger>
+                            <TabsTrigger value="awaiting_owner">Awaiting Owner</TabsTrigger>
+                            <TabsTrigger value="completed">Completed</TabsTrigger>
+                        </TabsList>
 
-                        <Card className="relative mx-auto w-[800px] h-[200px] flex-row items-center justify-between">
-                            <div className="absolute inset-0 z-30 aspect-video" />
-                            <LazyImage
-                                src="/public/drone.avif"
-                                alt="Event cover"
-                                className="w-[240px] h-[130px] relative top-[0px] left-[38px] rounded-[20px]"
-                            />
-                            <CardHeader className="w-[500px] flex-col relative left-[35px] bottom-[0px] gap-[20px]">
-                                <div className="upcoming-currently-rented-unavailable">
-                                    <Badge className="bg-blue-50 text-blue-700 dark:bg-blue-950 
-                                                dark:text-blue-300 text-[15px] font-bold">
-                                        Upcoming
-                                    </Badge>
-                                    {/* 
-                                    <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
-                                        Currently Rented
-                                    </Badge>
-                                    <Badge className="bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">
-                                        Unavailable
-                                    </Badge> 
-                                */}
-                                </div>
+                        <TabsContent value="active_upcoming" className="flex flex-col mt-6 gap-6">
+                            {active.map((booking) => (
+                                <MyBookingsCard key={booking.bookingId} booking={booking} />
+                            ))}
 
-                                <div className="product-name-location-date">
-                                    <span className="text-[20px] font-bold">DJI Mavic 3 Pro Cinematic</span>
-                                    <div className="product-location-date flex">
-                                        <span name="date">Oct 12 - Oct, 2026</span>
-                                        <span name="location"> Pune, Maharashtra</span>
-                                    </div>
-                                </div>
+                            <Card className="mx-auto w-full max-w-[800px] p-6 flex flex-col items-center justify-center bg-[#f0f0ff] gap-3">
+                                <h2 className="text-[22px] font-bold">Need more gear?</h2>
+                                <span className="text-[16px] text-center">Explore thousands of premium electronics available in your area.</span>
+                                <a href='#' className="text-[#5650cc] flex items-center gap-1 font-bold">
+                                    Browse Marketplace <ArrowRight className="w-4 h-4" />
+                                </a>
+                            </Card>
+                        </TabsContent>
 
-                                <div className="owner-detail">
-                                    <div className="flex items-center gap-2 ">
-                                        <Avatar>
-                                            <AvatarImage src="/public/profile1.avif" alt="@shadcn" />
-                                        </Avatar>
-                                        <span>Rented from Alex D.</span>
-                                    </div>
-                                </div>
+                        <TabsContent value="awaiting_owner" className="flex flex-col mt-6 gap-6">
+                            {awaitingOwner.map((booking) => (
+                                <MyBookingsCard key={booking.bookingId} booking={booking} />
+                            ))}
+                        </TabsContent>
 
-                            </CardHeader>
+                        <TabsContent value="completed" className="flex flex-col mt-6 gap-6">
+                            {completed.map((booking) => (
+                                <MyBookingsCard key={booking.bookingId} booking={booking} />
+                            ))}
+                        </TabsContent>
+                    </Tabs>
+                </div>
+            </main>
 
-                            <div className="flex-col mr-[25px] w-[260px]">
-                                <Button className="w-full h-[40px] rounded-[16px]">View Details</Button>
-                            </div>
-
-                        </Card>
-
-                        <Card className="relative mx-auto w-[800px] h-[170px] flex-col items-center justify-evenly bg-[#f0f0ff]">
-
-                            <h1 className="text-[22px] font-bold relative top-[20px]">Need more gear?</h1>
-                            <span className="text-[16px]">Explore thousands of premium electronics available in your area.</span>
-                            <a href='#' className="text-[#5650cc] mb-[25px] flex gap-1 font-bold">Browse Marketplace<ArrowRight /></a>
-
-                        </Card>
-
-                    </TabsContent>
-                </Tabs>
-            </div>
+            {/* <Footer /> */}
         </div>
-
-    </>)
+    )
 };
 
 export default MyBookings;
