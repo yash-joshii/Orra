@@ -7,7 +7,8 @@ import { CalendarDays } from "lucide-react";
 const RentalDatePicker = ({
   startDate, endDate, setStartDate, setEndDate,
   startOpen, setStartOpen, endOpen, setEndOpen, rentalDays,
-}) => (
+}) => {
+  return(
   <div className="space-y-4">
     <h3 className="text-base font-bold text-slate-950 flex items-center gap-2">
       <CalendarDays className="w-5 h-5 text-indigo-600" /> Rental Dates
@@ -50,7 +51,7 @@ const RentalDatePicker = ({
     <div className="rental-days-left bg-indigo-50/60 rounded-xl p-3.5 border border-indigo-50">
       <span className="text-sm font-semibold text-indigo-700">Total rental duration: {rentalDays} days</span>
     </div>
-  </div>
-);
+  </div>)
+};
 
 export default RentalDatePicker;

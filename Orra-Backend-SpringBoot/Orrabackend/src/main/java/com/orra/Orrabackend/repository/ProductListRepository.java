@@ -24,7 +24,6 @@ public interface ProductListRepository extends JpaRepository<ProductList, Long> 
     long countByOwnerId(Long ownerId);
     long countByOwner_IdAndIsActiveTrue(Long ownerId);
     List<ProductList> findByOwner_IdAndIsActiveTrue(Long ownerId);
-
     long countByApprovalStatus(ListingStatus approvalStatus);                              // ADD
     Page<ProductList> findByApprovalStatus(ListingStatus approvalStatus, Pageable pageable); // ADD
 

@@ -7,42 +7,35 @@ import {
   removeFromWishlist,
   checkWishlist,
 } from "@/api/wishlist";
+import LazyImage from "../common/LazyImage";
+import ProductDetailsSkeleton from "./ProductDetailsSkeleton";
 
-const ProductDetails = ({ data }) => {
+const ProductDetails = ({ data, loading }) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
-useEffect(() => {
-  if (!data?.productId) return;
+  useEffect(() => {
+    if (!data?.productId) return;
 
-  const fetchWishlistStatus = async () => {
-    try {
-      const response = await checkWishlist(userId, data.productId);
-      setIsWishlisted(response.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-const handleWishlist = async () => {
-  try {
-    if (isWishlisted) {
-      await removeFromWishlist(userId, data.productId);
-      setIsWishlisted(false);
-    } else {
-      await addToWishlist(userId, data.productId);
-      setIsWishlisted(true);
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
-  fetchWishlistStatus();
-}, [data]);
-const userId = 1;
+    const fetchWishlistStatus = async () => {
+      try {
+        const response = await checkWishlist(userId, data.productId);
+        setIsWishlisted(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchWishlistStatus();
+  }, [data]);
+  const userId = 1;
 
   const images =
     data?.images?.length > 0
       ? data.images
-      : ["https://placehold.co/800x500?text=No+Image"];
+      : [
+          {
+            imageBase64: "https://placehold.co/800x500?text=No+Image",
+          },
+        ];
 
   const includedItems = data?.productspec || [
     "Camera Body",
@@ -62,52 +55,51 @@ const userId = 1;
         .filter((item) => item.length > 0)
     : [];
 
+  const handleWishlist = async (e) => {
+    e.stopPropagation();
 
-    const handleWishlist = async (e) => {
-        e.stopPropagation();
-    
-        console.log("Heart clicked");
-        console.log("Product ID:", data.productId);
-    
-        try {
-          if (liked) {
-            await removeFromWishlist(userId, data.productId);
-            setLiked(false);
-            console.log("Removed from wishlist");
-          } else {
-            await addToWishlist(userId, data.productId);
-            setLiked(true);
-            console.log("Added to wishlist");
-          }
-        } catch (error) {
-          console.error("Wishlist Error:", error.response?.data || error.message);
-        }
-      };
+    console.log("Heart clicked");
+    console.log("Product ID:", data.productId);
 
+    try {
+      if (isWishlisted) {
+        await removeFromWishlist(userId, data.productId);
+        setIsWishlisted(false);
+        console.log("Removed from wishlist");
+      } else {
+        await addToWishlist(userId, data.productId);
+        setIsWishlisted(true);
+        console.log("Added to wishlist");
+      }
+    } catch (error) {
+      console.error("Wishlist Error:", error.response?.data || error.message);
+    }
+  };
+  if (loading) {
+    return <ProductDetailsSkeleton />;
+  }
   return (
     <div className="max-w-5xl mx-auto px-5 py-10">
       {/* Image */}
       <div className="relative">
-        <img
+        <LazyImage
           src={images[selectedImage]?.imageBase64}
           alt={data?.productName}
           className="w-full h-[500px] rounded-3xl object-cover"
         />
 
         <div className="absolute top-4 right-4 flex gap-2">
-         <button
-  onClick={handleWishlist}
-  className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition"
->
-  <Heart
-    size={20}
-    className={
-      isWishlisted
-        ? "fill-red-500 text-red-500"
-        : "text-gray-500"
-    }
-  />
-</button>
+          <button
+            onClick={handleWishlist}
+            className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition"
+          >
+            <Heart
+              size={20}
+              className={
+                isWishlisted ? "fill-red-500 text-red-500" : "text-gray-500"
+              }
+            />
+          </button>
 
           <button className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
             <Share2 size={18} />
@@ -118,7 +110,7 @@ const userId = 1;
       {/* Thumbnail */}
       <div className="flex gap-3 mt-4">
         {images.map((img, index) => (
-          <img
+          <LazyImage
             key={img.id ?? index}
             src={img.imageBase64}
             alt=""
