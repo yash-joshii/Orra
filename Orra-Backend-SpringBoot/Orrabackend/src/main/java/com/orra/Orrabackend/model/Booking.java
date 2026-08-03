@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Data
 @Entity
@@ -33,10 +34,10 @@ public class Booking {
     private ProductList listing;
 
     @Column(name = "start_datetime")
-    private Instant startDateTime;
+    private LocalDate startDateTime;
 
     @Column(name = "end_datetime")
-    private Instant endDateTime;
+    private LocalDate endDateTime;
 
     @Column(name = "total_price")
     private BigDecimal totalPrice;

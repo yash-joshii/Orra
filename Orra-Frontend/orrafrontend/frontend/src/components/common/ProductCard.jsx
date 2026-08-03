@@ -1,7 +1,9 @@
-import React from "react";
+
+    
+    import React from "react";
+// import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -9,12 +11,8 @@ import {
   removeFromWishlist,
   checkWishlist,
 } from "@/api/wishlist";
-import {
-  isInGuestWishlist,
-  addGuestWishlistItem,
-  removeGuestWishlistItem,
-} from "@/utils/guestWishlist";
-
+import { useDispatch, useSelector } from "react-redux";
+import { setSelectedProduct } from "@/redux/slices/productslices";
 import {
   Card,
   CardAction,
@@ -32,97 +30,89 @@ import {
   Verified,
   VerifiedIcon,
   Eye,
-  Heart
+  Heart,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import LazyImage from "./LazyImage";
+//import { useSelector } from "react-redux";
 
 const ProductCard = ({ data }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  console.log("images →", data.images);
   const [liked, setLiked] = useState(false);
 
-  const { user } = useSelector((state) => state.auth) || {};
-  const userId = user?.userId ?? user?.id;
-  const isLoggedIn = Boolean(userId);
+  const currentUserId = useSelector((state) => state.auth.user?.userId);
+  const isOwner = currentUserId === data.owner?.userId;
 
+  // Temporary userId
+  const userId = 1;
   useEffect(() => {
-    if (!data?.productId) return;
+    const fetchWishlistStatus = async () => {
+      try {
+        const response = await checkWishlist(userId, data.productId);
+        setLiked(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
-    if (isLoggedIn) {
-      // Logged-in: check wishlist status from the backend
-      const fetchWishlistStatus = async () => {
-        try {
-          const response = await checkWishlist(userId, data.productId);
-          setLiked(response.data);
-        } catch (error) {
-          console.error(error);
-        }
-      };
+    if (data?.productId) {
       fetchWishlistStatus();
-    } else {
-      // Guest: check localStorage instead
-      setLiked(isInGuestWishlist(data.productId));
     }
-  }, [data, isLoggedIn, userId]);
-
-  const imageUrl =
-    data.images && data.images.length > 0
-      ? data.images[0].imageBase64 ?? data.images[0]
-      : "https://placehold.co/400x200?text=No+Image";
+  }, [data]);
+const imageUrl =
+  data.images && data.images.length > 0
+    ? data.images[0].imageUrl
+    : "https://placehold.co/400x200?text=No+Image";
 
   const handleWishlist = async (e) => {
     e.stopPropagation();
 
-    if (isLoggedIn) {
-      // Logged-in flow: hits the backend, same as before
-      try {
-        if (liked) {
-          await removeFromWishlist(userId, data.productId);
-          setLiked(false);
-        } else {
-          await addToWishlist(userId, data.productId);
-          setLiked(true);
-        }
-      } catch (error) {
-        console.error("Wishlist Error:", error.response?.data || error.message);
-      }
-    } else {
-      // Guest flow: localStorage only, no API call
+    console.log("Heart clicked");
+    console.log("Product ID:", data.productId);
+
+    try {
       if (liked) {
-        removeGuestWishlistItem(data.productId);
+        await removeFromWishlist(userId, data.productId);
         setLiked(false);
+        console.log("Removed from wishlist");
       } else {
-        addGuestWishlistItem(data.productId);
+        await addToWishlist(userId, data.productId);
         setLiked(true);
+        console.log("Added to wishlist");
       }
+    } catch (error) {
+      console.error("Wishlist Error:", error.response?.data || error.message);
     }
   };
-
   return (
     <Card className="relative group w-[30%] h-[50%] rounded-[25px]  pt-0 shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-y-1 hover:shadow-xl hover:cursor-pointer">
       <div className="relative ">
         <div className="absolute inset-0 z-10 aspect-video bg-black/35" />
 
-        <img
+        <LazyImage
           src={imageUrl}
+          alt={data.productName}
           className="relative z-20 aspect-[4/3] w-full object-cover brightness-60 dark:brightness-40"
         />
         <div
           className="btn flex pl-[10px] gap-[4px] w-[40%]  opacity-0 invisible group-hover:visible group-hover:opacity-100 transition duration-200  bg-white none absolute z-20 p-[2%] rounded-[19px] font-[12px] text-center bottom-[38%] left-[35%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)]  "
           onClick={(e) => {
             e.stopPropagation();
+            dispatch(setSelectedProduct(data));
             navigate(`/product/${data.productId}`);
           }}
         >
           <Eye className="w-4 h-4 text-center mt-[2px]" /> Quick view
         </div>
         <div
-  onClick={handleWishlist}
-  className="btn bg-white absolute z-20 w-[9%] p-[1.5%] rounded-full font-medium text-center top-[2%] right-[2%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)] cursor-pointer flex items-center justify-center"
->
+          onClick={handleWishlist}
+          className="btn bg-white absolute z-20 w-[9%] p-[1.5%] rounded-full font-medium text-center top-[2%] right-[2%] shadow-[0px_10px_20px_rgba(0,0,0,0.19),0px_6px_6px_rgba(0,0,0,0.23)] cursor-pointer flex items-center justify-center"
+        >
           <Heart
-            className={`w-5 h-5 transition ${
-              liked ? "fill-red-500 text-red-500" : "text-gray-600"
-            }`}
+            className={`w-5 h-5 transition ${liked ? "fill-red-500 text-red-500" : "text-gray-600"
+              }`}
           />
         </div>
       </div>
@@ -150,7 +140,7 @@ const ProductCard = ({ data }) => {
         />
         <div className="ownername">
           <span className="flex gap-[7px] text-[13px] text-gray-500 font-medium items-center">
-          {data.owner?.name || "Unknown Owner"}
+            {data.owner?.name || "Unknown Owner"}
             <CheckCircle2 className="w-3.5 h-3.5 !text-green-500" />
           </span>
         </div>
@@ -163,15 +153,22 @@ const ProductCard = ({ data }) => {
             <span className="text-[10px] text-gray-300 mt-[16%]"> /day</span>
           </span>
         </div>
-        <div className="bookbtn mr-[2%]">
-          <button onClick={() => navigate(`/booking/${data.productId}`)}
-          className="bg-black w-[100%] h-[10%] p-2 rounded-[12px] shadow-[rgba(50,50,93,0.25)_0px_2px_5px_-1px,rgba(0,0,0,0.3)_0px_1px_3px_-1px] cursor-pointer hover:bg-[#5650cc] ">
-            {" "}
-            <Calendar className="text-white w-4 h-4" />{" "}
-          </button>
-        </div>
+        
+        {!isOwner && (
+          <div className="bookbtn mr-[2%]">
+            <button
+              onClick={() => navigate(`/booking/${data.productId}`)}
+              className="bg-black w-[100%] h-[10%] p-2 rounded-[12px] shadow-[rgba(50,50,93,0.25)_0px_2px_5px_-1px,rgba(0,0,0,0.3)_0px_1px_3px_-1px] cursor-pointer hover:bg-[#5650cc]"
+            >
+              <Calendar className="text-white w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+
       </div>
-    </Card>
+    {/* </div> */}
+    </Card >
   );
 };
 

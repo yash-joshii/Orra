@@ -1,71 +1,176 @@
+import React, { lazy, Suspense, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
-import SearchResults from "@/pages/SearchResults";
+import { useDispatch } from "react-redux";
+
+import {
+  clearCredentials,
+  setCredentials,
+} from "@/redux/slices/authslices";
+
+import { GetCurrentUser } from "@/api/authApi";
+
+// Layout & Components
 import Mainlayout from "@/layout/Mainlayout";
-import Booking from "@/pages/Bookings";
-import BrowseDevices from "@/pages/BrowseDevices";
-
-import LandingPage from "@/pages/LandingPage";
-import ListingDevice from "@/pages/ListingDevice";
-import Login from "@/pages/Login";
-import Productpage from "@/pages/Productpage";
-import Signup from "@/pages/Signup";
-// import WhyChooseOrra from "@/pages/WhyChooseOrra";
-import React from "react";
-import Wishlist from "@/pages/Wishlist";
-
-import Categories from "@/pages/Categories";
-
-import SettingPage from "@/pages/SettingPage";
-import Dashboard from "@/pages/Dashboard";
-
-import ProductCard from "@/components/common/ProductCard";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Bookings from "@/pages/Bookings";
-import MyBookings from "@/pages/MyBookings";
-import ProfilePage from "@/pages/ProfilePage";
-// import { Route, Routes } from "react-router-dom";
+import LogoLoader from "@/components/common/LogoLoader";
+
+// Routes
+import AdminRoutes from "./AdminRoutes";
+
+// Pages
+import Cart from "@/pages/Cart";
+
+// Lazy-loaded pages
+const LandingPage = lazy(() => import("@/pages/LandingPage"));
+const BrowseDevices = lazy(() => import("@/pages/BrowseDevices"));
+const ListingDevice = lazy(() => import("@/pages/ListingDevice"));
+const Productpage = lazy(() => import("@/pages/Productpage"));
+const Wishlist = lazy(() => import("@/pages/Wishlist"));
+const Categories = lazy(() => import("@/pages/Categories"));
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const SettingPage = lazy(() => import("@/pages/SettingPage"));
+const Signup = lazy(() => import("@/pages/Signup"));
+const Login = lazy(() => import("@/pages/Login"));
+const Bookings = lazy(() => import("@/pages/Bookings"));
+const MyBookings = lazy(() => import("@/pages/MyBookings"));
 
 const AppRoutes = () => {
+  const dispatch = useDispatch();
+
+  // Restore logged-in user when app starts
+  useEffect(() => {
+    const rehydrateAuth = async () => {
+      try {
+        const response = await GetCurrentUser();
+
+        console.log("GetCurrentUser response:", response.data);
+
+        dispatch(
+          setCredentials({
+            user: {
+              userId: response.data.userId,
+              roles: response.data.roles,
+            },
+          })
+        );
+      } catch (error) {
+        console.error("Authentication failed:", error);
+        dispatch(clearCredentials());
+      }
+    };
+
+    rehydrateAuth();
+  }, [dispatch]);
+
   return (
-    <Routes>
-      <Route element={<Mainlayout />}>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/browserdevices" element={<BrowseDevices />}
+    <Suspense fallback={<LogoLoader />}>
+      <Routes>
+
+        {/* =========================
+            MAIN LAYOUT ROUTES
+        ========================= */}
+        <Route element={<Mainlayout />}>
+
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+
+          <Route
+            path="/browserdevices"
+            element={<BrowseDevices />}
+          />
+
+          <Route
+            path="/listingdevice"
+            element={<ListingDevice />}
+          />
+
+          <Route
+            path="/product/:id"
+            element={<Productpage />}
+          />
+
+          <Route
+            path="/categories"
+            element={<Categories />}
+          />
+
+          <Route
+            path="/cart"
+            element={<Cart />}
+          />
+
+          {/* =========================
+              PROTECTED ROUTES
+          ========================= */}
+
+          <Route
+            path="/wishlist"
+            element={
+              <ProtectedRoute>
+                <Wishlist />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/booking/:id"
+            element={
+              <ProtectedRoute>
+                <Bookings />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/mybookings"
+            element={
+              <ProtectedRoute>
+                <MyBookings />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+        </Route>
+
+        {/* =========================
+            ADMIN ROUTES
+        ========================= */}
+        {AdminRoutes}
+
+        {/* =========================
+            AUTH ROUTES
+        ========================= */}
+
+        <Route
+          path="/signup"
+          element={<Signup />}
         />
-        <Route path="/listingdevice" element={<ListingDevice />} />
-        <Route path="/product/:id" element={<Productpage />} />
-        <Route path="/settings" element={<SettingPage />} />
-        <Route path="/product/:id" element={<Productpage />} />
-        <Route path="/categories" element={<Categories />} />
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        } />
-        <Route path="/booking/:id" element={
-          <ProtectedRoute>
-            <Bookings />
-          </ProtectedRoute>
-        } />
 
-        {/* <Route path="/mybookings" element={
-          <ProtectedRoute>
-        <MyBookings/>
-          </ProtectedRoute>
-          } /> */}
+        <Route
+          path="/login"
+          element={<Login />}
+        />
 
-        <Route path="/dashboard" element={<Dashboard />} />
-      </Route>
-      <Route path="/mybookings" element={
-        <ProtectedRoute>
-          <MyBookings />
-        </ProtectedRoute>
-      } />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/product" element={<ProductCard />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 };
 

@@ -6,12 +6,15 @@ import com.orra.Orrabackend.enums.UserRole;
 import com.orra.Orrabackend.exception.UserNotFoundException;
 import com.orra.Orrabackend.model.User;
 import com.orra.Orrabackend.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
 
 @Service
 public class UserService {
@@ -38,6 +41,7 @@ public class UserService {
     }
 
     public void grantOwnerRole(Long userId) {
+
         User user = repo.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
@@ -56,7 +60,9 @@ public class UserService {
         user.setPhone(dto.getPhone());
 //        user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setSupabaseId(UUID.fromString(dto.getSupabaseUserId()));
-        user.setRoles(Set.of(UserRole.BUYER));   // default — matches your "everyone starts BUYER" rule
+        user.setRoles(new HashSet<>());
+
+        user.setRoles(new HashSet<>(Set.of(UserRole.BUYER)));  // default — matches your "everyone starts BUYER" rule
         user.setAddress("NA");                    // temporary
 
         user.setIdProof(UserIdProof.NONE);

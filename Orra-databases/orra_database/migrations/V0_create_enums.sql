@@ -1,7 +1,7 @@
-CREATE TYPE user_role_enum AS ENUM(
+CREATE TYPE app_user_role_enum AS ENUM (
+    'BUYER',
     'OWNER',
-    'RENTER',
-    'BOTH'
+    'ADMIN'
 );
 
 CREATE TYPE id_proof_enum AS ENUM(
@@ -13,10 +13,12 @@ CREATE TYPE id_proof_enum AS ENUM(
 
 CREATE TYPE booking_status-enum AS ENUM(
     'PENDING',
-    'CONFIRMED',
-    'ACTIVE',
+    'ACCEPTED',
+    'REJECTED',
+    'PAID',
+    'SHIPPED',
     'COMPLETED',
-    'DISPUTED',
+    'REFUNDED',
     'CANCELLED'
 );
 
@@ -31,4 +33,25 @@ CREATE TYPE transaction_status_enum AS ENUM(
     'PENDING',
     'SUCCESS',
     'FAILED'
+);
+
+CREATE TYPE category_enum AS ENUM (
+    'LAPTOP',
+    'CAMERA',
+    'GAMING_CONSOLES',
+    'DRONES',
+    'MOBILE',
+    'SMART_WATCHES',
+    'AUDIO_DEVICES',
+    'MONITORS',
+    'VR_AR',
+    'LENSES',
+    'LIGHTING',
+    'ACTION_CAMERAS',
+    'PROJECTORS',
+    'MICROPHONES',
+    'TABLETS',
+    'ACCESSORIES',
+    'REFRIGERATOR',
+    'TV'
 );

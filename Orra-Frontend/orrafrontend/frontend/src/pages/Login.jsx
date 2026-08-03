@@ -3,8 +3,11 @@ import { setError, setLoading, setUser } from "@/redux/slices/authslices";
 import { syncWishlistOnLogin } from "@/utils/syncWishlist";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from 'react-toastify';
+// import { GetCurrentUser, SignIn } from "@/api/authApi";
+//import { setError, setLoading, setCredentials } from "@/redux/slices/authslices";
+// import { toast } from "sonner";
 
 const Login = () => {
   const [formData, setFormdata] = useState({
@@ -16,37 +19,37 @@ const Login = () => {
   const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  console.log(formData);
+    console.log(formData);
 
-  try {
-    dispatch(setLoading(true));
+    try {
+      dispatch(setLoading(true));
 
-    await SignIn(formData);
+      await SignIn(formData);
 
-    const meResponse = await GetCurrentUser();
-    dispatch(setUser(meResponse.data));
+      const meResponse = await GetCurrentUser();
+      dispatch(setCredentials({ user: meResponse.data }));
+      dispatch(setLoading(false));
 
     // Merge any guest wishlist items (added before login) into the DB
     const loggedInUserId = meResponse.data?.userId ?? meResponse.data?.id;
     await syncWishlistOnLogin(loggedInUserId);
 
     dispatch(setLoading(false));
+      toast.success("Login Successful");
 
-    toast.success("Login Successful");
+      navigate("/");
+    } catch (error) {
+      dispatch(setLoading(false));
 
-    navigate("/");
-  } catch (error) {
-    dispatch(setLoading(false));
+      dispatch(setError(error.message));
 
-    dispatch(setError(error.message));
+      toast.error("Invalid Email or Password");
 
-    toast.error("Invalid Email or Password");
-
-    console.log(error);
-  }
-};
+      console.log(error);
+    }
+  };
 
   return (
     <div className="min-h-screen flex">
@@ -66,12 +69,6 @@ const Login = () => {
           <button className="w-full border border-gray-200 rounded-2xl py-4 mb-4 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08),0_0px_4px_rgba(0,0px_4px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_-4px_rgba(0,0,0,0.12),0_4px_8px_rgba(0,0,0,0.05)]">
             <img src="/public/google.svg" alt="Google" className="w-5 h-5" />
             <span className="font-medium">Continue with Google</span>
-          </button>
-
-          {/* Apple Button */}
-          <button className="w-full border border-gray-200 rounded-2xl py-4 mb-6 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08),0_0px_4px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_-4px_rgba(0,0,0,0.12),0_4px_8px_rgba(0,0,0,0.05)]">
-            <img src="/public/apple.svg" alt="Apple" className="w-5 h-5" />
-            <span className="font-medium">Continue with Apple</span>
           </button>
 
           {/* Divider */}
@@ -152,9 +149,11 @@ const Login = () => {
 
           <p className="text-center mt-6 text-gray-500">
             Don't have an account?{" "}
-            <span className="text-[#544be9] font-medium cursor-pointer">
+            <Link
+              to="/signup"
+              className="text-[#544be9] font-medium cursor-pointer">
               Sign up
-            </span>
+            </Link>
           </p>
 
         </div>

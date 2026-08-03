@@ -17,22 +17,30 @@ const ActionCenter = () => {
   const [toShip, setToShip] = useState([]);
   const [shipLoading, setShipLoading] = useState(true);
 
-  useEffect(() => {
-    fetchIncomingRequests();
-    // fetchToShip();
-  }, [user]);
+useEffect(() => {
+  if (!user || !user.userId) {
+    setLoading(false);
+    return;
+  }
 
-  const fetchIncomingRequests = async () => {
-    try {
-      setLoading(true);
-      const response = await getIncomingRequests(user.userId);
-      setRequests(response.data);
-    } catch (error) {
-      console.error("Failed to fetch incoming requests:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  fetchIncomingRequests();
+}, [user]);
+
+const fetchIncomingRequests = async () => {
+  if (!user?.userId) return;
+
+  try {
+    setLoading(true);
+
+    const response = await getIncomingRequests(user.userId);
+
+    setRequests(response.data);
+  } catch (error) {
+    console.error("Failed to fetch incoming requests:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // const fetchToShip = async () => {
   //   try {
@@ -75,58 +83,58 @@ const ActionCenter = () => {
   // };
 
   return (
-    <Card className="w-full max-w-sm rounded-3xl p-6 shadow-sm border border-slate-100">
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-6">
-        <Bell className="h-6 w-6 text-slate-900" />
-        <h2 className="text-xl font-bold text-slate-900">Action Center</h2>
-      </div>
+      <Card className="w-full max-w-sm rounded-3xl p-6 shadow-sm border border-slate-100">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-6">
+          <Bell className="h-6 w-6 text-slate-900" />
+          <h2 className="text-xl font-bold text-slate-900">Action Center</h2>
+        </div>
 
-      {/* Section 1: Booking Requests */}
-      <div className="space-y-4">
-        {loading ? (
-          <p className="text-sm text-slate-400">Loading requests...</p>
-        ) : requests.length === 0 ? (
-          <p className="text-sm text-slate-400">No pending requests.</p>
-        ) : (
-          requests.map((booking) => (
-            <div
-              key={booking.bookingId}
-              className="rounded-2xl border border-orange-200 bg-orange-50/30 p-4 space-y-3"
-            >
-              <div className="flex justify-between items-center text-xs font-semibold">
-                <span className="text-orange-600 tracking-wider">BOOKING REQUEST</span>
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900 text-lg">{booking.listingTitle}</h3>
-                <p className="text-sm text-slate-500">
-                  {new Date(booking.startDateTime).toLocaleDateString("en-GB")} -{" "}
-                  {new Date(booking.endDateTime).toLocaleDateString("en-GB")} • $
-                  {booking.totalPrice} total
-                </p>
-              </div>
-              <div className="flex gap-3 pt-1">
-                <Button
-                  onClick={() => handleAccept(booking.bookingId)}
-                  className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-5"
-                >
-                  Approve
-                </Button>
-                <Button
-                  onClick={() => handleDecline(booking.bookingId)}
-                  variant="outline"
-                  className="flex-1 rounded-xl py-5 border-slate-200 text-slate-800"
-                >
-                  Decline
-                </Button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+        {/* Section 1: Booking Requests */}
+        <div className="space-y-4">
+          {loading ? (
+              <p className="text-sm text-slate-400">Loading requests...</p>
+          ) : requests.length === 0 ? (
+              <p className="text-sm text-slate-400">No pending requests.</p>
+          ) : (
+              requests.map((booking) => (
+                  <div
+                      key={booking.bookingId}
+                      className="rounded-2xl border border-orange-200 bg-orange-50/30 p-4 space-y-3"
+                  >
+                    <div className="flex justify-between items-center text-xs font-semibold">
+                      <span className="text-orange-600 tracking-wider">BOOKING REQUEST</span>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 text-lg">{booking.listingTitle}</h3>
+                      <p className="text-sm text-slate-500">
+                        {new Date(booking.startDateTime).toLocaleDateString("en-GB")} -{" "}
+                        {new Date(booking.endDateTime).toLocaleDateString("en-GB")} • $
+                        {booking.totalPrice} total
+                      </p>
+                    </div>
+                    <div className="flex gap-3 pt-1">
+                      <Button
+                          onClick={() => handleAccept(booking.bookingId)}
+                          className="flex-1 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-5"
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                          onClick={() => handleDecline(booking.bookingId)}
+                          variant="outline"
+                          className="flex-1 rounded-xl py-5 border-slate-200 text-slate-800"
+                      >
+                        Decline
+                      </Button>
+                    </div>
+                  </div>
+              ))
+          )}
+        </div>
 
-      {/* Section 2: Ready to Ship */}
-      {/* <div className="space-y-4">
+        {/* Section 2: Ready to Ship */}
+        {/* <div className="space-y-4">
         <h3 className="text-sm font-bold text-slate-900 tracking-wide">READY TO SHIP</h3>
         {shipLoading ? (
           <p className="text-sm text-slate-400">Loading...</p>
@@ -153,7 +161,7 @@ const ActionCenter = () => {
           ))
         )}
       </div> */}
-    </Card>
+      </Card>
   );
 };
 

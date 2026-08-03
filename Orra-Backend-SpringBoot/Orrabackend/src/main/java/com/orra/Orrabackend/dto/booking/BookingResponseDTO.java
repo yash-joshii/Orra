@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 
 @Data
@@ -32,8 +33,8 @@ public class BookingResponseDTO {
     private String renterName;
 
     //Booking Core Data
-    private Instant startDateTime;
-    private Instant endDateTime;
+    private LocalDate startDateTime;
+    private LocalDate endDateTime;
     private BigDecimal totalPrice;
     private BigDecimal depositAmount;
 

@@ -1,17 +1,17 @@
-import { listdevice } from '@/api/ListingFormapi';
-import Availability from '@/components/StepperFormForListing/Availability';
-import BasicDetails from '@/components/StepperFormForListing/BasicDetails';
-import PricingDetails from '@/components/StepperFormForListing/PricingDetails';
-import ProductDetails from '@/components/StepperFormForListing/ProductDetails';
-import SpeacificationInForm from '@/components/StepperFormForListing/SpeacificationInForm';
-import UploadPhoto from '@/components/StepperFormForListing/UploadPhoto';
+import { listdevice } from "@/api/ListingFormapi";
+import Availability from "@/components/StepperFormForListing/Availability";
+import BasicDetails from "@/components/StepperFormForListing/BasicDetails";
+import PricingDetails from "@/components/StepperFormForListing/PricingDetails";
+import ProductDetails from "@/components/StepperFormForListing/ProductDetails";
+import SpeacificationInForm from "@/components/StepperFormForListing/SpeacificationInForm";
+import UploadPhoto from "@/components/StepperFormForListing/UploadPhoto";
 
-
-import React, { useState } from 'react'
-
+import React, { useState } from "react";
+import { toast } from "react-toastify";
 
 const ListingDevice = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const today = new Date().toISOString().split("T")[0];
 
   const [formData, setFormData] = useState({
     basicDetails: {
@@ -41,65 +41,63 @@ const ListingDevice = () => {
     },
 
     availability: {
-      availableFrom: "",
+      availableFrom: today,
       availableTo: "",
       minimumRentalDays: "",
       maximumRentalDays: "",
     },
   });
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    const toNumber = (val) => (val === "" || val === null || val === undefined ? null : Number(val));
+    try {
+      const toNumber = (val) =>
+        val === "" || val === null || val === undefined ? null : Number(val);
 
-    const dto = {
-      product: {
-        productName: formData.basicDetails.productName || null,
-        category: formData.basicDetails.category || null,
-        brand: formData.basicDetails.brand || null,
-        model: formData.basicDetails.model || null,
-        description: formData.basicDetails.description || null,
+      const dto = {
+        product: {
+          productName: formData.basicDetails.productName || null,
+          category: formData.basicDetails.category || null,
+          brand: formData.basicDetails.brand || null,
+          model: formData.basicDetails.model || null,
+          description: formData.basicDetails.description || null,
 
-        purchaseYear: toNumber(formData.productDetails.purchaseYear),
-        serialOrImei: formData.productDetails.serialorimei?.trim() || null,
-        location: formData.productDetails.location || null,
+          purchaseYear: toNumber(formData.productDetails.purchaseYear),
+          serialOrImei: formData.productDetails.serialorimei?.trim() || null,
+          location: formData.productDetails.location || null,
 
-        purchasePrice: toNumber(formData.pricing.purchasePrice),
-        securityDeposit: toNumber(formData.pricing.securityDeposit),
-        dailyRate: toNumber(formData.pricing.rentalPrice),
+          purchasePrice: toNumber(formData.pricing.purchasePrice),
+          securityDeposit: toNumber(formData.pricing.securityDeposit),
+          dailyRate: toNumber(formData.pricing.rentalPrice),
 
-        availableFrom: formData.availability.availableFrom
-          ? `${formData.availability.availableFrom}T00:00:00`
-          : null,
+          // Send plain dates
+          availableFrom: formData.availability.availableFrom || null,
+          availableTo: formData.availability.availableTo || null,
 
-        availableTo: formData.availability.availableTo
-          ? `${formData.availability.availableTo}T00:00:00`
-          : null,
+          minimumRentalDays: toNumber(formData.availability.minimumRentalDays),
+          maximumRentalDays: toNumber(formData.availability.maximumRentalDays),
 
-        minimumRentalDays: toNumber(formData.availability.minimumRentalDays),
-        maximumRentalDays: toNumber(formData.availability.maximumRentalDays),
+          productspec: formData.specifications.whatsIncluded || [],
+        },
 
-        productspec: formData.specifications.whatsIncluded || [],
-      },
+        images: formData.images.map((img) => img.imageBase64),
+      };
 
-      images: formData.images.map((img) => img.imageBase64),
-    };
+      console.log("FORM DATA");
+      console.log(formData);
 
-   console.log("FORM DATA");
-console.log(formData);
+      console.log("DTO");
+      console.log(JSON.stringify(dto, null, 2));
 
-console.log("DTO");
-console.log(JSON.stringify(dto, null, 2));
-
-    const response = await listdevice(dto);
-    console.log(response);
-
-  } catch (error) {
-    console.log(error);
-  }
-};
+      const response = await listdevice(dto);
+      console.log(response);
+      toast.success("Product is successfully added")
+    } catch (error) {
+      console.log(error);
+      toast.error("Product is failed to add")
+    }
+  };
 
   return (
     <>
@@ -156,8 +154,7 @@ console.log(JSON.stringify(dto, null, 2));
         />
       )}
     </>
-
   );
-}
+};
 
-export default ListingDevice
+export default ListingDevice;

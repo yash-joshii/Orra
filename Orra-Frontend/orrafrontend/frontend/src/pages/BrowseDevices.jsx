@@ -1,12 +1,11 @@
-import SearchBar from "@/components/common/SearchBar";
 import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { getAllProducts, searchProducts } from "@/api/listingApi";
+
+import SearchBar from "@/components/common/SearchBar";
 import FilterationSidebar from "@/components/common/FilterationSidebar";
 import ProductCard from "@/components/common/ProductCard";
-import { useDispatch, useSelector } from "react-redux";
+import LogoLoader from "@/components/common/LogoLoader";
 
-
+import { Button } from "@/components/ui/button";
 
 import {
   DropdownMenu,
@@ -14,16 +13,8 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-import {
-  setError,
-  setLoading,
-  setProducts,
-} from "@/redux/slices/productslices";
-
 
 import {
   Pagination,
@@ -34,97 +25,65 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { useNavigate, useSearchParams } from "react-router-dom";
+
+import { useSearchParams } from "react-router-dom";
+import useProduct from "@/hooks/useProduct";
+import ProductCardSkeleton from "@/components/common/ProductCardSkeleton";
 
 const BrowseDevices = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  
+  const { products, loading, error } = useProduct();
 
-  const products = useSelector((state) => state.products.products);
-
-  const loading = useSelector((state) => state.products.loading);
-
-  const error = useSelector((state) => state.products.error);
   const [search, setSearch] = useState("");
 
-  const [searchParams] = useSearchParams();
-  const categoryFilter = searchParams.get("category");
-
-  const filteredProducts = categoryFilter 
-    ? products?.filter((p) => p.category === categoryFilter)
-    : products;
-
-
-   console.log("products");
-  useEffect(() => {
-    fetchProduct();
-  }, []);
-
-  const fetchProduct = async () => {
-  try {
-    dispatch(setLoading(true));
-
-    const response = await getAllProducts();
-
-
-
-console.log("Status:", response.status);
-console.log("Data:", response.data);
-console.log("Is Array:", Array.isArray(response.data));
-    console.log("Base URL:", import.meta.env.VITE_SPRINGBOOT_API_URL);
-    console.log("Response:", response);
-    console.log("Response Data:", response.data);
-
-    dispatch(setProducts(response.data));
-    dispatch(setLoading(false));
-  } catch (error) {
-    console.error("API Error:", error);
-    dispatch(setLoading(false));
-    dispatch(setError(error.message));
-  }
-};
-  const handleSearch = async (value) => {
-  setSearch(value);
-
-  try {
-    if (value.trim() === "") {
-      fetchProduct();
-      return;
-    }
-
-    const response = await searchProducts(value);
-
-    dispatch(setProducts(response.data));
-    setCurrentPage(1);
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [categoryFilter]);
-
-  const ITEMS_PER_PAGE = 6;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil((filteredProducts?.length || 0) / ITEMS_PER_PAGE);
+  const [searchParams] = useSearchParams();
+
+  const categoryFilter = searchParams.get("category");
+
+  // Category Filter
+  const filteredProducts = categoryFilter
+    ? products.filter(
+        (item) =>
+          item.category?.toLowerCase() === categoryFilter.toLowerCase()
+      )
+    : products;
+
+  // Search Filter
+  const displayProducts = filteredProducts.filter((item) =>
+    item.productName?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryFilter, search]);
+
+  // Pagination
+  const ITEMS_PER_PAGE = 6;
+
+  const totalPages = Math.ceil(displayProducts.length / ITEMS_PER_PAGE);
+
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedProducts = filteredProducts?.slice(
+
+  const paginatedProducts = displayProducts.slice(
     startIndex,
-    startIndex + ITEMS_PER_PAGE,
+    startIndex + ITEMS_PER_PAGE
   );
 
   const goToPage = (page) => {
     if (page < 1 || page > totalPages) return;
+
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
-  
 
   const getPageNumbers = () => {
     const pages = [];
+
     for (let i = 1; i <= totalPages; i++) {
       if (
         i === 1 ||
@@ -136,35 +95,57 @@ console.log("Is Array:", Array.isArray(response.data));
         pages.push("ellipsis");
       }
     }
+
     return pages;
   };
-  console.log("Products:", products);
-console.log("Paginated:", paginatedProducts);
+
+  if (loading)   return (
+    <div className="bg-gray-200 py-8 px-6">
+      <div className="flex flex-wrap gap-[30px] justify-center">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <ProductCardSkeleton key={index} />
+        ))}
+      </div>
+    </div>
+  );
+
+  if (error)
+    return (
+      <div className="text-center text-red-500 py-10">{error}</div>
+    );
+
   return (
-    <div className="BrowseDevices-container w-full max-h-full">
-      <div className="upper-section-browdev w-full p-8 pl-[8.5%] h-[40%] ">
+    <div className="w-full">
+      {/* Top */}
+      <div className="w-full p-8 pl-[8.5%]">
         <h2 className="text-[40px] font-extrabold">Browse Devices</h2>
-        <div className="upper-sec-data flex flex-row justify-center ">
-          <div className="search-box mt-5 w-[70%]">
-           <SearchBar
-  value={search}
-  onChange={(e) => handleSearch(e.target.value)}
-  placeholder="Search gear..."
-  className="w-[97%]"
-/>
+
+        <div className="flex gap-4 mt-5">
+          <div className="w-[70%]">
+            <SearchBar
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="!w-full !p-[17px] !rounded-[10px] !text-[16px] !font-semibold"
+              placeholder="Search Devices..."
+            />
           </div>
-          <div className="bd-filter  mt-5 w-[30%]">
+
+          <div className="w-[30%]">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-[70%] p-7  ">
-                  SortBy: Recommanded
+                <Button variant="outline" className="w-full p-6">
+                  Sort By : Recommended
                 </Button>
               </DropdownMenuTrigger>
+
               <DropdownMenuContent>
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel>SortBy: Recommanded</DropdownMenuLabel>
-                  <DropdownMenuItem>Price: Low to High</DropdownMenuItem>
-                  <DropdownMenuItem>Price: high to low</DropdownMenuItem>
+                  <DropdownMenuLabel>Sort Options</DropdownMenuLabel>
+
+                  <DropdownMenuItem>Price : Low to High</DropdownMenuItem>
+
+                  <DropdownMenuItem>Price : High to Low</DropdownMenuItem>
+
                   <DropdownMenuItem>Highest Rated</DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
@@ -172,17 +153,19 @@ console.log("Paginated:", paginatedProducts);
           </div>
         </div>
       </div>
-      <div className="lower-section-browdev bg-gray-200 pt-8 pb-8 flex flex-row justify-center">
-        <div className="left-browdev w-[50%] pr-[2%]">
+
+      {/* Body */}
+      <div className="bg-gray-200 py-8 flex gap-6 px-6">
+        <div className="w-[25%]">
           <FilterationSidebar />
         </div>
-        <div className="rightbrowdev w-full min-h-full">
-          <div className="flex flex-wrap gap-[36px]">
-            {paginatedProducts?.map((item) => (
+
+        <div className="w-[75%]">
+          <div className="flex flex-wrap gap-[30px]">
+            {paginatedProducts.map((item, index) => (
               <ProductCard
-                key={item.productId}
+                key={item.productId ?? `product-${startIndex + index}`}
                 data={item}
-               
               />
             ))}
           </div>
@@ -192,26 +175,21 @@ console.log("Paginated:", paginatedProducts);
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious
-                    href="#"
                     onClick={(e) => {
                       e.preventDefault();
                       goToPage(currentPage - 1);
                     }}
-                    className={
-                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                    }
                   />
                 </PaginationItem>
 
-                {getPageNumbers().map((page, idx) =>
+                {getPageNumbers().map((page, index) =>
                   page === "ellipsis" ? (
-                    <PaginationItem key={`ellipsis-${idx}`}>
+                    <PaginationItem key={`ellipsis-${index}`}>
                       <PaginationEllipsis />
                     </PaginationItem>
                   ) : (
-                    <PaginationItem key={page}>
+                    <PaginationItem key={`page-${page}`}>
                       <PaginationLink
-                        href="#"
                         isActive={page === currentPage}
                         onClick={(e) => {
                           e.preventDefault();
@@ -221,21 +199,15 @@ console.log("Paginated:", paginatedProducts);
                         {page}
                       </PaginationLink>
                     </PaginationItem>
-                  ),
+                  )
                 )}
 
                 <PaginationItem>
                   <PaginationNext
-                    href="#"
                     onClick={(e) => {
                       e.preventDefault();
                       goToPage(currentPage + 1);
                     }}
-                    className={
-                      currentPage === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : ""
-                    }
                   />
                 </PaginationItem>
               </PaginationContent>

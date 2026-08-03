@@ -2,19 +2,29 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { BrowserRouter } from "react-router-dom";
-import AppRoutes from "./routes/AppRoutes";
 import { Provider } from "react-redux";
 import { store } from "./redux/Store";
-import { Toaster } from "./components/ui/sonner";
-import AuthInitializer from "./components/booking/AuthInitializer";
+import { Bounce, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import AppRoutes from "./routes/AppRoutes";
 
 createRoot(document.getElementById("root")).render(
   <Provider store={store}>
     <BrowserRouter>
-      <AuthInitializer>
-        <AppRoutes />
-        <Toaster richColors position="top-right" />
-      </AuthInitializer>
+      <AppRoutes />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        transition={Bounce}
+      />
     </BrowserRouter>
   </Provider>,
 );

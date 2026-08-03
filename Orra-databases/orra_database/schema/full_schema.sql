@@ -32,9 +32,9 @@ DROP TYPE IF EXISTS transaction_status_enum;
 
 -- V0 ENUM CREATION 
 
-CREATE TYPE user_role_enum AS ENUM(
+CREATE TYPE app_user_role_enum AS ENUM (
+    'BUYER',
     'OWNER',
-    'RENTER',
     'ADMIN'
 );
 
@@ -67,6 +67,27 @@ CREATE TYPE transaction_status_enum AS ENUM(
     'PENDING',
     'SUCCESS',
     'FAILED'
+);
+
+CREATE TYPE category_enum AS ENUM (
+    'LAPTOP',
+    'CAMERA',
+    'GAMING_CONSOLES',
+    'DRONES',
+    'MOBILE',
+    'SMART_WATCHES',
+    'AUDIO_DEVICES',
+    'MONITORS',
+    'VR_AR',
+    'LENSES',
+    'LIGHTING',
+    'ACTION_CAMERAS',
+    'PROJECTORS',
+    'MICROPHONES',
+    'TABLETS',
+    'ACCESSORIES',
+    'REFRIGERATOR',
+    'TV'
 );
 
 
