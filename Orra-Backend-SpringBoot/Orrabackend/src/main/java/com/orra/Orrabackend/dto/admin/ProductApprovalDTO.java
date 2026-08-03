@@ -15,4 +15,5 @@ public class ProductApprovalDTO {
     private BigDecimal dailyRate;
     private String approvalStatus;
     private LocalDate submittedDate;
+    private String imageUrl;
 }

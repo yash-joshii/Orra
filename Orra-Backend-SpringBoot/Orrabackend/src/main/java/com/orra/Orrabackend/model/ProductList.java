@@ -2,14 +2,15 @@ package com.orra.Orrabackend.model;
 
 import com.orra.Orrabackend.enums.Category;
 import com.orra.Orrabackend.enums.ListingStatus;
-import com.orra.Orrabackend.enums.ProductCondition;
+//import com.orra.Orrabackend.enums.ProductCondition;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.Data;
+//import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -74,11 +75,11 @@ public class ProductList {
 //    @Column(name = "product_condition")
 //    private ProductCondition productcondition;
 
-    @Column(name = "available_from")
-    private LocalDateTime availableFrom;
+//    @Column(name = "available_from")
+    private LocalDate availableFrom;
 
     @Column(name = "available_to")
-    private LocalDateTime availableTo;
+    private LocalDate availableTo;
 
     @Column(name = "minimum_rental_days")
     private Integer minimumRentalDays;
@@ -92,9 +93,13 @@ public class ProductList {
 
     @OneToMany(
             mappedBy = "product",
-            cascade = CascadeType.ALL
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
     private List<Productimage> images;
+
+    @Column(name = "is_available", nullable = false)
+    private Boolean isAvailable = true;
 }
 
 

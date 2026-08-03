@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Bell, Package, User, CreditCard, Check } from "lucide-react";
 import { useSelector } from "react-redux";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getUserNotifications, getUnreadCount, markAsRead } from "@/api/notificationApi";
 import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
 
 const TYPE_CONFIG = {
     BOOKING_REQUEST: { icon: Package, bg: "bg-indigo-100", color: "text-indigo-600", title: "Booking Request" },
@@ -34,7 +35,7 @@ const timeAgo = (dateString) => {
 const NotificationBell = () => {
 
     const user = useSelector((state) => state.auth.user);
-
+    const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
 
@@ -42,13 +43,18 @@ const NotificationBell = () => {
     useEffect(() => {
         if (!user) return;
         fetchUnreadCount();
+        // fetchNotifications();
+        const intervalId = setInterval(() => {
+            fetchUnreadCount();
+            // fetchNotifications();
+        }, 10000);
 
-        const intervalId = setInterval(fetchUnreadCount, 10000);
         return () => clearInterval(intervalId);
     }, [user]);
 
     const fetchUnreadCount = async () => {
         try {
+            if (!user?.userId) return;
             const response = await getUnreadCount(user.userId);
             setUnreadCount((prevCount) => {
                 if (response.data.count > prevCount) {
@@ -63,6 +69,7 @@ const NotificationBell = () => {
 
     const fetchNotifications = async () => {
         try {
+            if (!user?.userId) return;
             const response = await getUserNotifications(user.userId);
             setNotifications(response.data);
         } catch (error) {
@@ -75,30 +82,47 @@ const NotificationBell = () => {
     };
 
     const handleNotificationClick = async (notification) => {
-        if (notification.read) return;
-        try {
-            const response = await markAsRead(notification.id);
-            const updateNotification = response.data;
-            setNotifications((prev) =>
-                prev.map((n) => (n.id === updateNotification.id ? updateNotification : n))
-            );
-            setUnreadCount((prev) => Math.max(0, prev - 1));
-        } catch (error) {
-            console.error("Failed to mark as read:", error);
+        try{
+            if (!notification.read) {
+                const response = await markAsRead(notification.id);
+    
+                setNotifications((prev) =>
+                    prev.map((n) =>
+                        n.id === response.data.id ? response.data : n
+                    )
+                );
+    
+                setUnreadCount((prev) => Math.max(prev - 1, 0));
+            }
+    
+            switch (notification.type) {
+                case "BOOKING_REQUEST":
+                    navigate(`/booking/${notification.bookingId}`);
+                    break;
+    
+                case "PAYMENT_SUCCESS":
+                    navigate("/mybookings");
+                    break;
+    
+                default:
+                    break;
+            }
+        } catch(error){
+            console.error("Failed to handle notification:", error);
         }
     };
 
     const handleMarkAllRead = async () => {
-    const unread = notifications.filter((n) => !n.read);
-    if (unread.length === 0) return;
-    try {
-        await Promise.all(unread.map((n) => markAsRead(n.id)));
-        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-        setUnreadCount(0);
-    } catch (error) {
-        console.error("Failed to mark all as read:", error);
-    }
-};
+        const unread = notifications.filter((n) => !n.read);
+        if (unread.length === 0) return;
+        try {
+            await Promise.all(unread.map((n) => markAsRead(n.id)));
+            setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+            setUnreadCount(0);
+        } catch (error) {
+            console.error("Failed to mark all as read:", error);
+        }
+    };
     return (
         <DropdownMenu onOpenChange={handleOpenChange}>
             <DropdownMenuTrigger asChild>

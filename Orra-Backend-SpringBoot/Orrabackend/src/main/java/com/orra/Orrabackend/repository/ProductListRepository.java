@@ -1,7 +1,7 @@
 // ProductListRepository.java
 package com.orra.Orrabackend.repository;
 import com.orra.Orrabackend.model.ProductList;
-import com.orra.Orrabackend.model.Productimage;
+//import com.orra.Orrabackend.model.Productimage;
 import com.orra.Orrabackend.enums.ListingStatus;          // ADD
 import org.springframework.data.domain.Page;               // ADD
 import org.springframework.data.domain.Pageable;            // ADD
@@ -32,4 +32,5 @@ public interface ProductListRepository extends JpaRepository<ProductList, Long> 
             "LOWER(p.category) LIKE LOWER(CONCAT(:keyword, '%')) OR " +
             "LOWER(p.brand) LIKE LOWER(CONCAT(:keyword, '%'))")
     List<ProductList> searchProducts(@Param("keyword") String keyword);
+    List<ProductList> findByIsAvailableTrueAndIsActiveTrue();
 }
