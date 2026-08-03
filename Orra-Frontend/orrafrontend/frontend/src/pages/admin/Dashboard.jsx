@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import StatCard from "@/components/admin/StatCard";
 import { getDashboardStats } from "@/api/admin/adminApi";
+import LogoLoader from "@/components/common/LogoLoader";
 
 const Dashboard = () => {
 
@@ -11,7 +12,7 @@ const Dashboard = () => {
     getDashboardStats().then((res) => setStats(res.data));
   }, []);
 
-  if (!stats) return <div>Loading...</div>;
+  if (!stats) return <div><LogoLoader/></div>;
   return (
   <div>
       <h1 className="text-xl font-semibold mb-4">Dashboard</h1>

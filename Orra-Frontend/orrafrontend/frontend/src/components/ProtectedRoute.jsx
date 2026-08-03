@@ -1,11 +1,12 @@
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
+import LogoLoader from "./common/LogoLoader";
 
 const ProtectedRoute = ({ children, role }) => {
   const { isAuthenticated, authLoading, user } = useSelector((state) => state.auth);  // CHECK — user must be here
 
   if (authLoading) {
-    return <div>Loading...</div>;
+    return <div><LogoLoader/></div>;
   }
 
   if (!isAuthenticated) {
