@@ -52,6 +52,9 @@ public class AdminProductService {
         dto.setOwnerName(p.getOwner().getName());   // CHECK — confirm User has getName()
         dto.setDailyRate(p.getDailyRate());
         dto.setApprovalStatus(p.getApprovalStatus().name());
+        if (p.getImages() != null && !p.getImages().isEmpty()) {
+            dto.setImageUrl(p.getImages().get(0).getImageUrl());
+        }
         return dto;
     }
 }

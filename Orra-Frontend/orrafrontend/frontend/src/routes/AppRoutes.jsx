@@ -49,6 +49,7 @@ const AppRoutes = () => {
   const rehydrateAuth = async () => {
     try {
       const response = await GetCurrentUser();
+      console.log("GetCurrentUser response:", response.data);  
       dispatch(setCredentials({
         user: { userId: response.data.userId, roles: response.data.roles },
       }));
