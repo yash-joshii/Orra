@@ -12,7 +12,7 @@
 **/dist/
 **/build/
 .env
-
+.env.docker
 # OS files
 .DS_Store
 Thumbs.db
