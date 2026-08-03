@@ -38,7 +38,7 @@ import { setError } from "@/redux/slices/productslices";
 import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
-  
+
   const navigate = useNavigate();
 
   const [scrolled, setScrolled] = useState(false);
@@ -111,23 +111,23 @@ const Navbar = () => {
   };
 
   const navItems = [
-  { name: "Home", path: "/" },
-  { name: "Browse Devices", path: "/browserdevices" },
-  { name: "Categories", path: "/categories" },
-  { name: "My Bookings", path: "/mybookings" },
-  { name: "Wishlist", path: "/wishlist" },
+    { name: "Home", path: "/" },
+    { name: "Browse Devices", path: "/browserdevices" },
+    { name: "Categories", path: "/categories" },
+    { name: "My Bookings", path: "/mybookings" },
+    { name: "Wishlist", path: "/wishlist" },
 
-  ...(isOwner
-    ? [{ name: "Dashboard", path: "/dashboard" }]
-    : []),
-];
+    ...(isOwner
+      ? [{ name: "Dashboard", path: "/dashboard" }]
+      : []),
+  ];
 
   // 1. Get the current booking state from Redux
   const currentBooking = useSelector((state) => state.booking.currentBooking);
 
   // 2. Check if a booking is currently pending or accepted
   const isBookingPendingPayment =
-  currentBooking?.status === "ACCEPTED";
+    currentBooking?.status === "ACCEPTED";
 
   // 3. Set the target destination dynamically
   const targetRoute = isBookingPendingPayment
@@ -217,14 +217,15 @@ const Navbar = () => {
 
           </div>
 
-            <NotificationBell />
-          
+          <NotificationBell />
 
-          <Link to={targetRoute} className="relative inline-block">
+
+          {/* Cart / Active Booking Link */}
+          <Link to="/cart" className="relative inline-block">
             <button className="relative p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer flex items-center justify-center">
               <Calendar className="text-black w-5 h-5" />
 
-              {/* Show badge only when a pending booking exists */}
+              {/* Show badge when a booking is accepted and needs payment */}
               {isBookingPendingPayment && (
                 <span className="absolute -top-1 -right-1 text-xs bg-indigo-600 text-white font-bold w-4 h-4 rounded-full flex items-center justify-center">
                   1

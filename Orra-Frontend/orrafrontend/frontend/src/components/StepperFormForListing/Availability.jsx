@@ -66,7 +66,7 @@ const Availability = ({ prev, next, formData, setFormData }) => {
                             type="date"
                             name="availableFrom"
                             min={today}
-                            value={formData.availability?.availableFrom || today}
+                            value={formData.availability?.availableFrom}
                             onChange={handleChange}
                             className="w-full h-12 rounded-xl border border-gray-300 px-4 outline-none focus:ring-2 focus:ring-[#5B4CF6]"
                         />

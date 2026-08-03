@@ -65,12 +65,6 @@ const Login = () => {
             <span className="font-medium">Continue with Google</span>
           </button>
 
-          {/* Apple Button */}
-          <button className="w-full border border-gray-200 rounded-2xl py-4 mb-6 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08),0_0px_4px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_-4px_rgba(0,0,0,0.12),0_4px_8px_rgba(0,0,0,0.05)]">
-            <img src="/public/apple.svg" alt="Apple" className="w-5 h-5" />
-            <span className="font-medium">Continue with Apple</span>
-          </button>
-
           {/* Divider */}
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px bg-gray-300 flex-1"></div>
