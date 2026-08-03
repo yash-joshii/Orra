@@ -101,14 +101,6 @@ const Signup = () => {
                 <img className="w-[6%]" src="/public/google.svg" alt="Google" />
                 Continue with Google
               </Button>
-
-              <Button
-                className="apple-login w-[90%] p-6 rounded-[15px]  text-gray-600 text-md"
-                variant="outline"
-              >
-                <img className="w-[6%]" src={apple} alt="apple" />
-                Continue with Apple
-              </Button>
             </div>
             <div className="text-in-line flex items-center justify-center w-full my-4 ">
               <div className="grow-[0.2] border-t border-gray-200"></div>
@@ -198,29 +190,6 @@ const Signup = () => {
                         id="input-demo-disabled"
                         type="email"
                         placeholder="Email"
-                        className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
-                  bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
-                      />
-                    </Field>
-
-                    <Field className="mt-[30px]">
-                      <FieldLabel htmlFor="input-demo-disabled">
-                        Phone Number
-                      </FieldLabel>
-                      <Input
-                        value={formData.phone}
-                        onChange={(e) => {
-                          const value = e.target.value
-                            .replace(/\D/g, "")
-                            .slice(0, 10);
-                          setFormData({
-                            ...formData,
-                            phone: value,
-                          });
-                        }}
-                        id="input-demo-disabled"
-                        type="tel"
-                        placeholder="Phone Number"
                         className="shadow-[0_1px_3px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] 
                   bg-gray-50 py-3 px-4 h-[50px] rounded-[17px] "
                       />

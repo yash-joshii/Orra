@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 
 const ListingDevice = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const today = new Date().toISOString().split("T")[0];
 
   const [formData, setFormData] = useState({
     basicDetails: {
@@ -40,7 +41,7 @@ const ListingDevice = () => {
     },
 
     availability: {
-      availableFrom: "",
+      availableFrom: today,
       availableTo: "",
       minimumRentalDays: "",
       maximumRentalDays: "",
@@ -70,13 +71,9 @@ const ListingDevice = () => {
           securityDeposit: toNumber(formData.pricing.securityDeposit),
           dailyRate: toNumber(formData.pricing.rentalPrice),
 
-          availableFrom: formData.availability.availableFrom
-            ? `${formData.availability.availableFrom}T00:00:00`
-            : null,
-
-          availableTo: formData.availability.availableTo
-            ? `${formData.availability.availableTo}T00:00:00`
-            : null,
+          // Send plain dates
+          availableFrom: formData.availability.availableFrom || null,
+          availableTo: formData.availability.availableTo || null,
 
           minimumRentalDays: toNumber(formData.availability.minimumRentalDays),
           maximumRentalDays: toNumber(formData.availability.maximumRentalDays),

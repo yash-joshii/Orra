@@ -4,93 +4,129 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Calendar, MapPinIcon } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
-// badgeConfig maps a booking's derived "displayStatus" to its label + classes
 const badgeConfig = {
-    active: {
-        label: "Active/Paid",
+    PENDING: {
+        label: "Pending Owner Approval",
+        className: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+    },
+    ACCEPTED: {
+        label: "Accepted - Payment Required",
+        className: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300"
+    },
+    ACTIVE: {
+        label: "Active Rental",
         className: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
     },
-    completed: {
+    COMPLETED: {
         label: "Completed",
         className: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-    },
-    reuested: {
-        label: "Requested",
-        className: "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
     }
 }
 
 const MyBookingsCard = ({ booking }) => {
-    const {
-        productImage,
-        productName,
-        startDate,
-        endDate,
-        location,
-        ownerName,
-        ownerAvatar,
-        displayStatus, // "currently_rented" | "upcoming" | "unavailable"
-    } = booking
+    const navigate = useNavigate()
 
-    const badge = badgeConfig[displayStatus]
-    const isActive = displayStatus === "currently_rented"
+    // 1. Direct binding to your BookingResponseDTO fields
+    const productName = booking?.listingTitle || booking?.productName || "Product"
+    const ownerName = booking?.ownerName || "Owner"
+    
+    // Dates
+    const startDate = booking?.startDateTime || ""
+    const endDate = booking?.endDateTime || ""
+
+    // Image & Location
+    const productImage = booking?.listingImage || "https://via.placeholder.com/240x130?text=No+Image"
+    const location = booking?.location || "N/A"
+
+    // Status
+    const status = (booking?.status || booking?.displayStatus || "PENDING").toUpperCase()
+    const badge = badgeConfig[status] || badgeConfig["PENDING"]
+
+    const dateRangeDisplay = (startDate && endDate) 
+        ? `${startDate} - ${endDate}` 
+        : (startDate || endDate || "Dates not specified")
 
     return (
-        <Card className={`relative mx-auto w-[800px] h-[200px] flex-row items-center justify-between 
-            ${isActive ? "border-black" : ""}`}>
-            <div className="absolute inset-0 z-30 aspect-video" />
-
+        <Card className={`relative mx-auto w-full max-w-[800px] min-h-[180px] flex flex-row items-center justify-between p-4 ${status === 'ACTIVE' ? 'border-black' : ''}`}>
+            
+            {/* Product Image */}
             <img
                 src={productImage}
                 alt={productName}
-                className="w-[240px] h-[130px] relative top-[0px] left-[38px] rounded-[20px]"
+                className="w-[220px] h-[130px] object-cover rounded-[16px] bg-slate-100 flex-shrink-0"
+                onError={(e) => {
+                    e.target.onerror = null
+                    e.target.src = "https://via.placeholder.com/240x130?text=No+Image"
+                }}
             />
 
-            <CardHeader className="w-[500px] flex-col relative left-[35px] bottom-[0px] gap-[20px]">
-                <div className="upcoming-currently-rented-unavailable">
-                    {badge && (
-                        <Badge className={`${badge.className} text-[15px] font-bold`}>
-                            {badge.label}
-                        </Badge>
-                    )}
+            <CardHeader className="flex-1 flex flex-col gap-2 px-6 py-2">
+                <div>
+                    <Badge className={`${badge.className} text-[12px] font-bold px-3 py-1`}>
+                        {badge.label}
+                    </Badge>
                 </div>
 
-                <div className="product-name-location-date">
-                    <span className="text-[20px] font-bold">{productName}</span>
-                    <div className="product-location-date flex justify-around align-baseline flex-row">
-                        <span className="!flex !flex-row !gap-2.5 !items-center !justify-center">
-                            <Calendar className="w-3 h-3" /> {startDate} - {endDate}
+                <div className="product-name-location-date flex flex-col gap-1">
+                    <span className="text-[18px] font-bold text-slate-900 leading-snug">
+                        {productName}
+                    </span>
+
+                    <div className="product-location-date flex items-center gap-4 text-xs text-slate-600">
+                        <span className="flex items-center gap-1">
+                            <Calendar className="w-3.5 h-3.5 text-slate-500" /> 
+                            {dateRangeDisplay}
                         </span>
-                        <span className="!flex !flex-row !gap-2.5 !items-center !justify-center">
-                            <MapPinIcon className="w-3 h-3" /> {location}
+                        <span className="flex items-center gap-1">
+                            <MapPinIcon className="w-3.5 h-3.5 text-slate-500" /> 
+                            {location}
                         </span>
                     </div>
                 </div>
 
-                <div className="owner-detail">
-                    <div className="flex items-center gap-2">
-                        <Avatar>
-                            <AvatarImage src={ownerAvatar} alt={ownerName} />
-                        </Avatar>
-                        <span>Rented from {ownerName}</span>
-                    </div>
+                <div className="owner-detail flex items-center gap-2">
+                    <Avatar className="w-6 h-6">
+                        <AvatarImage src="" alt={ownerName} />
+                    </Avatar>
+                    <span className="text-xs text-slate-600">
+                        Rented from <strong className="text-slate-800">{ownerName}</strong>
+                    </span>
                 </div>
             </CardHeader>
 
-            <div className="flex-col mr-[25px] w-[260px]">
-                {isActive ? (
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-2 w-[160px] flex-shrink-0">
+                {status === "PENDING" && (
+                    <Button variant="outline" className="w-full h-[40px] rounded-[16px] text-xs" disabled>
+                        Awaiting Owner
+                    </Button>
+                )}
+
+                {status === "ACCEPTED" && (
+                    <Button 
+                        onClick={() => navigate('/cart')} 
+                        className="w-full h-[40px] rounded-[16px] bg-[#6a61fd] hover:bg-[#5850e0] text-xs font-semibold"
+                    >
+                        Pay Now
+                    </Button>
+                )}
+
+                {status === "ACTIVE" && (
                     <>
-                        <Button className="w-full h-[40px] rounded-[16px] bg-[#6a61fd]">
-                            Return Instructions
+                        <Button className="w-full h-[36px] rounded-[12px] bg-[#6a61fd] hover:bg-[#5850e0] text-xs">
+                            Return Info
                         </Button>
-                        <Button className="w-full h-[40px] rounded-[16px] mt-[10px] bg-[#fff] text-black border border-slate-300">
+                        <Button className="w-full h-[36px] rounded-[12px] bg-white text-black border border-slate-300 hover:bg-slate-50 text-xs">
                             Message Owner
                         </Button>
                     </>
-                ) : (
-                    <Button className="w-full h-[40px] rounded-[16px]">
-                        View Details
+                )}
+
+                {status === "COMPLETED" && (
+                    <Button variant="outline" className="w-full h-[40px] rounded-[16px] text-xs">
+                        View Receipt
                     </Button>
                 )}
             </div>

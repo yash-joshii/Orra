@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { useRazorpay } from "react-razorpay";
+import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
 
-// Shadcn Imports
+// UI Components
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 
-// Redux Imports & API Actions
+// API Actions
 import { getProductById } from "@/api/listingApi";
 import {
   cancelBooking,
   createBooking,
   getBookingById,
+  getMyBookings,
 } from "@/api/bookingApi";
+import { createOrder } from "@/api/paymentapi";
+
+// Redux Actions
 import {
   setLoading as setBookingLoading,
   setCurrentBooking,
@@ -24,73 +28,107 @@ import {
   setError,
   setSelectedProduct,
 } from "@/redux/slices/productslices";
-import { useSelector, useDispatch } from "react-redux";
-import { toast } from "react-toastify";
-import { createOrder } from "@/api/paymentapi";
 
-// Sub-components
-import BookingBreadcrumb from "../components/booking/BookingBreadcrumb";
-import ProductSummaryCard from "../components/booking/ProductSummaryCard";
-import RentalDatePicker from "../components/booking/RentalDatePicker";
-import PriceSummary from "../components/booking/PriceSummary";
-import BookingActionButtons from "../components/booking/BookingActionButtons";
-import TrustBadges from "../components/booking/TrustBadges";
+// 4 Consolidated Subcomponents
+import BookingHeader from "@/components/booking/BookingHeader";
+import BookingProductDetails from "@/components/booking/BookingProductDetails";
+import BookingPriceSummary from "@/components/booking/BookingPriceSummary";
+import BookingActions from "@/components/booking/BookingActions";
 
 const Bookings = () => {
   const { Razorpay } = useRazorpay();
   const dispatch = useDispatch();
   const { id } = useParams();
 
-  // Component states
+  // Date & Input State
   const [startOpen, setStartOpen] = useState(false);
   const [endOpen, setEndOpen] = useState(false);
-  const [startDate, setStartDate] = useState();
-  const [endDate, setEndDate] = useState();
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const [message, setMessage] = useState("");
 
-  // Redux Selectors
+  // Redux State
   const product = useSelector((state) => state.products.selectedProduct);
   const user = useSelector((state) => state.auth.user);
   const currentBooking = useSelector((state) => state.booking.currentBooking);
 
-  // Fetch product if an ID is present in the URL
+  // 1. Fetch Product Data
   useEffect(() => {
     if (id) {
-      fetchProduct();
-    }
-  }, [id]);
-
-  const fetchProduct = async () => {
-    try {
       dispatch(setLoading(true));
-      const response = await getProductById(id);
-      dispatch(setSelectedProduct(response.data));
-      dispatch(setLoading(false));
-    } catch (error) {
-      dispatch(setError(error.message));
-      dispatch(setLoading(false));
+      getProductById(id)
+        .then((res) => dispatch(setSelectedProduct(res.data)))
+        .catch((err) => dispatch(setError(err.message)))
+        .finally(() => dispatch(setLoading(false)));
     }
-  };
+  }, [id, dispatch]);
 
+  // 2. Fetch Active Booking for this Product on Mount
+  useEffect(() => {
+    const userId = user?.userId || user?.id;
+    if (userId && id) {
+      getMyBookings(userId)
+        .then((res) => {
+          const bookings = res.data || [];
+          const active = bookings.find(
+            (b) =>
+              String(b.listingId || b.product?.id || b.productId) === String(id) &&
+              (b.status === "PENDING" || b.status === "ACCEPTED")
+          );
+          if (active) dispatch(setCurrentBooking(active));
+        })
+        .catch((err) => console.error("Error fetching booking state:", err));
+    }
+  }, [id, user, dispatch]);
 
+  // 3. Sync Local Dates when currentBooking Updates
+  useEffect(() => {
+    if (currentBooking) {
+      if (currentBooking.startDateTime) setStartDate(new Date(currentBooking.startDateTime));
+      if (currentBooking.endDateTime) setEndDate(new Date(currentBooking.endDateTime));
+    }
+  }, [currentBooking]);
+
+  // 4. Polling for Status Updates (PENDING -> ACCEPTED)
+  useEffect(() => {
+    if (!currentBooking?.bookingId) return;
+    if (currentBooking.status !== "PENDING" && currentBooking.status !== "ACCEPTED") return;
+
+    const intervalId = setInterval(() => {
+      getBookingById(currentBooking.bookingId)
+        .then((res) => dispatch(setCurrentBooking(res.data)))
+        .catch(() => {
+          toast.error("This booking request was updated or declined.");
+          dispatch(setCurrentBooking(null));
+        });
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [currentBooking?.bookingId, currentBooking?.status, dispatch]);
+
+  // Local Date Formatter Utility (YYYY-MM-DD)
   const formatLocalDate = (date) => {
     if (!date) return null;
-
     const d = date instanceof Date ? date : new Date(date);
-
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   };
 
-  // Handler: Request Booking
+  // Pricing Calculation Rules
+  const rentalDays =
+    startDate && endDate
+      ? Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)))
+      : 0;
+  const totalRent = product ? rentalDays * (product?.dailyRate || 0) : 0;
+  const platformFee = totalRent * 0.1;
+  const estimatedTax = totalRent * 0.08;
+  const grandTotal = totalRent + platformFee + estimatedTax + (product?.securityDeposit || 0);
+
+  // Handlers
   const handleRequestBooking = async () => {
     if (!startDate || !endDate) {
       toast.error("Please select both start and end dates.");
       return;
     }
-
     dispatch(setBookingLoading(true));
     try {
       const payload = {
@@ -98,72 +136,58 @@ const Bookings = () => {
         renterId: user?.userId || user?.id,
         startDateTime: formatLocalDate(startDate),
         endDateTime: formatLocalDate(endDate),
+        message,
       };
       const response = await createBooking(payload);
       dispatch(setCurrentBooking(response.data));
       toast.success("Booking requested successfully!");
     } catch (err) {
-      const serverMessage = err.response?.data?.message || err.message;
-      dispatch(setBookingError(err.message));
-      toast.error(err.message || "Failed to create booking.");
+      toast.error(err.response?.data?.message || err.message || "Failed to create booking.");
     } finally {
       dispatch(setBookingLoading(false));
     }
   };
 
-  // Handler: Razorpay Payment
-  const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
-
   const handlePayForBooking = async () => {
     dispatch(setBookingLoading(true));
     try {
-      // 1. Create payment order
-      const orderResponse = await createOrder(
-        grandTotal,
-        currentBooking.bookingId
-      );
+      const orderResponse = await createOrder(grandTotal, currentBooking.bookingId);
       const order = orderResponse.data;
 
-      // 2. Open Razorpay modal
       const options = {
-        key: RAZORPAY_KEY_ID,
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount * 100,
         currency: order.currency,
         name: "Orra Booking",
         description: "Booking Payment",
         order_id: order.razorpayOrderId,
-        handler: function (response) {
+        handler: () => {
           toast.success("Payment received! Confirming your booking...");
-          dispatch(setBookingLoading(false));
-
-          // Reset current booking state after successful payment -> redirects to cart
           dispatch(setCurrentBooking(null));
+          dispatch(setBookingLoading(false));
         },
         modal: {
-          ondismiss: function () {
+          ondismiss: () => {
             dispatch(setBookingLoading(false));
             toast.error("Payment cancelled.");
           },
         },
         theme: { color: "#4f46e5" },
       };
-
       const rzp = new Razorpay(options);
       rzp.open();
     } catch (err) {
-      dispatch(setBookingError(err.message));
       toast.error("Could not start payment. Please try again.");
       dispatch(setBookingLoading(false));
     }
   };
 
-  // Handler: Cancel Booking
   const handleCancelBooking = async () => {
     dispatch(setBookingLoading(true));
     try {
-      await cancelBooking(currentBooking.bookingId, user.userId);
+      await cancelBooking(currentBooking.bookingId, user?.userId || user?.id);
       dispatch(setCurrentBooking(null));
-      toast.success("Booking cancelled.");
+      toast.success("Booking request cancelled.");
     } catch (err) {
       dispatch(setBookingError(err.message));
     } finally {
@@ -171,97 +195,35 @@ const Bookings = () => {
     }
   };
 
-  // Polling for booking status changes
-  useEffect(() => {
-    if (!currentBooking) return;
-    if (
-      currentBooking.status !== "PENDING" &&
-      currentBooking.status !== "ACCEPTED"
-    )
-      return;
-
-    const intervalId = setInterval(async () => {
-      try {
-        const response = await getBookingById(currentBooking.bookingId);
-        dispatch(setCurrentBooking(response.data));
-      } catch (error) {
-        console.error("Polling error:", error);
-        toast.error("This booking request was declined by the owner.");
-        dispatch(setCurrentBooking(null));
-      }
-    }, 5000);
-
-    return () => clearInterval(intervalId);
-  }, [currentBooking?.bookingId, currentBooking?.status]);
-
-  // Pricing calculations
-  const rentalDays =
-    startDate && endDate
-      ? Math.max(
-        1,
-        Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
-      )
-      : 0;
-  const totalRent = product ? rentalDays * (product?.dailyRate || 0) : 0;
-  const platformFee = totalRent * 0.1;
-  const estimatedTax = totalRent * 0.08;
-  const grandTotal =
-    totalRent + platformFee + estimatedTax + (product?.securityDeposit || 0);
-
-  // If there is no URL product ID and no active booking, navigate to cart
-  if (!id && !currentBooking) {
-    return <Navigate to="/cart" replace />;
-  }
+  if (!id) return <Navigate to="/cart" replace />;
 
   return (
     <div className="parent max-w-[1280px] mx-auto px-6 py-8 space-y-8">
-      <BookingBreadcrumb />
-
-      <div className="heading-detail text-2xl">
-        <h1 className="text-4xl font-bold">Review Your Booking</h1>
-        <span className="text-[17px] text-gray-500">
-          Confirm the dates and details below to proceed.
-        </span>
-      </div>
-
-      <hr className="border-t border-slate-200 my-6" />
+      {/* 1. Header (Breadcrumb, Title, Subtitle) */}
+      <BookingHeader />
 
       <TooltipProvider>
-        <div className="booking-detail flex flex-row items-start justify-center gap-8 p-12 bg-slate-50/50 rounded-3xl min-h-[600px]">
-          {/* Left Side: Product & Rental Details */}
-          <div className="product-detail w-[660px] bg-white border border-slate-100 rounded-3xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.04)] flex flex-col gap-6">
-            <ProductSummaryCard product={product} />
+        <div className="booking-detail flex flex-col lg:flex-row items-start justify-center gap-8 p-8 md:p-12 bg-slate-50/50 rounded-3xl min-h-[600px]">
+          {/* 2. Left Side Details (Product, Date Picker, Owner Message) */}
+          <BookingProductDetails
+            product={product}
+            startDate={startDate}
+            endDate={endDate}
+            setStartDate={setStartDate}
+            setEndDate={setEndDate}
+            startOpen={startOpen}
+            setStartOpen={setStartOpen}
+            endOpen={endOpen}
+            setEndOpen={setEndOpen}
+            rentalDays={rentalDays}
+            message={message}
+            setMessage={setMessage}
+          />
 
-            <Separator className="bg-slate-100" />
-
-            <RentalDatePicker
-              startDate={startDate}
-              endDate={endDate}
-              setStartDate={setStartDate}
-              setEndDate={setEndDate}
-              startOpen={startOpen}
-              setStartOpen={setStartOpen}
-              endOpen={endOpen}
-              setEndOpen={setEndOpen}
-              rentalDays={rentalDays}
-            />
-
-            {/* Message Box */}
-            <div className="message-input space-y-2">
-              <label className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                💬 Message to Owner{" "}
-                <span className="text-slate-400 font-normal">(Optional)</span>
-              </label>
-              <Textarea
-                className="min-h-[100px] rounded-xl border-slate-200 bg-slate-50/30 placeholder:text-slate-400 p-4 resize-none focus-visible:ring-indigo-500"
-                placeholder="Hello! I'd like to rent this gear for a weekend project..."
-              />
-            </div>
-          </div>
-
-          {/* Right Side: Pricing Details */}
-          <div className="pricing w-[380px] bg-white border border-slate-100 rounded-3xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.04)] flex flex-col gap-5">
-            <PriceSummary
+          {/* Right Side Pricing & Actions */}
+          <div className="pricing w-full lg:w-[380px] bg-white border border-slate-100 rounded-3xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.04)] flex flex-col gap-5 shrink-0">
+            {/* 3. Price Breakdown */}
+            <BookingPriceSummary
               product={product}
               rentalDays={rentalDays}
               totalRent={totalRent}
@@ -270,15 +232,14 @@ const Bookings = () => {
               grandTotal={grandTotal}
             />
 
-            <BookingActionButtons
+            {/* 4. Action Buttons & Security Badges */}
+            <BookingActions
               currentBooking={currentBooking}
               grandTotal={grandTotal}
               onRequestBooking={handleRequestBooking}
               onPayForBooking={handlePayForBooking}
               onCancelBooking={handleCancelBooking}
             />
-
-            <TrustBadges />
           </div>
         </div>
       </TooltipProvider>
