@@ -8,6 +8,8 @@ import com.orra.Orrabackend.repository.ProductListImageRepository;
 import com.orra.Orrabackend.repository.ProductListRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import com.orra.Orrabackend.repository.UserRepository;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,16 +17,24 @@ import java.util.stream.Collectors;
 @Service
 public class ProductListService {
 
+
     private final ProductListRepository repo;
     private final ProductListImageRepository repoImage;
     private final UserService userService;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
 
     public ProductListService(ProductListRepository repo,
                               ProductListImageRepository repoImage,
-                              UserService userService) {
+                              UserService userService,
+                              UserRepository userRepository,
+                              EmailService emailService) {
+
         this.repo = repo;
         this.repoImage = repoImage;
         this.userService = userService;
+        this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     public List<ProductList> getAll() {
@@ -126,6 +136,16 @@ public class ProductListService {
                     .collect(Collectors.toList());
 
             repoImage.saveAll(imagelist);
+        }
+
+        List<User> subscribers = userRepository.findBySubscribedTrue();
+
+        for (User subscriber : subscribers) {
+
+            emailService.sendNewListingEmail(
+                    subscriber.getEmail(),
+                    saved.getProductName()
+            );
         }
 
         return saved;

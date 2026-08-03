@@ -29,4 +29,24 @@ public class EmailService {
 
         mailSender.send(message);
     }
+
+    public void sendNewListingEmail(String toEmail, String productName) {
+
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setTo(toEmail);
+
+        message.setSubject("New Product Listed on ORRA");
+
+        message.setText(
+                "Hello,\n\n" +
+                        "A new product has just been listed on ORRA.\n\n" +
+                        "Product: " + productName + "\n\n" +
+                        "Visit ORRA to check it out before someone else rents it!\n\n" +
+                        "Regards,\n" +
+                        "Team ORRA"
+        );
+
+        mailSender.send(message);
+    }
 }

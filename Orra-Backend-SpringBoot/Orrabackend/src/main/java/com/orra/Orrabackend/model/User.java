@@ -67,4 +67,7 @@ public class User {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(name = "subscribed", nullable = false)
+    private Boolean subscribed = false;
 }
