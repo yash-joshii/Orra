@@ -166,21 +166,32 @@ function PersonalInfo() {
         />
       </div>
 
-      <button
-        onClick={() => setIsEditing(true)}
-        className="px-5 py-2 border rounded-lg"
-      >
-        Edit
-      </button>
+      {!isEditing && (
+  <button
+    onClick={() => setIsEditing(true)}
+    className="px-5 py-2 border rounded-lg"
+  >
+    Edit
+  </button>
+)}
 
-      {isEditing && (
-        <button
-          onClick={handleSave}
-          className="bg-purple-600 text-white px-6 py-3 rounded-lg"
-        >
-          Save Changes
-        </button>
-      )}
+{isEditing && (
+  <div className="flex gap-3">
+    <button
+      onClick={handleSave}
+      className="bg-purple-600 text-white px-6 py-3 rounded-lg"
+    >
+      Save Changes
+    </button>
+    <button
+      onClick={() => setIsEditing(false)}
+      className="px-5 py-2 border rounded-lg"
+    >
+      Cancel
+    </button>
+  </div>
+)}
+      
     </div>
   );
 }

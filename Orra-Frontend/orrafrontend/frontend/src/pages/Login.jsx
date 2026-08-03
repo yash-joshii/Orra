@@ -1,5 +1,6 @@
 import { GetCurrentUser, SignIn } from "@/api/authApi";
 import { setError, setLoading, setUser } from "@/redux/slices/authslices";
+import { syncWishlistOnLogin } from "@/utils/syncWishlist";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +27,10 @@ const Login = () => {
 
     const meResponse = await GetCurrentUser();
     dispatch(setUser(meResponse.data));
+
+    // Merge any guest wishlist items (added before login) into the DB
+    const loggedInUserId = meResponse.data?.userId ?? meResponse.data?.id;
+    await syncWishlistOnLogin(loggedInUserId);
 
     dispatch(setLoading(false));
 

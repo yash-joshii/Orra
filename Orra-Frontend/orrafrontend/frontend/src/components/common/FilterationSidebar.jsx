@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { SlidersHorizontal, Star } from "lucide-react";
+import { useState } from "react";
 
 const categories = [
   "ALL",
@@ -24,10 +25,21 @@ const categories = [
 ];
 
 const FilterationSidebar = () => {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCategory = searchParams.get("category") || "ALL";
+
   const [maxPrice, setMaxPrice] = useState(150);
   const [minRating, setMinRating] = useState(null);
   const [showOnlyAvailable, setShowOnlyAvailable] = useState(true);
+
+  const handleCategoryClick = (cat) => {
+    if (cat === "ALL") {
+      searchParams.delete("category");
+    } else {
+      searchParams.set("category", cat);
+    }
+    setSearchParams(searchParams);
+  };
 
   return (
     <div className="w-[300px] bg-white rounded-2xl border border-[#EEF0F3] shadow-sm p-6 ml-auto">
@@ -47,7 +59,7 @@ const FilterationSidebar = () => {
             <label
               key={cat}
               className="flex items-center gap-3 cursor-pointer"
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => handleCategoryClick(cat)}
             >
               <span
                 className={`w-4 h-4 rounded-full border flex items-center justify-center ${

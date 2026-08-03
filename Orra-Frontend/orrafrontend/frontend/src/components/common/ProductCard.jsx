@@ -1,7 +1,7 @@
 import React from "react";
-// import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +9,11 @@ import {
   removeFromWishlist,
   checkWishlist,
 } from "@/api/wishlist";
+import {
+  isInGuestWishlist,
+  addGuestWishlistItem,
+  removeGuestWishlistItem,
+} from "@/utils/guestWishlist";
 
 import {
   Card,
@@ -33,49 +38,65 @@ import { useNavigate } from "react-router-dom";
 
 const ProductCard = ({ data }) => {
   const navigate = useNavigate();
-  console.log("images →", data.images);
- const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(false);
 
-// Temporary userId
-const userId = 1;
-useEffect(() => {
-  const fetchWishlistStatus = async () => {
-    try {
-      const response = await checkWishlist(userId, data.productId);
-      setLiked(response.data);
-    } catch (error) {
-      console.error(error);
+  const { user } = useSelector((state) => state.auth) || {};
+  const userId = user?.userId ?? user?.id;
+  const isLoggedIn = Boolean(userId);
+
+  useEffect(() => {
+    if (!data?.productId) return;
+
+    if (isLoggedIn) {
+      // Logged-in: check wishlist status from the backend
+      const fetchWishlistStatus = async () => {
+        try {
+          const response = await checkWishlist(userId, data.productId);
+          setLiked(response.data);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      fetchWishlistStatus();
+    } else {
+      // Guest: check localStorage instead
+      setLiked(isInGuestWishlist(data.productId));
+    }
+  }, [data, isLoggedIn, userId]);
+
+  const imageUrl =
+    data.images && data.images.length > 0
+      ? data.images[0].imageBase64 ?? data.images[0]
+      : "https://placehold.co/400x200?text=No+Image";
+
+  const handleWishlist = async (e) => {
+    e.stopPropagation();
+
+    if (isLoggedIn) {
+      // Logged-in flow: hits the backend, same as before
+      try {
+        if (liked) {
+          await removeFromWishlist(userId, data.productId);
+          setLiked(false);
+        } else {
+          await addToWishlist(userId, data.productId);
+          setLiked(true);
+        }
+      } catch (error) {
+        console.error("Wishlist Error:", error.response?.data || error.message);
+      }
+    } else {
+      // Guest flow: localStorage only, no API call
+      if (liked) {
+        removeGuestWishlistItem(data.productId);
+        setLiked(false);
+      } else {
+        addGuestWishlistItem(data.productId);
+        setLiked(true);
+      }
     }
   };
 
-  if (data?.productId) {
-    fetchWishlistStatus();
-  }
-}, [data]);
-  const imageUrl =
-    data.images && data.images.length > 0
-      ? data.images[0].imageBase64 ?? data.images[0]  // handles both cases
-      : "https://placehold.co/400x200?text=No+Image";
-      const handleWishlist = async (e) => {
-  e.stopPropagation();
-
-  console.log("Heart clicked");
-  console.log("Product ID:", data.productId);
-
-  try {
-    if (liked) {
-      await removeFromWishlist(userId, data.productId);
-      setLiked(false);
-      console.log("Removed from wishlist");
-    } else {
-      await addToWishlist(userId, data.productId);
-      setLiked(true);
-      console.log("Added to wishlist");
-    }
-  } catch (error) {
-    console.error("Wishlist Error:", error.response?.data || error.message);
-  }
-};
   return (
     <Card className="relative group w-[30%] h-[50%] rounded-[25px]  pt-0 shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-y-1 hover:shadow-xl hover:cursor-pointer">
       <div className="relative ">
@@ -83,8 +104,6 @@ useEffect(() => {
 
         <img
           src={imageUrl}
-          // src="https://i.pravatar.cc/500"
-          // alt="Event cover"
           className="relative z-20 aspect-[4/3] w-full object-cover brightness-60 dark:brightness-40"
         />
         <div

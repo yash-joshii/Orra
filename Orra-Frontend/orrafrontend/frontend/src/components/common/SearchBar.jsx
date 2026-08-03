@@ -2,23 +2,41 @@ import React from "react";
 import { Search } from "lucide-react";
 
 const SearchBar = ({
-  value,
+  value = "",
   onChange,
-  placeholder = "Search gear...",
+  placeholder = "Search...",
   className = "",
-  inputClassName = "",
 }) => {
   return (
     <div
-      className={`${className} hidden lg:flex items-center bg-gray-100 w-[90%] rounded-full px-3 py-2 border border-[#e2e8f0] `}
+      className={`
+        flex items-center
+        w-full
+        h-[58px]
+        px-6
+        rounded-xl
+        border border-gray-200
+        bg-white
+        shadow-md
+        ${className}
+      `}
     >
-      <Search className="w-4 h-4 text-gray-500" />
+      <Search className="w-5 h-5 text-gray-500 mr-4 shrink-0" />
+
       <input
+        type="text"
         value={value}
         onChange={onChange}
-        type="text"
         placeholder={placeholder}
-        className={`bg-transparent outline-none ml-2 text-sm w-full ${inputClassName}`}
+        className="
+          flex-1
+          bg-transparent
+          outline-none
+          border-none
+          text-[16px]
+          text-gray-800
+          placeholder:text-gray-400
+        "
       />
     </div>
   );

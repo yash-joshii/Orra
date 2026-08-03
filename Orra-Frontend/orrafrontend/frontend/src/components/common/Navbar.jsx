@@ -213,10 +213,10 @@ const { user } = useSelector((state) => state.auth);
     <DropdownMenuContent className="w-[220px] p-3">
       <DropdownMenuSeparator />
 
-      <DropdownMenuItem>
-        <UserIcon className="mr-2 h-4 w-4" />
-        Profile
-      </DropdownMenuItem>
+     <DropdownMenuItem onClick={() => navigate("/profile")}>
+  <UserIcon className="mr-2 h-4 w-4" />
+  Profile
+</DropdownMenuItem>
 
       <DropdownMenuItem>
         <Package className="mr-2 h-4 w-4" />

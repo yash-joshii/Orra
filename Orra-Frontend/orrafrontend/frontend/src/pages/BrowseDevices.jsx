@@ -149,8 +149,8 @@ console.log("Paginated:", paginatedProducts);
            <SearchBar
   value={search}
   onChange={(e) => handleSearch(e.target.value)}
-  className="!w-[97%] !p-[17px] !rounded-[10px] !text-[16px] !font-semibold"
   placeholder="Search gear..."
+  className="w-[97%]"
 />
           </div>
           <div className="bd-filter  mt-5 w-[30%]">
