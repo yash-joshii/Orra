@@ -41,6 +41,7 @@ const MyBookings = lazy(() => import("@/pages/MyBookings"));
 
 const SearchResults = lazy(() => import("@/pages/SearchResults"));
 
+const MyListings = lazy(() => import("@/pages/MyListings"));
 
 const AppRoutes = () => {
   const dispatch = useDispatch();
@@ -99,14 +100,15 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-        {/* <Route
-          path="/mybooking/:id"
-          element={
-            <ProtectedRoute>
-              <MyBookings />
-            </ProtectedRoute>
-          }
-        /> */}
+        {/* 💡 2. Add Route for MyListings */}
+          <Route
+            path="/my-listings"
+            element={
+              <ProtectedRoute>
+                <MyListings />
+              </ProtectedRoute>
+            }
+          />
         <Route
           path="/mybookings"
           element={

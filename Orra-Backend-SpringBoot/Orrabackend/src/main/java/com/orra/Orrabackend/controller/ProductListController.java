@@ -67,4 +67,11 @@ package com.orra.Orrabackend.controller;
         public ResponseEntity<List<CategoryCountProjection>> getCategorySummary() {
             return new ResponseEntity<>(productlistservice.getCategorySummary(), HttpStatus.OK);
         }
+
+        @GetMapping("/product/user/me")
+        public ResponseEntity<List<ProductList>> getMyProducts(Authentication authentication) {
+            Long userId = (Long) authentication.getPrincipal();
+            List<ProductList> userProducts = productlistservice.getProductsByUserId(userId);
+            return new ResponseEntity<>(userProducts, HttpStatus.OK);
+        }
     }
