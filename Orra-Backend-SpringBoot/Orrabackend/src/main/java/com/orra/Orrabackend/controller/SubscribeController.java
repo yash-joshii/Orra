@@ -29,6 +29,17 @@ public class SubscribeController {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+// Already subscribed?
+        if (Boolean.TRUE.equals(user.getSubscribed())) {
+            return "You are already subscribed.";
+        }
+
+// Update subscription status
+        user.setSubscribed(true);
+
+        userRepository.save(user);
+
+// Send confirmation email
         emailService.sendSubscriptionEmail(user.getEmail());
 
         return "Subscription email sent successfully.";

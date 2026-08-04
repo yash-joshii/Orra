@@ -1,4 +1,3 @@
-
 package com.orra.Orrabackend.service;
 
 import com.orra.Orrabackend.model.ProductList;
@@ -11,6 +10,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.orra.Orrabackend.repository.UserRepository;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,9 +20,13 @@ import java.util.stream.Collectors;
 @Service
 public class ProductListService {
 
+
     private final ProductListRepository repo;
     private final ProductListImageRepository repoImage;
     private final UserService userService;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
+
     private final SupabaseStorageService storageService;
 
     public List<ProductList> getAll() {
@@ -138,6 +143,16 @@ public class ProductListService {
 
             repoImage.saveAll(imagelist);
             saved.setImages(imagelist);
+        }
+
+        List<User> subscribers = userRepository.findBySubscribedTrue();
+
+        for (User subscriber : subscribers) {
+
+            emailService.sendNewListingEmail(
+                    subscriber.getEmail(),
+                    saved.getProductName()
+            );
         }
 
         return saved;
