@@ -17,66 +17,82 @@ const BookingPriceSummary = ({
   grandTotal,
 }) => {
   return (
-    <>
-      <h2 className="text-xl font-bold text-slate-950">Price Details</h2>
+    <div className="flex flex-col w-full">
+      {/* Header */}
+      <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mb-4 sm:mb-6">
+        Price Details
+      </h2>
 
-      <div className="space-y-3.5 pt-1">
-        <div className="days-calculation flex justify-between items-center text-sm font-medium text-slate-500">
+      {/* Breakdown Section */}
+      <div className="space-y-3.5 sm:space-y-4">
+        
+        {/* Rent Calculation */}
+        <div className="flex justify-between items-center text-sm sm:text-base font-medium text-slate-500">
           <span>
-            ${product?.dailyRate || 0} × {rentalDays} days
+            Rs {product?.dailyRate || 0} × {rentalDays} {rentalDays === 1 ? 'day' : 'days'}
           </span>
           <span className="font-semibold text-slate-800">
-            ${totalRent.toFixed(2)}
+            Rs {totalRent.toFixed(2)}
           </span>
         </div>
 
-        <div className="refund flex justify-between items-center text-sm font-medium text-slate-500">
-          <TooltipProvider>
+        {/* Refundable Deposit with Tooltip */}
+        <div className="flex justify-between items-center text-sm sm:text-base font-medium text-slate-500">
+          <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="cursor-help flex items-center gap-1 border-b border-dashed border-slate-300 pb-0.5">
-                  Refundable Deposit <Lock className="w-3 h-3 text-slate-400" />
+                <span className="cursor-help inline-flex items-center gap-1.5 border-b border-dashed border-slate-300 pb-0.5 hover:text-slate-800 hover:border-slate-400 transition-colors">
+                  Refundable Deposit 
+                  <Lock className="w-3.5 h-3.5 text-slate-400" />
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="bg-slate-900 text-white p-2 rounded-lg text-xs">
+              <TooltipContent 
+                side="top" 
+                className="bg-slate-900 text-white p-3 rounded-xl text-xs sm:text-sm font-medium shadow-xl border border-slate-800 max-w-[220px] text-center leading-relaxed"
+              >
                 Fully refunded upon safe return of the gear.
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
           <span className="font-semibold text-slate-800">
-            ${product?.securityDeposit || 0}
+            Rs {product?.securityDeposit || 0}
           </span>
         </div>
 
-        <div className="days-calculation flex justify-between items-center text-sm font-medium text-slate-500">
+        {/* Platform Fee */}
+        <div className="flex justify-between items-center text-sm sm:text-base font-medium text-slate-500">
           <span>Platform Fee (10%)</span>
           <span className="font-semibold text-slate-800">
-            ${platformFee.toFixed(2)}
+            Rs {platformFee.toFixed(2)}
           </span>
         </div>
 
-        <div className="days-calculation flex justify-between items-center text-sm font-medium text-slate-500">
+        {/* Estimated Tax */}
+        <div className="flex justify-between items-center text-sm sm:text-base font-medium text-slate-500">
           <span>Estimated Tax (8%)</span>
           <span className="font-semibold text-slate-800">
-            ${estimatedTax.toFixed(2)}
+            Rs {estimatedTax.toFixed(2)}
           </span>
         </div>
       </div>
 
-      <Separator className="bg-slate-100 my-1" />
+      <Separator className="bg-slate-200/80 my-5 sm:my-6" />
 
-      <div className="total-price-display flex justify-between items-end">
-        <div className="total flex flex-col gap-0.5">
-          <span className="text-base font-bold text-slate-900">Total</span>
-          <span className="text-xs font-medium text-slate-400">
-            Includes ${product?.securityDeposit || 0} deposit
+      {/* Grand Total */}
+      <div className="flex flex-row justify-between items-end gap-4">
+        <div className="flex flex-col gap-1 sm:gap-1.5">
+          <span className="text-base sm:text-lg lg:text-xl font-bold text-slate-900">
+            Total
+          </span>
+          <span className="text-[11px] sm:text-xs font-medium text-slate-400 leading-tight">
+            Includes Rs {product?.securityDeposit || 0} deposit
           </span>
         </div>
-        <div className="price-display text-3xl font-extrabold text-indigo-600 tracking-tight">
-          ${grandTotal.toFixed(2)}
+        <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-indigo-600 tracking-tight shrink-0">
+          Rs {grandTotal.toFixed(2)}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

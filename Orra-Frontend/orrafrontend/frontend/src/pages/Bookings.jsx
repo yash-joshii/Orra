@@ -207,31 +207,35 @@ const Bookings = ({ bookingData }) => {
   };
 
   return (
-    <div className="parent max-w-[1280px] mx-auto px-6 py-8 space-y-8">
+    <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
       {/* 1. Header (Breadcrumb, Title, Subtitle) */}
       <BookingHeader />
 
       <TooltipProvider>
-        <div className="booking-detail flex flex-col lg:flex-row items-start justify-center gap-8 p-8 md:p-12 bg-slate-50/50 rounded-3xl min-h-[600px]">
+        <div className="relative flex flex-col lg:flex-row items-start justify-between gap-6 lg:gap-10 xl:gap-12 p-5 sm:p-8 lg:p-10 bg-slate-50/60 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 min-h-[60vh]">
+          
           {/* 2. Left Side Details (Product, Date Picker, Owner Message) */}
-          <BookingProductDetails
-            product={product}
-            startDate={startDate}
-            endDate={endDate}
-            setStartDate={setStartDate}
-            setEndDate={setEndDate}
-            startOpen={startOpen}
-            setStartOpen={setStartOpen}
-            endOpen={endOpen}
-            setEndOpen={setEndOpen}
-            rentalDays={rentalDays}
-            message={message}
-            setMessage={setMessage}
-          />
+          <div className="w-full flex-1 min-w-0">
+            <BookingProductDetails
+              product={product}
+              startDate={startDate}
+              endDate={endDate}
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
+              startOpen={startOpen}
+              setStartOpen={setStartOpen}
+              endOpen={endOpen}
+              setEndOpen={setEndOpen}
+              rentalDays={rentalDays}
+              message={message}
+              setMessage={setMessage}
+            />
+          </div>
 
-          {/* Right Side Pricing & Actions */}
-          <div className="pricing w-full lg:w-[380px] bg-white border border-slate-100 rounded-3xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.04)] flex flex-col gap-5 shrink-0">
-            {/* 3. Price Breakdown */}
+          {/* 3. Right Side Pricing & Actions (Sticky on Desktop) */}
+          <div className="w-full lg:w-[380px] xl:w-[420px] bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col gap-6 shrink-0 lg:sticky lg:top-28">
+            
+            {/* Price Breakdown */}
             <BookingPriceSummary
               product={product}
               rentalDays={rentalDays}
@@ -241,7 +245,7 @@ const Bookings = ({ bookingData }) => {
               grandTotal={grandTotal}
             />
 
-            {/* 4. Action Buttons & Security Badges */}
+            {/* Action Buttons & Security Badges */}
             <BookingActions
               currentBooking={currentBooking}
               grandTotal={grandTotal}
@@ -250,11 +254,11 @@ const Bookings = ({ bookingData }) => {
               onCancelBooking={handleCancelBooking}
             />
           </div>
+          
         </div>
       </TooltipProvider>
     </div>
   );
 };
-
 
 export default Bookings;

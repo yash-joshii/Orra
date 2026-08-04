@@ -339,7 +339,12 @@ public class bookingService {
                 .bookingId(booking.getId())
                 .listingId(booking.getListing().getProductId())
                 .listingTitle(booking.getListing().getProductName())
-                .listingImage(null)
+                .listingImage(
+                        booking.getListing().getImages() != null &&
+                                !booking.getListing().getImages().isEmpty()
+                                ? booking.getListing().getImages().get(0).getImageUrl()
+                                : null
+                )
                 .dailyRate(booking.getListing().getDailyRate())
                 .ownerId(booking.getListing().getOwner().getId())
                 .ownerName(booking.getListing().getOwner().getName())
@@ -359,7 +364,12 @@ public class bookingService {
                 .bookingId(booking.getId())
                 .listingId(booking.getListing().getProductId())
                 .listingTitle(booking.getListing().getProductName())
-                .listingImage(null)
+                .listingImage(
+                        booking.getListing().getImages() != null &&
+                                !booking.getListing().getImages().isEmpty()
+                                ? booking.getListing().getImages().get(0).getImageUrl()
+                                : null
+                )
                 .dailyRate(booking.getListing().getDailyRate())
                 .ownerId(booking.getListing().getOwner().getId())
                 .ownerName(booking.getListing().getOwner().getName())

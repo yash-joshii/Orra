@@ -10,30 +10,36 @@ import {
 
 const BookingHeader = () => {
   return (
-    <div className="space-y-4">
+    <div className="w-full space-y-4 sm:space-y-5 lg:space-y-6">
       {/* Breadcrumb Navigation */}
       <Breadcrumb>
-        <BreadcrumbList>
+        <BreadcrumbList className="text-xs sm:text-sm font-medium text-slate-500">
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            <BreadcrumbLink href="/" className="hover:text-indigo-600 transition-colors">
+              Home
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="#">Browse Devices</BreadcrumbLink>
+            <BreadcrumbLink href="#" className="hover:text-indigo-600 transition-colors">
+              Browse Devices
+            </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Request to Book</BreadcrumbPage>
+            <BreadcrumbPage className="font-bold text-slate-900">
+              Request to Book
+            </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       {/* Page Title & Subtitle */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+      <div className="flex flex-col gap-1.5 sm:gap-2">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
           Request to Book
         </h1>
-        <p className="text-sm font-medium text-slate-500 mt-1">
+        <p className="text-sm sm:text-base font-medium text-slate-500 max-w-2xl leading-relaxed">
           Review your rental dates and request approval from the item owner.
         </p>
       </div>
