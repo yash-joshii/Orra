@@ -151,21 +151,25 @@ public class ProductListService {
             saved.setImages(imagelist);
         }
 
-        List<User> subscribers = userRepository.findBySubscribedTrue();
-
-        for (User subscriber : subscribers) {
-
-            emailService.sendNewListingEmail(
-                    subscriber.getEmail(),
-                    saved.getProductName()
-            );
-        }
+//        List<User> subscribers = userRepository.findBySubscribedTrue();
+//
+//        for (User subscriber : subscribers) {
+//
+//            emailService.sendNewListingEmail(
+//                    subscriber.getEmail(),
+//                    saved.getProductName()
+//            );
+//        }
 
         return saved;
     }
 
     public List<CategoryCountProjection> getCategorySummary() {
         return repo.getCategoryCounts();
+    }
+
+    public List<ProductList> getUserListings(Long userId) {
+        return repo.findByOwner_IdAndIsActiveTrue(userId);
     }
 
     private void validateListingCanBeModified(Long productId) {

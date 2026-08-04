@@ -19,3 +19,7 @@ export const getCategorySummary = () => {
 export const getMyListings = () => {
   return axiosinstance.get("/api/product/user/me");
 };
+
+export const updateProduct = (productId, payload) => {
+  return axiosinstance.patch(`/api/product/${productId}`, payload);
+};

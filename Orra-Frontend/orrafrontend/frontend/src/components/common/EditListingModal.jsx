@@ -3,6 +3,7 @@ import { X, Calendar, DollarSign, Package, AlertCircle } from "lucide-react";
 
 const EditListingModal = ({ isOpen, onClose, listing, onSave }) => {
   const [formData, setFormData] = useState({
+     ...listing, 
     productName: "",
     dailyRate: "",
     available_from: "",
@@ -15,12 +16,15 @@ const EditListingModal = ({ isOpen, onClose, listing, onSave }) => {
   // Helper to format ISO/Date string into YYYY-MM-DD for <input type="date" />
   const formatDateForInput = (dateString) => {
     if (!dateString) return "";
-    try {
-      const date = new Date(dateString);
-      return date.toISOString().split("T")[0];
-    } catch {
-      return "";
-    }
+
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
   };
 
   // Populate form state whenever the listing changes or modal opens
@@ -28,7 +32,7 @@ const EditListingModal = ({ isOpen, onClose, listing, onSave }) => {
     if (listing) {
       setFormData({
         productName: listing.productName || listing.title || "",
-        dailyRate: listing.dailyRate || listing.pricePerDay || listing.rentalPrice || 0,
+        dailyRate: listing.dailyRate ?? listing.pricePerDay ?? listing.rentalPrice ?? "",
         available_from: formatDateForInput(listing.available_from || listing.availableFrom),
         available_to: formatDateForInput(listing.available_to || listing.availableTo),
       });

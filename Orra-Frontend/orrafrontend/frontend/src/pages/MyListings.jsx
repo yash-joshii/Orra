@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ListingCard from "../components/common/ListingCard";
 import EditListingModal from "../components/common/EditListingModal";
-import { getMyListings, updateProduct } from "./apiService"; // update path as needed
-import { setProducts, setLoading, setError } from "./productSlice"; // update path as needed
+// import { getMyListings, updateProduct } from "./apiService"; // update path as needed
+// import { setProducts, setLoading, setError } from "./productSlice"; // update path as needed
 import { Loader2, AlertCircle, PackageX } from "lucide-react";
+import { getMyListings, updateProduct } from "@/api/listingApi";
+import { setError, setLoading, setProducts } from "@/redux/slices/productslices";
 
 const MyListings = ({ activeBookings = [] }) => {
   const dispatch = useDispatch();
@@ -47,18 +49,16 @@ const MyListings = ({ activeBookings = [] }) => {
 
   // Save changes from Modal to Backend & Redux
   const handleSaveListing = async (productId, updatedPayload) => {
-    // 1. Call Backend API
-    const response = await updateProduct(productId, updatedPayload);
-    const updatedProduct = response.data || updatedPayload;
+  const response = await updateProduct(productId, updatedPayload);
+  const updatedProduct = response.data;
 
-    // 2. Local State / Redux Sync
-    const updatedList = products.map((item) => {
-      const itemId = item.productId || item.id;
-      return Number(itemId) === Number(productId) ? { ...item, ...updatedProduct } : item;
-    });
+  const updatedList = products.map((item) => {
+    const itemId = item.productId || item.id;
+    return Number(itemId) === Number(productId) ? { ...item, ...updatedProduct } : item;
+  });
 
-    dispatch(setProducts(updatedList));
-  };
+  dispatch(setProducts(updatedList));
+};
 
   // Handle Delete listing (Placeholder / API connection)
   const handleDeleteClick = async (listing) => {
