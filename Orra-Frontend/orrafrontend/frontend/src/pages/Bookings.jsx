@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useRazorpay } from "react-razorpay";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
@@ -35,10 +35,26 @@ import BookingProductDetails from "@/components/booking/BookingProductDetails";
 import BookingPriceSummary from "@/components/booking/BookingPriceSummary";
 import BookingActions from "@/components/booking/BookingActions";
 
-const Bookings = () => {
+const Bookings = ({ bookingData }) => {
   const { Razorpay } = useRazorpay();
   const dispatch = useDispatch();
-  const { id } = useParams();
+  const { id: paramId } = useParams();
+
+  // Redux State
+  const product = useSelector((state) => state.products.selectedProduct);
+  const user = useSelector((state) => state.auth.user);
+  const reduxBooking = useSelector((state) => state.booking.currentBooking);
+
+  // Target booking object
+  const currentBooking = bookingData || reduxBooking;
+
+  // Get active listingId from URL params OR active booking object
+  const targetListingId =
+    paramId ||
+    currentBooking?.listingId ||
+    currentBooking?.productId ||
+    currentBooking?.listing?.id ||
+    currentBooking?.product?.id;
 
   // Date & Input State
   const [startOpen, setStartOpen] = useState(false);
@@ -47,39 +63,34 @@ const Bookings = () => {
   const [endDate, setEndDate] = useState(null);
   const [message, setMessage] = useState("");
 
-  // Redux State
-  const product = useSelector((state) => state.products.selectedProduct);
-  const user = useSelector((state) => state.auth.user);
-  const currentBooking = useSelector((state) => state.booking.currentBooking);
-
-  // 1. Fetch Product Data
+  // 1. Fetch Product Data (Using paramId or targetListingId)
   useEffect(() => {
-    if (id) {
+    if (targetListingId) {
       dispatch(setLoading(true));
-      getProductById(id)
+      getProductById(targetListingId)
         .then((res) => dispatch(setSelectedProduct(res.data)))
         .catch((err) => dispatch(setError(err.message)))
         .finally(() => dispatch(setLoading(false)));
     }
-  }, [id, dispatch]);
+  }, [targetListingId, dispatch]);
 
-  // 2. Fetch Active Booking for this Product on Mount
+  // 2. Fetch Active Booking if accessing directly via URL route `/booking/:id`
   useEffect(() => {
     const userId = user?.userId || user?.id;
-    if (userId && id) {
+    if (userId && paramId && !currentBooking) {
       getMyBookings(userId)
         .then((res) => {
           const bookings = res.data || [];
           const active = bookings.find(
             (b) =>
-              String(b.listingId || b.product?.id || b.productId) === String(id) &&
+              String(b.listingId || b.product?.id || b.productId) === String(paramId) &&
               (b.status === "PENDING" || b.status === "ACCEPTED")
           );
           if (active) dispatch(setCurrentBooking(active));
         })
         .catch((err) => console.error("Error fetching booking state:", err));
     }
-  }, [id, user, dispatch]);
+  }, [paramId, user, currentBooking, dispatch]);
 
   // 3. Sync Local Dates when currentBooking Updates
   useEffect(() => {
@@ -132,7 +143,7 @@ const Bookings = () => {
     dispatch(setBookingLoading(true));
     try {
       const payload = {
-        listingId: product?.productId || product?.id,
+        listingId: product?.productId || product?.id || targetListingId,
         renterId: user?.userId || user?.id,
         startDateTime: formatLocalDate(startDate),
         endDateTime: formatLocalDate(endDate),
@@ -195,8 +206,6 @@ const Bookings = () => {
     }
   };
 
-  if (!id) return <Navigate to="/cart" replace />;
-
   return (
     <div className="parent max-w-[1280px] mx-auto px-6 py-8 space-y-8">
       {/* 1. Header (Breadcrumb, Title, Subtitle) */}
@@ -246,5 +255,6 @@ const Bookings = () => {
     </div>
   );
 };
+
 
 export default Bookings;
