@@ -59,6 +59,7 @@ const ProductCard = ({ data }) => {
       fetchWishlistStatus();
     }
   }, [data]);
+  
 const imageUrl =
   data.images && data.images.length > 0
     ? data.images[0].imageUrl

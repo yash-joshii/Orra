@@ -1,31 +1,28 @@
 CREATE TABLE listings (
-    product_id SERIAL PRIMARY KEY,
-
-    owner_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-
-    serial_or_imei VARCHAR(100) UNIQUE,
-
-    category VARCHAR(100) NOT NULL,
-
-    title VARCHAR(200) NOT NULL,
-
-    brand VARCHAR(100),
-
-    model VARCHAR(100),
-
-    purchase_price DECIMAL(10,2),
-
-    daily_rate DECIMAL(10,2) NOT NULL,
-
-    security_deposit DECIMAL(10,2) NOT NULL,
-
-    health_score INT CHECK (health_score BETWEEN 1 AND 100),
-
-    specifications JSONB, 
-
-    location VARCHAR(150),
-
-    is_active BOOLEAN DEFAULT TRUE,
-
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  product_id bigint NOT NULL DEFAULT nextval('listings_product_id_seq'::regclass),
+  owner_id bigint,
+  serial_or_imei character varying UNIQUE,
+  brand character varying,
+  model character varying,
+  purchase_price numeric,
+  daily_rate numeric NOT NULL,
+  security_deposit numeric NOT NULL,
+  health_score integer CHECK (health_score >= 1 AND health_score <= 100),
+  location character varying,
+  is_active boolean DEFAULT true,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  days integer,
+  description character varying,
+  product_name character varying,
+  category character varying,
+  productspec jsonb,
+  available_from date,
+  available_to date,
+  maximum_rental_days integer,
+  minimum_rental_days integer,
+  purchase_year integer,
+  is_available boolean NOT NULL DEFAULT true,
+  approval_status character varying NOT NULL DEFAULT 'PENDING'::character varying,
+  CONSTRAINT listings_pkey PRIMARY KEY (product_id),
+  CONSTRAINT listings_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.users(user_id)
 );

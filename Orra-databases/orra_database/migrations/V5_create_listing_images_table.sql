@@ -1,8 +1,11 @@
 CREATE TABLE listing_images (
-    image_id SERIAL PRIMARY KEY,
-    listing_id INT NOT NULL REFERENCES listings(product_id) ON DELETE CASCADE,    -- Delete images automatically if listing is deleted
-    image_data TEXT NOT NULL,  -- Base64-encoded image string (sent from React, no size limit)
-    is_cover BOOLEAN NOT NULL DEFAULT FALSE,    
-    display_order INT NOT NULL DEFAULT 0,  -- Controls gallery order (0, 1, 2, 3...)
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  image_id bigint NOT NULL DEFAULT nextval('listing_images_image_id_seq'::regclass),
+  listing_id bigint NOT NULL,
+  image_url text NOT NULL,
+  is_cover boolean NOT NULL DEFAULT false,
+  display_order integer NOT NULL DEFAULT 0,
+  created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  image_data text,
+  CONSTRAINT listing_images_pkey PRIMARY KEY (image_id),
+  CONSTRAINT listing_images_listing_id_fkey FOREIGN KEY (listing_id) REFERENCES public.listings(product_id)
 );
