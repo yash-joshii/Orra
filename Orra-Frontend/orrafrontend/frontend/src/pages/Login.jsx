@@ -1,12 +1,10 @@
-import { GetCurrentUser, SignIn } from "@/api/authApi";
-// import { setError, setLoading, setUser } from "@/redux/slices/authslices";
+
+import { GetCurrentUser, SignIn, SignInWithGoogle } from "@/api/authApi";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from 'react-toastify';
-// import { GetCurrentUser, SignIn } from "@/api/authApi";
 import { setError, setLoading, setCredentials } from "@/redux/slices/authslices";
-// import { toast } from "sonner";
 
 const Login = () => {
   const [formData, setFormdata] = useState({
@@ -60,7 +58,17 @@ const Login = () => {
           </p>
 
           {/* Google Button */}
-          <button className="w-full border border-gray-200 rounded-2xl py-4 mb-4 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08),0_0px_4px_rgba(0,0px_4px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_-4px_rgba(0,0,0,0.12),0_4px_8px_rgba(0,0,0,0.05)]">
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await SignInWithGoogle();
+              } catch (err) {
+                toast.error(err.message || "Google sign-in failed.");
+              }
+            }}
+            className="w-full border border-gray-200 rounded-2xl py-4 mb-4 hover:bg-gray-50 transition-all duration-200 flex items-center justify-center gap-3 shadow-[0_12px_30px_-4px_rgba(0,0,0,0.08),0_0px_4px_rgba(0,0px_4px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_36px_-4px_rgba(0,0,0,0.12),0_4px_8px_rgba(0,0,0,0.05)]"
+          >
             <img src="/public/google.svg" alt="Google" className="w-5 h-5" />
             <span className="font-medium">Continue with Google</span>
           </button>
@@ -183,3 +191,4 @@ const Login = () => {
 };
 
 export default Login;
+

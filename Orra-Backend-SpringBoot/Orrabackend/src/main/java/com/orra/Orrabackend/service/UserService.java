@@ -6,12 +6,12 @@ import com.orra.Orrabackend.enums.UserRole;
 import com.orra.Orrabackend.exception.UserNotFoundException;
 import com.orra.Orrabackend.model.User;
 import com.orra.Orrabackend.repository.UserRepository;
-import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -52,19 +52,23 @@ public class UserService {
     }
 
     public User signup(SignupRequestDTO dto) {
-        User user = new User();
+        UUID supabaseUuid = UUID.fromString(dto.getSupabaseUserId());
 
+        // Idempotent — return existing user for returning OAuth users
+        Optional<User> existing = repo.findBySupabaseId(supabaseUuid);
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        User user = new User();
         user.setUsername(dto.getUsername());
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
-        user.setPhone(dto.getPhone());
-//        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setSupabaseId(UUID.fromString(dto.getSupabaseUserId()));
-        user.setRoles(new HashSet<>());
-
-        user.setRoles(new HashSet<>(Set.of(UserRole.BUYER)));  // default — matches your "everyone starts BUYER" rule
-        user.setAddress("NA");                    // temporary
-
+        // phone is optional for OAuth providers (Google/Apple)
+        user.setPhone(dto.getPhone() != null ? dto.getPhone() : "");
+        user.setSupabaseId(supabaseUuid);
+        user.setRoles(new HashSet<>(Set.of(UserRole.BUYER)));
+        user.setAddress("NA");
         user.setIdProof(UserIdProof.NONE);
 
         return repo.save(user);

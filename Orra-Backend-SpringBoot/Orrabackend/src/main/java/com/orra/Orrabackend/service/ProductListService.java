@@ -1,3 +1,4 @@
+
 package com.orra.Orrabackend.service;
 
 import com.orra.Orrabackend.enums.BookingStatus;
@@ -151,15 +152,15 @@ public class ProductListService {
             saved.setImages(imagelist);
         }
 
-//        List<User> subscribers = userRepository.findBySubscribedTrue();
-//
-//        for (User subscriber : subscribers) {
-//
-//            emailService.sendNewListingEmail(
-//                    subscriber.getEmail(),
-//                    saved.getProductName()
-//            );
-//        }
+        List<User> subscribers = userRepository.findBySubscribedTrue();
+
+        for (User subscriber : subscribers) {
+
+            emailService.sendNewListingEmail(
+                    subscriber.getEmail(),
+                    saved.getProductName()
+            );
+        }
 
         return saved;
     }

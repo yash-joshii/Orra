@@ -1,8 +1,9 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { SignupUser } from "@/api/authApi";
+import { SignupUser, SignInWithGoogle } from "@/api/authApi";
 import apple from "/public/apple.svg";
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
@@ -95,8 +96,16 @@ const Signup = () => {
             </div>
             <div className="google-apple-login flex justify-around flex-col items-center w-3/5 h-[15vh]  mt-[30px] gap-5">
               <Button
+                type="button"
                 className="google-login w-[90%] p-6 rounded-[15px]  text-gray-600 text-md"
                 variant="outline"
+                onClick={async () => {
+                  try {
+                    await SignInWithGoogle();
+                  } catch (err) {
+                    toast.error(err.message || "Google sign-in failed.");
+                  }
+                }}
               >
                 <img className="w-[6%]" src="/public/google.svg" alt="Google" />
                 Continue with Google

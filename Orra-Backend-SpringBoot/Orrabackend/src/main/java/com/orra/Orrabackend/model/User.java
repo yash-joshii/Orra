@@ -37,8 +37,8 @@ public class User {
 //    @Column(nullable = false)
 //    private String password;
 
-//    @Column(name = "profile_pic")
-//    private String profilePic;
+    @Column(name = "avatar")
+    private String avatar;
 
     private String address;
 
@@ -67,4 +67,7 @@ public class User {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(name = "subscribed", nullable = false)
+    private Boolean subscribed = false;
 }
