@@ -93,137 +93,141 @@ CREATE TYPE category_enum AS ENUM (
 
 -- V1 USER TABLE CREATION 
 
-CREATE TABLE users(
-    user_id SERIAL PRIMARY KEY,
-    fullname VARCHAR(100) NOT NULL,
-    username VARCHAR(100) NOT NULL,
-    email VARCHAR(150) NOT NULL UNIQUE,
-    phone VARCHAR(15),
-    password VARCHAR(255) NOT NULL,
-    profile_pic VARCHAR(255),
-    address TEXT,
-    role user_role_enum NOT NULL,
-    id_proof id_proof_enum NOT NULL,
-
-    pan_number VARCHAR(20),
-    aadhaar_number VARCHAR(20),
-
-    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT chk_id_proof_consistency CHECK(
-        (id_proof = 'PAN' and pan_number IS NOT NULL AND aadhaar_number IS NULL)
-        OR
-        (id_proof = 'AADHAAR' and aadhaar_number IS NOT NULL AND pan_number IS NULL)
-        OR
-        (id_proof = 'BOTH' and pan_number IS NOT NULL AND aadhaar_number IS NOT NULL)
-    )
+CREATE TABLE users (
+  user_id bigint NOT NULL DEFAULT nextval('users_user_id_seq'::regclass),
+  name character varying NOT NULL,
+  email character varying NOT NULL UNIQUE,
+  phone character varying,
+  profile_pic character varying,
+  address character varying,
+  pan_number character varying,
+  aadhaar_number character varying,
+  is_verified boolean DEFAULT false,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  username character varying,
+  id_proof character varying,
+  supabase_id uuid UNIQUE,
+  status character varying NOT NULL DEFAULT 'ACTIVE'::character varying,
+  verified boolean NOT NULL DEFAULT false,
+  avatar character varying,
+  subscribed boolean NOT NULL DEFAULT false,
+  CONSTRAINT users_pkey PRIMARY KEY (user_id)
 );
 
 
 -- V2 LISTING TABLE CREATION
 
-CREATE TABLE listings(
-    product_id SERIAL PRIMARY KEY,
-    owner_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    serial_or_imei VARCHAR(100) UNIQUE,            
-    category VARCHAR(100) NOT NULL,         
-    title VARCHAR(200) NOT NULL,
-    brand VARCHAR(100),
-    model VARCHAR(100),
-    purchase_price DECIMAL(10,2),                    
-    daily_rate DECIMAL(10,2) NOT NULL,
-    security_deposit DECIMAL(10,2) NOT NULL,
-
-    health_score INT DEFAULT 100 CHECK(health_score BETWEEN 1 AND 100),
-    specifications JSONB,
-
-    location VARCHAR(150),
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT chk_daily_rate CHECK(daily > 0),
-    CONSTRAINT chk_security_deposit CHECK(security_deposit >= 0)
-
+CREATE TABLE listings (
+  product_id bigint NOT NULL DEFAULT nextval('listings_product_id_seq'::regclass),
+  owner_id bigint,
+  serial_or_imei character varying UNIQUE,
+  brand character varying,
+  model character varying,
+  purchase_price numeric,
+  daily_rate numeric NOT NULL,
+  security_deposit numeric NOT NULL,
+  health_score integer CHECK (health_score >= 1 AND health_score <= 100),
+  location character varying,
+  is_active boolean DEFAULT true,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  days integer,
+  description character varying,
+  product_name character varying,
+  category character varying,
+  productspec jsonb,
+  available_from date,
+  available_to date,
+  maximum_rental_days integer,
+  minimum_rental_days integer,
+  purchase_year integer,
+  is_available boolean NOT NULL DEFAULT true,
+  approval_status character varying NOT NULL DEFAULT 'PENDING'::character varying,
+  CONSTRAINT listings_pkey PRIMARY KEY (product_id),
+  CONSTRAINT listings_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES .users(user_id)
 );
 
 -- V3 BOOKING TABLE CREATION
 
-CREATE TABLE bookings(
-    booking_id SERIAL PRIMARY KEY,
-    listing_id INT NOT NULL REFERENCES listings(product_id) ON DELETE RESTRICT, -- Cannot delete a listed product with active bookings
-    renter_id INT NOT NUL REFERENCES users(user_id) ON DELETE RESTRICT, -- Cannot delete a user with booking history
-
-    start_datetime TIMESTAMP NOT NULL,
-    end_datetime TIMESTAMP NOT NULL,
-
-    total_price DECIMAL(10, 2),
-    deposit_amount DECIMAL(10, 2),
-
-    status booking_status_enum NOT NULL DEFAULT 'PENDING',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT chk_booking_dates CHECK(end_datetime > start_datetime)
+CREATE TABLE bookings (
+  booking_id bigint NOT NULL DEFAULT nextval('bookings_booking_id_seq'::regclass),
+  listing_id bigint,
+  renter_id bigint,
+  start_datetime date NOT NULL,
+  end_datetime date NOT NULL,
+  total_price numeric,
+  deposit_amount numeric,
+  status character varying NOT NULL DEFAULT 'pending'::booking_status_enum,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  accepted_at timestamp with time zone,
+  completed_at timestamp with time zone,
+  paid_at timestamp with time zone,
+  shipped_at timestamp with time zone,
+  CONSTRAINT bookings_pkey PRIMARY KEY (booking_id),
+  CONSTRAINT bookings_listing_id_fkey FOREIGN KEY (listing_id) REFERENCES .listings(product_id),
+  CONSTRAINT bookings_renter_id_fkey FOREIGN KEY (renter_id) REFERENCES .users(user_id)
 );
 
 -- V4 TRANSACTION TABLE CREATION
 
-CREATE TABLE transactions(
-    transaction_id SERIAL PRIMARY KEY,
-    booking_id INT NOT NULL REFERENCES bookings(booking_id) ON DELETE RESTRICT,
-
-    amount DECIMAL(10, 2) NOT NULL,
-    type transaction_type_enum NOT NULL,
-    status transaction_status_enum NOT NULL DEFAULT 'PENDING',
-
-    payment_gateway_ref VARCHAR(255),
-
-    created_at TIMESTAMP NOT NULL CURRENT_TIMESTAMP,
-    CONSTRAINT chk_txn_amount CHECK(amount > 0)
+CREATE TABLE transactions (
+  transaction_id bigint NOT NULL DEFAULT nextval('transactions_transaction_id_seq'::regclass),
+  booking_id bigint,
+  amount double precision NOT NULL,
+  type character varying NOT NULL,
+  status character varying NOT NULL,
+  payment_gateway_ref character varying,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT transactions_pkey PRIMARY KEY (transaction_id),
+  CONSTRAINT transactions_booking_id_fkey FOREIGN KEY (booking_id) REFERENCES .bookings(booking_id)
 );
 
 
 -- V5 LISTING IMAGE TABLE CREATION
 
 CREATE TABLE listing_images (
-    image_id SERIAL PRIMARY KEY,
-    listing_id INT NOT NULL REFERENCES listings(product_id) ON DELETE CASCADE,    -- Delete images automatically if listing is deleted
-    image_data TEXT NOT NULL,  -- Base64-encoded image string (sent from React, no size limit)
-    is_cover BOOLEAN NOT NULL DEFAULT FALSE,    
-    display_order INT NOT NULL DEFAULT 0,  -- Controls gallery order (0, 1, 2, 3...)
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  image_id bigint NOT NULL DEFAULT nextval('listing_images_image_id_seq'::regclass),
+  listing_id bigint NOT NULL,
+  image_url text NOT NULL,
+  is_cover boolean NOT NULL DEFAULT false,
+  display_order integer NOT NULL DEFAULT 0,
+  created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  image_data text,
+  CONSTRAINT listing_images_pkey PRIMARY KEY (image_id),
+  CONSTRAINT listing_images_listing_id_fkey FOREIGN KEY (listing_id) REFERENCES .listings(product_id)
 );
-
 -- V6 NOTIFICATION TABLE CREATION
 
 CREATE TABLE notifications (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL REFERENCES users(user_id),
-    booking_id BIGINT REFERENCES bookings(booking_id),
-    message TEXT NOT NULL,
-    type VARCHAR(50) NOT NULL,
-    is_read BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
-)
-
+  id bigint NOT NULL DEFAULT nextval('notifications_id_seq'::regclass),
+  user_id bigint NOT NULL,
+  booking_id bigint,
+  message text NOT NULL,
+  type character varying NOT NULL,
+  is_read boolean NOT NULL DEFAULT false,
+  created_at timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT notifications_pkey PRIMARY KEY (id),
+  CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES .users(user_id),
+  CONSTRAINT notifications_booking_id_fkey FOREIGN KEY (booking_id) REFERENCES .bookings(booking_id)
+);
 --V7 WHISLIST TABLE CREATION
 
 CREATE TABLE wishlist (
-    wishlist_id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    product_id BIGINT NOT NULL,
-    added_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  wishlist_id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  added_at timestamp without time zone,
+  product_id bigint,
+  user_id bigint,
+  CONSTRAINT wishlist_pkey PRIMARY KEY (wishlist_id),
+  CONSTRAINT fke0d9j8grqwrdfeo8as6p5qdqk FOREIGN KEY (product_id) REFERENCES .listings(product_id),
+  CONSTRAINT fktrd6335blsefl2gxpb8lr0gr7 FOREIGN KEY (user_id) REFERENCES .users(user_id)
+);
 
-    CONSTRAINT fk_wishlist_user
-        FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
-        ON DELETE CASCADE,
 
-    CONSTRAINT fk_wishlist_product
-        FOREIGN KEY (product_id)
-        REFERENCES listings(product_id)
-        ON DELETE CASCADE,
+--V8 USER ROLE CREATION
 
-    CONSTRAINT uq_wishlist_user_product
-        UNIQUE (user_id, product_id)
+CREATE TABLE user_roles (
+  user_id bigint NOT NULL,
+  role character varying NOT NULL,
+  CONSTRAINT user_roles_pkey PRIMARY KEY (user_id, role),
+  CONSTRAINT fk_user_roles_user FOREIGN KEY (user_id) REFERENCES .users(user_id)
 );

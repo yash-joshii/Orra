@@ -28,6 +28,8 @@ const Bookings = lazy(() => import("@/pages/Bookings"));
 const MyBookings = lazy(() => import("@/pages/MyBookings"));
 const SearchResults = lazy(() => import("@/pages/SearchResults"));
 
+const MyListings = lazy(() => import("@/pages/MyListings"));
+
 const AppRoutes = () => {
   const dispatch = useDispatch();
 
@@ -62,54 +64,63 @@ const AppRoutes = () => {
           {/* Cart Page Route */}
           <Route path="/cart" element={<Cart />} />
 
-          {/* Protected User Routes */}
+        {/* Protected User Routes */}
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute>
+              <Wishlist />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/booking/:id"
+          element={
+            <ProtectedRoute>
+              <Bookings />
+            </ProtectedRoute>
+          }
+        />
+        {/* 💡 2. Add Route for MyListings */}
           <Route
-            path="/wishlist"
+            path="/my-listings"
             element={
               <ProtectedRoute>
-                <Wishlist />
+                <MyListings />
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <SettingPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/booking/:id"
-            element={
-              <ProtectedRoute>
-                <Bookings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/mybookings"
-            element={
-              <ProtectedRoute>
-                <MyBookings />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-        </Route>
-        {AdminRoutes}
-        <Route path="/mybookings" element={
-          <ProtectedRoute>
-            <MyBookings />
-          </ProtectedRoute>
-        } />
+        <Route
+          path="/mybookings"
+          element={
+            <ProtectedRoute>
+              <MyBookings />
+            </ProtectedRoute>
+          } 
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
+      {AdminRoutes}
+      <Route path="/mybookings" element={
+        <ProtectedRoute>
+          <MyBookings />
+        </ProtectedRoute>
+      } />
 
         {/* Auth Routes outside MainLayout */}
         <Route path="/signup" element={<Signup />} />

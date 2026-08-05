@@ -1,51 +1,21 @@
 CREATE TABLE users (
-    user_id SERIAL PRIMARY KEY,
-
-    fullname VARCHAR(100) NOT NULL,
-
-    username VARCHAR(100) NOT NULL UNIQUE,
-
-    email VARCHAR(150) UNIQUE NOT NULL,
-
-    phone VARCHAR(15) UNIQUE,
-
-    password VARCHAR(255) NOT NULL,
-
-    profile_pic VARCHAR(255),
-
-    address TEXT,
-
-    -- Supabase Auth User ID
-    supabase_id UUID UNIQUE NOT NULL,
-
-    id_proof id_proof_enum NOT NULL,
-
-    pan_number VARCHAR(20),
-
-    aadhaar_number VARCHAR(20),
-
-    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
-
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT id_proof_validation CHECK (
-        (id_proof = 'PAN' AND pan_number IS NOT NULL AND aadhaar_number IS NULL)
-        OR
-        (id_proof = 'AADHAAR' AND aadhaar_number IS NOT NULL AND pan_number IS NULL)
-        OR
-        (id_proof = 'BOTH' AND pan_number IS NOT NULL AND aadhaar_number IS NOT NULL)
-    )
-);
-
-
-CREATE TABLE user_roles (
-    user_id BIGINT NOT NULL,
-    role app_user_role_enum NOT NULL,
-
-    PRIMARY KEY (user_id, role),
-
-    CONSTRAINT fk_user_roles_user
-        FOREIGN KEY (user_id)
-        REFERENCES users(user_id)
-        ON DELETE CASCADE
+  user_id bigint NOT NULL DEFAULT nextval('users_user_id_seq'::regclass),
+  name character varying NOT NULL,
+  email character varying NOT NULL UNIQUE,
+  phone character varying,
+  profile_pic character varying,
+  address character varying,
+  pan_number character varying,
+  aadhaar_number character varying,
+  is_verified boolean DEFAULT false,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  username character varying,
+  id_proof character varying,
+  supabase_id uuid UNIQUE,
+  status character varying NOT NULL DEFAULT 'ACTIVE'::character varying,
+  verified boolean NOT NULL DEFAULT false,
+  avatar character varying,
+  subscribed boolean NOT NULL DEFAULT false,
+  CONSTRAINT users_pkey PRIMARY KEY (user_id)
 );

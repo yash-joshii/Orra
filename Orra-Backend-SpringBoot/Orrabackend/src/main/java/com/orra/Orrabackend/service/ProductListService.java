@@ -1,5 +1,7 @@
+
 package com.orra.Orrabackend.service;
 
+import com.orra.Orrabackend.enums.BookingStatus;
 import com.orra.Orrabackend.model.ProductList;
 import com.orra.Orrabackend.model.Productimage;
 import com.orra.Orrabackend.model.User;
@@ -11,6 +13,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.orra.Orrabackend.repository.UserRepository;
+import com.orra.Orrabackend.repository.BookingRepository;
 
 
 import java.util.List;
@@ -20,7 +23,7 @@ import java.util.stream.Collectors;
 @Service
 public class ProductListService {
 
-
+    private final BookingRepository bookingRepository;
     private final ProductListRepository repo;
     private final ProductListImageRepository repoImage;
     private final UserService userService;
@@ -62,6 +65,8 @@ public class ProductListService {
         if (!existing.getOwner().getId().equals(userId)) {
             throw new AccessDeniedException("You do not own this listing");
         }
+
+        validateListingCanBeModified(existing.getProductId());
 
         if (product.getProductName() != null)
             existing.setProductName(product.getProductName());
@@ -109,6 +114,8 @@ public class ProductListService {
         if (!existing.getOwner().getId().equals(userId)) {
             throw new AccessDeniedException("You do not own this listing");
         }
+
+        validateListingCanBeModified(existing.getProductId());
 
         repo.deleteById(id);
     }
@@ -160,5 +167,27 @@ public class ProductListService {
 
     public List<CategoryCountProjection> getCategorySummary() {
         return repo.getCategoryCounts();
+    }
+
+    public List<ProductList> getUserListings(Long userId) {
+        return repo.findByOwner_IdAndIsActiveTrue(userId);
+    }
+
+    private void validateListingCanBeModified(Long productId) {
+
+        boolean hasActiveBooking =
+                bookingRepository.existsByListing_ProductIdAndStatusIn(
+                        productId,
+                        List.of(
+                                BookingStatus.PENDING,
+                                BookingStatus.ACTIVE
+                        )
+                );
+
+        if (hasActiveBooking) {
+            throw new IllegalStateException(
+                    "Cannot modify a listing because it has an active or pending booking."
+            );
+        }
     }
 }

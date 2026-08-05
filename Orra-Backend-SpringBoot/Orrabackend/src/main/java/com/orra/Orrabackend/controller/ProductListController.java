@@ -4,6 +4,7 @@ package com.orra.Orrabackend.controller;
     import com.orra.Orrabackend.model.ProductList;
     import com.orra.Orrabackend.repository.CategoryCountProjection;
     import com.orra.Orrabackend.service.ProductListService;
+    import lombok.AllArgsConstructor;
     import org.springframework.http.HttpStatus;
     import org.springframework.http.ResponseEntity;
     import org.springframework.security.core.Authentication;
@@ -13,13 +14,14 @@ package com.orra.Orrabackend.controller;
 
     @RestController
     @RequestMapping("/api")
+    @AllArgsConstructor
     public class ProductListController {
 
         private final ProductListService productlistservice;
 
-        public ProductListController(ProductListService productlistservice) {
-            this.productlistservice = productlistservice;
-        }
+//        public ProductListController(ProductListService productlistservice) {
+//            this.productlistservice = productlistservice;
+//        }
 
         @GetMapping("/product")
         public ResponseEntity<List<ProductList>> getAll() {
@@ -66,5 +68,12 @@ package com.orra.Orrabackend.controller;
         @GetMapping("/product/categories/summary")
         public ResponseEntity<List<CategoryCountProjection>> getCategorySummary() {
             return new ResponseEntity<>(productlistservice.getCategorySummary(), HttpStatus.OK);
+        }
+
+        @GetMapping("/product/user/me")
+        public ResponseEntity<List<ProductList>> getMyProducts(Authentication authentication) {
+            Long userId = (Long) authentication.getPrincipal();
+            List<ProductList> userProducts = productlistservice.getUserListings(userId);
+            return new ResponseEntity<>(userProducts, HttpStatus.OK);
         }
     }

@@ -312,12 +312,18 @@ const Navbar = () => {
                   Profile
                 </DropdownMenuItem>
 
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => navigate("/my-listings")}
+                  className="cursor-pointer"
+                >
                   <Package className="mr-2 h-4 w-4" />
-                  My Products
+                  My Listings
                 </DropdownMenuItem>
 
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => navigate("/mybookings")}
+                  className="cursor-pointer"
+                >
                   <LayoutDashboardIcon className="mr-2 h-4 w-4" />
                   My Bookings
                 </DropdownMenuItem>

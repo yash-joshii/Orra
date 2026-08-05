@@ -8,49 +8,61 @@ const Cart = () => {
   const dispatch = useDispatch();
   const currentBooking = useSelector((state) => state.booking.currentBooking);
   const user = useSelector((state) => state.auth.user);
-  const [loading, setLoading] = useState(false);
 
-  // Fetch active bookings on mount if missing from Redux state
+  // Initialize loading to true ONLY if we don't already have currentBooking in Redux
+  const [loading, setLoading] = useState(!currentBooking);
+
   useEffect(() => {
     const userId = user?.userId || user?.id;
 
+    // 💡 IF Redux already has an active booking, DO NOT set loading or call API
     if (userId && !currentBooking) {
       setLoading(true);
       getMyBookings(userId)
         .then((res) => {
           const bookings = res.data || [];
-          // Find active booking (ACCEPTED or PENDING)
           const active = bookings.find(
-            (b) => b.status === "ACCEPTED" || b.status === "PENDING"
+            (b) => b.status === "PENDING" || b.status === "ACCEPTED"
           );
+
           if (active) {
             dispatch(setCurrentBooking(active));
+          } else {
+            dispatch(setCurrentBooking(null));
           }
         })
-        .catch((err) => console.error("Error loading active booking for cart:", err))
+        .catch((err) => {
+          console.error("Error loading active booking for cart:", err);
+          dispatch(setCurrentBooking(null));
+        })
         .finally(() => setLoading(false));
+    } else {
+      // If currentBooking exists, ensure loading is false
+      setLoading(false);
     }
   }, [user, currentBooking, dispatch]);
 
-  if (loading) {
+  // 1. Show Loading Spinner ONLY during the initial background fetch when Redux is empty
+  if (loading && !currentBooking) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-2">
         <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-slate-500 text-sm font-medium">Loading booking review...</p>
+        <p className="text-slate-500 text-sm font-medium">Checking booking status...</p>
       </div>
     );
   }
 
-  // 1. Render Request to Book screen when an active booking exists
-  const hasActiveBooking =
+  // 2. Check if status is STRICTLY "PENDING" or "ACCEPTED"
+  const isPendingOrAccepted =
     currentBooking &&
     (currentBooking.status === "PENDING" || currentBooking.status === "ACCEPTED");
 
-  if (hasActiveBooking) {
+  // 3. Instant Render: Show Request to Book screen if active booking exists in Redux
+  if (isPendingOrAccepted) {
     return <Bookings bookingData={currentBooking} />;
   }
 
-  // 2. Render Empty State ONLY when no active booking exists
+  // 4. Render Empty State if no active booking exists
   return (
     <div className="flex flex-col items-center justify-center min-h-[65vh] w-full px-4">
       <div className="bg-slate-100 p-6 rounded-full mb-4">
