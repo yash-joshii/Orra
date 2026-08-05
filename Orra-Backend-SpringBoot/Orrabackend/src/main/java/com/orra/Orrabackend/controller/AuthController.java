@@ -5,6 +5,7 @@ import com.orra.Orrabackend.model.User;
 import com.orra.Orrabackend.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@Data
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -52,7 +52,10 @@ public class AuthController {
         return ResponseEntity.ok(
                 Map.of(
                         "userId", user.getId(),
-                        "roles", user.getRoles()
+                        "roles", user.getRoles(),
+                        "email", user.getEmail(),
+                        "name", user.getName(),
+                        "avatar", user.getAvatar() != null ? user.getAvatar() : ""
                 )
         );
     }
