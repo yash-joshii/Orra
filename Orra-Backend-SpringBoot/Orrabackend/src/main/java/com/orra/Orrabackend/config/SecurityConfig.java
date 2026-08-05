@@ -37,6 +37,9 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
+                        // 1. CRUCIAL FIX: Allow all preflight OPTIONS requests so they don't get blocked by auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .requestMatchers("/api/auth/session").permitAll()
                         .requestMatchers("/api/auth/logout").permitAll()
                         .requestMatchers("/api/users/signup").permitAll()
@@ -67,9 +70,11 @@ public class SecurityConfig {
                 "https://orraa.netlify.app"
         ));
 
-        config.setAllowedMethods(List.of("*"));
+        // 2. CRUCIAL FIX: Replace "*" with explicit methods when allowCredentials is true
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
-        config.setAllowedHeaders(List.of("*"));
+        // 3. CRUCIAL FIX: Replace "*" with explicit headers
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With", "Origin"));
 
         config.setAllowCredentials(true);
 
@@ -82,5 +87,4 @@ public class SecurityConfig {
 
         return source;
     }
-
 }

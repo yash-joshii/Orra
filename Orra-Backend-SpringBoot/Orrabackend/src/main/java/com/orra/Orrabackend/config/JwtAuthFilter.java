@@ -47,6 +47,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        // Skip JWT validation on preflight OPTIONS requests
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = extractToken(request);
 
         if (token != null) {
@@ -89,9 +95,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             } catch (Exception e) {
 
-                System.out.println("JWT Validation Failed");
-                System.out.println(e.getMessage());
-
+                System.out.println("JWT Validation Failed: " + e.getMessage());
                 SecurityContextHolder.clearContext();
             }
         }
