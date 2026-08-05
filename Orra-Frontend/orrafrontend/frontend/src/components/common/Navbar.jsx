@@ -1,29 +1,29 @@
-import { useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { searchProducts } from "@/api/listingApi";
 import { getWishlist } from "@/api/wishlist";
 import { NavLink, useNavigate, Link } from "react-router-dom";
-
-import { useDispatch } from "react-redux";
+// import { searchProducts } from "@/api/listingApi";
 import { logout } from "@/redux/slices/authslices";
 import { Logout } from "@/api/authApi";
+import { setLoading, setUser } from "@/redux/slices/userprofileSlice";
+import { getUser } from "@/api/userApi";
+import { setError } from "@/redux/slices/productslices";
+
 import {
   Search,
-  Bell,
   Calendar,
   ChevronDown,
   Heart,
   Package,
   LayoutDashboardIcon,
-} from "lucide-react";
-import {
   LogOutIcon,
   SettingsIcon,
   UserIcon,
+  Sparkles,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,9 +33,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import logo from "../../assets/logo/orralogo.svg";
-import { setLoading, setUser } from "@/redux/slices/userprofileSlice";
-import { getUser } from "@/api/userApi";
-import { setError } from "@/redux/slices/productslices";
+// import { setLoading, setUser } from "@/redux/slices/userprofileSlice";
+// import { getUser } from "@/api/userApi";
+// import { setError } from "@/redux/slices/productslices";
 import { setWishlistCount } from "@/redux/slices/wishlistSlice";
 import NotificationBell from "./NotificationBell";
 
@@ -50,17 +50,15 @@ const getAvatarSrc = (avatarPath) => {
 };
 
 const Navbar = () => {
-
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [scrolled, setScrolled] = useState(false);
-  const dispatch = useDispatch();
   const [search, setSearch] = useState("");
   const [results, setResults] = useState([]);
 
   const handleSearch = async (e) => {
     const value = e.target.value;
-
     setSearch(value);
 
     if (value.trim() === "") {
@@ -70,14 +68,11 @@ const Navbar = () => {
 
     try {
       const response = await searchProducts(value);
-
       setResults(response.data);
     } catch (err) {
       console.log(err);
     }
   };
-
-
 
   const user = useSelector((state) => state.auth.user);
   const userprofile = useSelector((state) => state.userProfile.user);
@@ -91,16 +86,13 @@ const Navbar = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = async () => {
     try {
       await Logout();
-
       dispatch(logout());
-
       navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
@@ -148,19 +140,14 @@ const Navbar = () => {
     { name: "Categories", path: "/categories" },
     { name: "My Bookings", path: "/mybookings" },
     { name: "Wishlist", path: "/wishlist" },
-    
-
-    ...(isOwner
-      ? [{ name: "Dashboard", path: "/dashboard" }]
-      : []),
+    ...(isOwner ? [{ name: "Dashboard", path: "/dashboard" }] : []),
   ];
 
   // 1. Get the current booking state from Redux
   const currentBooking = useSelector((state) => state.booking.currentBooking);
 
   // 2. Check if a booking is currently pending or accepted
-  const isBookingPendingPayment =
-    currentBooking?.status === "ACCEPTED";
+  const isBookingPendingPayment = currentBooking?.status === "ACCEPTED";
 
   // 3. Set the target destination dynamically
   const targetRoute = isBookingPendingPayment
@@ -169,32 +156,45 @@ const Navbar = () => {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${scrolled ? "bg-white shadow-md" : "bg-white/30 backdrop-blur-md"
-        }`}
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        scrolled
+          ? "bg-white/80 backdrop-blur-xl shadow-sm border-b border-slate-200/60"
+          : "bg-white/40 backdrop-blur-md border-b border-slate-100/40"
+      }`}
     >
-      <div className="flex items-center justify-center p-[2.2rem] h-16 relative">
-        <div className="flex items-center gap-8">
-
-          <div className="flex items-center gap-2">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        
+        {/* Brand & Nav */}
+        <div className="flex items-center gap-6 lg:gap-8 shrink-0">
+          
+          {/* ORIGINAL LOGO (UNTOUCHED) */}
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 group focus:outline-none shrink-0"
+          >
             <div className="w-9 h-9 flex items-center justify-center">
-              <img src={logo} alt="logo" />
+              <img
+                src={logo}
+                alt="logo"
+                className="w-full h-full object-contain"
+              />
             </div>
-
-            <span className="text-xl font-semibold">
+            <span className="text-xl font-black text-slate-900 tracking-tight">
               ORRA
             </span>
-          </div>
+          </Link>
 
-          <nav className="hidden md:flex items-center font-semibold text-gray-600 text-[14px] gap-[43px]">
+          {/* Desktop Navigation - Strictly Single Line */}
+          <nav className="hidden md:flex items-center gap-1 font-medium text-sm text-slate-600 whitespace-nowrap">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `relative flex items-center gap-1.5 ${
+                  `px-3.5 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap ${
                     isActive
-                      ? "text-indigo-600 font-bold"
-                      : "hover:text-black transition-colors"
+                      ? "text-indigo-600 font-semibold bg-indigo-50/80 border border-indigo-100/60"
+                      : "hover:text-slate-900 hover:bg-slate-100/60"
                   }`
                 }
               >
@@ -207,68 +207,67 @@ const Navbar = () => {
               </NavLink>
             ))}
           </nav>
-
         </div>
 
-        <div className="flex items-center gap-[25px] ml-[2%]">
-
-          {/* SEARCH */}
-          <div className="relative hidden lg:block w-[320px]">
-
-            <div className="flex items-center bg-gray-100 rounded-full px-3 py-2 border border-[#e2e8f0]">
-
-              <Search className="w-4 h-4 text-gray-500" />
-
+        {/* Search & Actions */}
+        <div className="flex items-center gap-3 lg:gap-4 shrink-0">
+          
+          {/* Search Input */}
+          <div className="relative hidden lg:block w-[200px] xl:w-[260px]">
+            <div className="group flex items-center bg-slate-100/80 hover:bg-slate-100 border border-slate-200/80 rounded-full px-3.5 py-1.5 focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all shadow-inner">
+              <Search className="w-4 h-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors shrink-0" />
               <input
                 type="text"
                 value={search}
                 onChange={handleSearch}
                 placeholder="Search gear..."
-                className="bg-transparent outline-none ml-2 text-sm w-full"
+                className="bg-transparent outline-none ml-2 text-sm text-slate-800 placeholder:text-slate-400 w-full font-normal"
               />
-
+              <kbd className="hidden xl:inline-block px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 bg-white border border-slate-200 rounded-md shadow-2xs">
+                ⌘K
+              </kbd>
             </div>
 
+            {/* Dropdown Search Results */}
             {results.length > 0 && (
-              <div className="absolute top-12 left-0 w-full bg-white rounded-xl shadow-xl border z-50 max-h-80 overflow-y-auto">
-
+              <div className="absolute top-12 left-0 w-full bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-100 z-50 max-h-80 overflow-y-auto p-1.5 space-y-1 transition-all duration-200">
                 {results.map((item) => (
                   <div
                     key={item.productId}
-                    className="p-3 hover:bg-gray-100 cursor-pointer"
+                    className="p-2.5 rounded-xl cursor-pointer hover:bg-slate-100/80 hover:translate-x-0.5 transition-all duration-150"
                     onClick={() => {
                       navigate(`/product/${item.productId}`);
                       setSearch("");
                       setResults([]);
                     }}
                   >
-                    <p className="font-semibold">
+                    <p className="font-semibold text-sm text-slate-800">
                       {item.productName}
                     </p>
-
-                    <p className="text-sm text-gray-500">
+                    <p className="text-xs text-slate-500 font-medium">
                       {item.brand}
                     </p>
                   </div>
                 ))}
-
               </div>
             )}
-
           </div>
 
+          {/* Notifications Bell */}
           <NotificationBell />
 
-
           {/* Cart / Active Booking Link */}
-          <Link to="/cart" className="relative inline-block">
-            <button className="relative p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer flex items-center justify-center">
-              <Calendar className="text-black w-5 h-5" />
+          <Link to={targetRoute} className="relative inline-block">
+            <button className="relative p-2.5 rounded-full text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/60 active:scale-95 transition-all duration-200 cursor-pointer flex items-center justify-center focus:outline-none">
+              <Calendar className="w-5 h-5" />
 
-              {/* Show badge when a booking is accepted and needs payment */}
+              {/* Animated Notification Badge */}
               {isBookingPendingPayment && (
-                <span className="absolute -top-1 -right-1 text-xs bg-indigo-600 text-white font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  1
+                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-4 w-4 bg-indigo-600 text-white text-[10px] font-bold items-center justify-center">
+                    1
+                  </span>
                 </span>
               )}
             </button>
@@ -283,33 +282,36 @@ const Navbar = () => {
                     <img
                       src={getAvatarSrc(userprofile.avatar)}
                       alt="profile"
-                      className="w-8 h-8 rounded-full object-cover"
+                      className="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/20"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-semibold text-indigo-600">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-xs">
                       {(userprofile?.firstName?.[0] || "") +
                         (userprofile?.lastName?.[0] || "") || "U"}
                     </div>
                   )}
-                  <ChevronDown className="w-4 h-4 text-gray-600" />
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
                 </Button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent className="w-50 p-3 absolute -right-40  top-2.5">
-                <div className="flex flex-col space-y-1 m-2 mb-3">
-                  <p className="text-sm font-semibold leading-none mb-2 ">
+              <DropdownMenuContent
+                align="end"
+                className="w-56 p-2 rounded-2xl shadow-xl border-slate-100 backdrop-blur-xl bg-white/95"
+              >
+                <div className="flex flex-col space-y-1 p-2.5 bg-slate-50/70 rounded-xl mb-1">
+                  <p className="text-sm font-bold text-slate-900 leading-none">
                     Hello, {userprofile?.firstName || "there"}!
                   </p>
-                  <p className="text-xs leading-none text-muted-foreground">
+                  <p className="text-xs text-slate-500 font-medium truncate">
                     {userprofile?.email}
                   </p>
                 </div>
 
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="my-1 bg-slate-100" />
 
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
                   <UserIcon className="mr-2 h-4 w-4" />
-                  Profile
+                  <span>Profile</span>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
@@ -325,45 +327,49 @@ const Navbar = () => {
                   className="cursor-pointer"
                 >
                   <LayoutDashboardIcon className="mr-2 h-4 w-4" />
-                  My Bookings
+                  <span>My Bookings</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem>
+                <DropdownMenuItem className="rounded-xl cursor-pointer py-2 hover:bg-indigo-50/60 hover:text-indigo-600 transition-colors">
                   <Heart className="mr-2 h-4 w-4" />
-                  Wishlist
+                  <span>Wishlist</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="my-1 bg-slate-100" />
 
-                <DropdownMenuItem onClick={() => navigate("/settings")}>
+                <DropdownMenuItem
+                  className="rounded-xl cursor-pointer py-2 hover:bg-indigo-50/60 hover:text-indigo-600 transition-colors"
+                  onClick={() => navigate("/settings")}
+                >
                   <SettingsIcon className="mr-2 h-4 w-4" />
-                  Settings
+                  <span>Settings</span>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
-                  className="text-red-600"
+                  className="rounded-xl cursor-pointer py-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50 transition-colors"
                   onClick={handleLogout}
                 >
                   <LogOutIcon className="mr-2 h-4 w-4" />
-                  Log out
+                  <span>Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Button
-                variant="outline"
-                className="rounded-full px-6"
+                variant="ghost"
+                className="rounded-full px-5 h-9 text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer"
                 onClick={() => navigate("/login")}
               >
                 Login
               </Button>
 
               <Button
-                className="rounded-full px-6 bg-indigo-600 hover:bg-indigo-700"
+                className="rounded-full px-5 h-9 text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
                 onClick={() => navigate("/signup")}
               >
-                Sign Up
+                <span>Sign Up</span>
+                <Sparkles className="w-3.5 h-3.5 ml-1.5" />
               </Button>
             </div>
           )}

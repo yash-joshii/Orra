@@ -5,6 +5,7 @@ import { Card, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Calendar, MapPinIcon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import LazyImage from './LazyImage'
 
 const badgeConfig = {
     PENDING: {
@@ -52,15 +53,11 @@ const MyBookingsCard = ({ booking }) => {
         <Card className={`relative mx-auto w-full max-w-[800px] min-h-[180px] flex flex-row items-center justify-between p-4 ${status === 'ACTIVE' ? 'border-black' : ''}`}>
             
             {/* Product Image */}
-            <img
-                src={productImage}
-                alt={productName}
-                className="w-[220px] h-[130px] object-cover rounded-[16px] bg-slate-100 flex-shrink-0"
-                onError={(e) => {
-                    e.target.onerror = null
-                    e.target.src = "https://via.placeholder.com/240x130?text=No+Image"
-                }}
-            />
+            <LazyImage
+    src={productImage}
+    alt={productName}
+    className="w-[220px] h-[130px] object-cover rounded-[16px] bg-slate-100 flex-shrink-0"
+/>
 
             <CardHeader className="flex-1 flex flex-col gap-2 px-6 py-2">
                 <div>

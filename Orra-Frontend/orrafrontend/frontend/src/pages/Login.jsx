@@ -3,8 +3,17 @@ import { GetCurrentUser, SignIn, SignInWithGoogle } from "@/api/authApi";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { toast } from 'react-toastify';
-import { setError, setLoading, setCredentials } from "@/redux/slices/authslices";
+import { toast } from "react-toastify";
+// import { GetCurrentUser, SignIn } from "@/api/authApi";
+import {
+  setError,
+  setLoading,
+  setCredentials,
+} from "@/redux/slices/authslices";
+// import { toast } from "sonner";
+const ADMIN_EMAIL = "yashjoshi.yj989@gmail.com";
+// import { toast } from 'react-toastify';
+// import { setError, setLoading, setCredentials } from "@/redux/slices/authslices";
 
 const Login = () => {
   const [formData, setFormdata] = useState({
@@ -31,7 +40,12 @@ const Login = () => {
 
       toast.success("Login Successful");
 
-      navigate("/");
+      // Redirect based on email
+      if (meResponse.data.roles?.includes("ADMIN")) {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       dispatch(setLoading(false));
 
@@ -48,7 +62,6 @@ const Login = () => {
       {/* LEFT SIDE */}
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-white px-8 py-12">
         <div className="w-full max-w-md">
-
           <h1 className="text-5xl font-bold text-gray-900 mb-3">
             Welcome back
           </h1>
@@ -83,12 +96,9 @@ const Login = () => {
           </div>
 
           <form onSubmit={handleSubmit}>
-
             {/* Email */}
             <div className="mb-5">
-              <label className="block mb-2 font-medium">
-                Email
-              </label>
+              <label className="block mb-2 font-medium">Email</label>
 
               <input
                 value={formData.email}
@@ -106,9 +116,7 @@ const Login = () => {
 
             {/* Password */}
             <div className="mb-5">
-              <label className="block mb-2 font-medium">
-                Password
-              </label>
+              <label className="block mb-2 font-medium">Password</label>
 
               <input
                 value={formData.password}
@@ -131,10 +139,7 @@ const Login = () => {
                 Remember me
               </label>
 
-              <a
-                href="#"
-                className="text-purple-700 text-sm hover:underline"
-              >
+              <a href="#" className="text-purple-700 text-sm hover:underline">
                 Forgot password?
               </a>
             </div>
@@ -146,24 +151,22 @@ const Login = () => {
             >
               Sign In
             </button>
-
           </form>
 
           <p className="text-center mt-6 text-gray-500">
             Don't have an account?{" "}
             <Link
               to="/signup"
-              className="text-[#544be9] font-medium cursor-pointer">
+              className="text-[#544be9] font-medium cursor-pointer"
+            >
               Sign up
             </Link>
           </p>
-
         </div>
       </div>
 
       {/* RIGHT SIDE */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-purple-950 via-purple-800 to-indigo-950 items-center justify-center">
-
         <div className="absolute w-[700px] h-[700px] rounded-full bg-purple-400/10 top-[-250px] right-[-200px]" />
         <div className="absolute w-[500px] h-[500px] rounded-full bg-indigo-400/10 bottom-[-150px] left-[-100px]" />
         <div className="absolute w-[300px] h-[300px] rounded-full bg-pink-400/10 top-[150px] left-[150px]" />
@@ -184,7 +187,6 @@ const Login = () => {
             <div className="w-3 h-3 rounded-full bg-white/40"></div>
           </div>
         </div>
-
       </div>
     </div>
   );

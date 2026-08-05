@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import { Calendar, ArrowRight } from "lucide-react";
+
 import Bookings from "@/pages/Bookings";
 import { getMyBookings } from "@/api/bookingApi";
 import { setCurrentBooking } from "@/redux/slices/bookingSlice";
+import LogoLoader from "@/components/common/LogoLoader";
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -15,7 +19,7 @@ const Cart = () => {
   useEffect(() => {
     const userId = user?.userId || user?.id;
 
-    // 💡 IF Redux already has an active booking, DO NOT set loading or call API
+    // IF Redux already has an active booking, DO NOT set loading or call API
     if (userId && !currentBooking) {
       setLoading(true);
       getMyBookings(userId)
@@ -42,12 +46,11 @@ const Cart = () => {
     }
   }, [user, currentBooking, dispatch]);
 
-  // 1. Show Loading Spinner ONLY during the initial background fetch when Redux is empty
+  // 1. Show Loading Spinner ONLY during initial background fetch when Redux is empty
   if (loading && !currentBooking) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-2">
-        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-slate-500 text-sm font-medium">Checking booking status...</p>
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <LogoLoader />
       </div>
     );
   }
@@ -62,32 +65,36 @@ const Cart = () => {
     return <Bookings bookingData={currentBooking} />;
   }
 
-  // 4. Render Empty State if no active booking exists
+  // 4. Render Enhanced Empty State if no active booking exists
   return (
-    <div className="flex flex-col items-center justify-center min-h-[65vh] w-full px-4">
-      <div className="bg-slate-100 p-6 rounded-full mb-4">
-        <svg
-          className="w-12 h-12 text-slate-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+    <div className="min-h-[70vh] flex flex-col items-center justify-center w-full px-6 py-12">
+      <div className="max-w-md w-full bg-white rounded-3xl border border-slate-200/80 shadow-xs p-10 text-center space-y-6">
+        
+        {/* Icon Badge */}
+        <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mx-auto">
+          <Calendar className="w-8 h-8" strokeWidth={1.75} />
+        </div>
+
+        {/* Text Details */}
+        <div className="space-y-2">
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            No Active Bookings
+          </h1>
+          <p className="text-xs text-slate-500 font-medium leading-relaxed">
+            You don't have any pending requests or payments at the moment. Explore our catalog to find gear for your next project.
+          </p>
+        </div>
+
+        {/* Action Button */}
+        <Link
+          to="/browserdevices"
+          className="inline-flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-xs"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="1.5"
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-          />
-        </svg>
+          <span>Browse Marketplace</span>
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+
       </div>
-
-      <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 text-center tracking-tight">
-        No Active Bookings
-      </h1>
-
-      <p className="mt-2 text-base text-slate-500 text-center max-w-md">
-        You don't have any pending requests or payments at the moment.
-      </p>
     </div>
   );
 };

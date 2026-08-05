@@ -13,6 +13,7 @@ import org.hibernate.annotations.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -67,8 +68,8 @@ public class ProductList {
   @Column(name = "is_active")
   private Boolean isActive = true;
 
-  //  @Column(name = "created_at")
-  //  private LocalDateTime createdAt;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     @Column(name ="purchase_year")
     private Integer purchaseYear;

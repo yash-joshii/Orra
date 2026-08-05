@@ -167,7 +167,7 @@ const ProductCard = ({ data }) => {
               onClick={() => navigate(`/booking/${data.productId}`)}
               className="bg-black w-[100%] h-[10%] p-2 rounded-[12px] shadow-[rgba(50,50,93,0.25)_0px_2px_5px_-1px,rgba(0,0,0,0.3)_0px_1px_3px_-1px] cursor-pointer hover:bg-[#5650cc]"
             >
-              <Calendar className="text-white w-4 h-4" />
+              <span className="text-white ">Book</span>
             </button>
           </div>
         )}

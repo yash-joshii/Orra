@@ -1,0 +1,11 @@
+﻿bin/
+obj/
+**/bin/
+**/obj/
+.vs/
+*.user
+appsettings.Development.json
+Dockerfile
+.dockerignore
+.git/
+.gitignore

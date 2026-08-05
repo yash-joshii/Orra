@@ -24,10 +24,7 @@ namespace Paymentapi.Consumers
         {
             var factory = new ConnectionFactory
             {
-                HostName = _configuration["RabbitMQ:HostName"] ?? "localhost",
-                Port = int.Parse(_configuration["RabbitMQ:Port"] ?? "5672"),
-                UserName = _configuration["RabbitMQ:UserName"] ?? "guest",
-                Password = _configuration["RabbitMQ:Password"] ?? "guest"
+                Uri = new Uri(_configuration["RabbitMQ:Url"]!)
             };
 
             _connection = await factory.CreateConnectionAsync(stoppingToken);

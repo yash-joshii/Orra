@@ -1,4 +1,3 @@
-
 import FeatureCard from "../components/common/FeatureCard";
 
 import {
@@ -8,6 +7,7 @@ import {
   Zap,
   RotateCcw,
   HeartHandshake,
+  Sparkles,
 } from "lucide-react";
 
 const features = [
@@ -56,28 +56,47 @@ const features = [
 
 const WhyChooseOrra = () => {
   return (
-    <div className="why-choose-orra-section bg-[#071428] min-h-screen py-24">
+    <div className="why-choose-orra-section relative bg-[#071428] text-white min-h-screen py-20 lg:py-28 overflow-hidden font-sans">
       
-      <div className="section-container max-w-7xl mx-auto px-6">
+      {/* Subtle Background Glows */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none -z-0" />
+      <div className="absolute bottom-10 right-10 w-[400px] h-[300px] bg-cyan-500/5 blur-[100px] rounded-full pointer-events-none -z-0" />
 
-        <h1 className=" section-heading text-center text-white text-5xl font-bold ">
+      <div className="section-container relative z-10 max-w-7xl mx-auto px-6 lg:px-12">
+
+        {/* Header Section */}
+        <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-20">
+          
+          {/* Pill Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-950/60 border border-indigo-800/50 text-indigo-300 text-xs font-semibold mb-6 shadow-sm backdrop-blur-sm">
+            <Sparkles className="w-3.5 h-3.5 text-[#5046E5]" />
+            <span>Built For Peace Of Mind</span>
+          </div>
+
+          <h1 className="section-heading text-[#FFFFFF] text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
             Why Choose ORRA?
-        </h1>
+          </h1>
 
-        <p className=" section-description text-center text-gray-400 max-w-3xl mx-auto mt-6 text-lg ">
-            We've built a platform that prioritizes trust, safety,
-            and convenience for both owners and renters.
-        </p>
+          <p className="section-description text-slate-400 max-w-2xl mx-auto mt-4 text-base sm:text-lg leading-relaxed">
+            We've built a platform that prioritizes trust, safety, and
+            convenience for both owners and renters.
+          </p>
+        </div>
 
-        <div className=" feature-cards-container grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16 ">
-            {features.map((feature, index) => (
-                <FeatureCard
-                key={index}
+        {/* Feature Cards Grid */}
+        <div className="feature-cards-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          {features.map((feature, index) => (
+            <div 
+              key={index}
+              className="transition-transform duration-300 hover:-translate-y-1.5"
+            >
+              <FeatureCard
                 icon={feature.icon}
                 title={feature.title}
                 description={feature.description}
-                />
-            ))}
+              />
+            </div>
+          ))}
         </div>
 
       </div>

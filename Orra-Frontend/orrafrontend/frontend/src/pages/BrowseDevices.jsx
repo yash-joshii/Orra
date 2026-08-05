@@ -50,11 +50,19 @@ const BrowseDevices = () => {
       )
     : products;
 
+    // Sort by most recent first
+const sortedProducts = [...filteredProducts].sort(
+  (a, b) => b.productId - a.productId
+);
+
+
   // Search Filter
-  const displayProducts = filteredProducts.filter((item) =>
+  const displayProducts = sortedProducts.filter((item) =>
     item.productName?.toLowerCase().includes(search.toLowerCase())
   );
 
+
+// Search Filter
   useEffect(() => {
     setCurrentPage(1);
   }, [categoryFilter, search]);

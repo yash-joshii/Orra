@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Heart, Share2, Star, MapPin, CheckCircle2 } from "lucide-react";
+import { useSelector } from "react-redux";
+import { Heart, Share2, MapPin, CheckCircle2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import {
   addToWishlist,
   removeFromWishlist,
@@ -13,178 +13,220 @@ import ProductDetailsSkeleton from "./ProductDetailsSkeleton";
 const ProductDetails = ({ data, loading }) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  // Retrieve authenticated user from Redux store
+  const { user } = useSelector((state) => state.auth);
+  const userId = user?.id || user?.userId;
+
   useEffect(() => {
-    if (!data?.productId) return;
+    if (!data?.productId || !userId) return;
 
     const fetchWishlistStatus = async () => {
       try {
         const response = await checkWishlist(userId, data.productId);
-        setIsWishlisted(response.data);
+        setIsWishlisted(Boolean(response?.data));
       } catch (error) {
-        console.log(error);
+        console.error("Failed to check wishlist status:", error);
       }
     };
-    fetchWishlistStatus();
-  }, [data]);
-  const userId = 1;
 
- const images =
-  data?.images?.length > 0
-    ? data.images
+    fetchWishlistStatus();
+  }, [data?.productId, userId]);
+
+  // Gallery Images Fallback
+  const images =
+    data?.images?.length > 0
+      ? data.images
+      : [
+          {
+            imageUrl: "https://placehold.co/800x500?text=No+Image+Available",
+          },
+        ];
+
+  // Included Items Array
+  const includedItems = Array.isArray(data?.productspec)
+    ? data.productspec
     : [
-        {
-          imageUrl: "https://placehold.co/800x500?text=No+Image",
-        },
+        "Camera Body",
+        "24-70mm f/2.8 Lens",
+        "2x Batteries",
+        "Dual Charger",
+        "128GB SD Card",
+        "Carrying Case",
+        "Lens Cleaning Kit",
       ];
 
-  const includedItems = data?.productspec || [
-    "Camera Body",
-    "24-70mm f/2.8 Lens",
-    "2x Batteries",
-    "Dual Charger",
-    "128GB SD Card",
-    "Carrying Case",
-    "Lens Cleaning Kit",
-    "Shoulder Strap",
-  ];
-
-  const feature = data?.description
+  // Key Features Bullet List
+  const features = data?.description
     ? data.description
         .split(".")
         .map((item) => item.trim())
         .filter((item) => item.length > 0)
     : [];
 
+  // Toggle Wishlist Action
   const handleWishlist = async (e) => {
     e.stopPropagation();
 
-    console.log("Heart clicked");
-    console.log("Product ID:", data.productId);
+    if (!userId) {
+      alert("Please log in to save items to your wishlist.");
+      return;
+    }
 
     try {
+      setWishlistLoading(true);
       if (isWishlisted) {
         await removeFromWishlist(userId, data.productId);
         setIsWishlisted(false);
-        console.log("Removed from wishlist");
       } else {
         await addToWishlist(userId, data.productId);
         setIsWishlisted(true);
-        console.log("Added to wishlist");
       }
     } catch (error) {
-      console.error("Wishlist Error:", error.response?.data || error.message);
+      console.error("Wishlist action error:", error.response?.data || error.message);
+    } finally {
+      setWishlistLoading(false);
     }
   };
+
+  // Share Listing Logic
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: data?.productName || "Equipment Listing",
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.log("Share canceled", err);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Listing URL copied to clipboard!");
+    }
+  };
+
   if (loading) {
     return <ProductDetailsSkeleton />;
   }
+
   return (
-    <div className="max-w-5xl mx-auto px-5 py-10">
-      {/* Image */}
-      <div className="relative">
-        <LazyImage
-          src={images[selectedImage]?.imageUrl}
-          alt={data?.productName}
-          className="w-full h-[500px] rounded-3xl object-cover"
-        />
-
-        <div className="absolute top-4 right-4 flex gap-2">
-          <button
-            onClick={handleWishlist}
-            className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition"
-          >
-            <Heart
-              size={20}
-              className={
-                isWishlisted ? "fill-red-500 text-red-500" : "text-gray-500"
-              }
-            />
-          </button>
-
-          <button className="bg-white rounded-full p-2 shadow-md hover:bg-gray-100">
-            <Share2 size={18} />
-          </button>
-        </div>
-      </div>
-
-      {/* Thumbnail */}
-      <div className="flex gap-3 mt-4">
-        {images.map((img, index) => (
+    <div className="space-y-8">
+      
+      {/* Primary Gallery Section */}
+      <div className="space-y-4">
+        {/* Main Banner Image */}
+        <div className="relative overflow-hidden rounded-3xl bg-slate-100 border border-slate-200/60 shadow-xs">
           <LazyImage
-            key={img.id ?? index}
-            src={img.imageUrl}
-            alt=""
-            onClick={() => setSelectedImage(index)}
-            className={`w-20 h-20 rounded-xl object-cover cursor-pointer border-2 transition ${
-              selectedImage === index
-                ? "border-indigo-600"
-                : "border-transparent"
-            }`}
+            src={images[selectedImage]?.imageUrl}
+            alt={data?.productName || "Product photo"}
+            className="w-full h-[380px] sm:h-[480px] object-cover transition-all duration-300"
           />
-        ))}
+
+          {/* Quick Action Floating Buttons */}
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            <button
+              type="button"
+              disabled={wishlistLoading}
+              onClick={handleWishlist}
+              className="p-2.5 rounded-full bg-white/90 backdrop-blur-md shadow-md hover:bg-white active:scale-95 transition-all text-slate-700 cursor-pointer disabled:opacity-50"
+              aria-label="Wishlist button"
+            >
+              <Heart
+                size={18}
+                className={
+                  isWishlisted ? "fill-rose-500 text-rose-500" : "text-slate-600"
+                }
+              />
+            </button>
+
+            <button
+              type="button"
+              onClick={handleShare}
+              className="p-2.5 rounded-full bg-white/90 backdrop-blur-md shadow-md hover:bg-white active:scale-95 transition-all text-slate-700 cursor-pointer"
+              aria-label="Share button"
+            >
+              <Share2 size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* Thumbnail Gallery Row */}
+        {images.length > 1 && (
+          <div className="flex items-center gap-3 overflow-x-auto pb-1 pt-1 scrollbar-none">
+            {images.map((img, index) => (
+              <button
+                key={img.id ?? index}
+                type="button"
+                onClick={() => setSelectedImage(index)}
+                className={`relative shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${
+                  selectedImage === index
+                    ? "border-indigo-600 ring-2 ring-indigo-600/20 shadow-xs"
+                    : "border-transparent opacity-70 hover:opacity-100"
+                }`}
+              >
+                <LazyImage
+                  src={img.imageUrl}
+                  alt={`Thumbnail ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Product Info */}
-      <div className="mt-7">
-        <h1 className="text-3xl font-bold">{data?.productName}</h1>
+      {/* Title & Metadata Header */}
+      <div className="space-y-2 border-b border-slate-200/60 pb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+          {data?.productName || "Unnamed Product"}
+        </h1>
 
-        <div className="flex items-center gap-2 mt-2">
-          {/* <Star
-            size={16}
-            className="fill-yellow-400 text-yellow-400"
-          />
-
-          <span className="font-semibold">
-            {data?.rating || 4.9}
-          </span>
-
-          <span className="text-sm text-gray-500">
-            ({data?.reviews || 24} Reviews)
-          </span>
-
-          <span className="text-gray-300">•</span> */}
-
-          <MapPin size={16} className="text-gray-500" />
-
-          <span className="text-sm text-gray-500">
-            {data?.location || "Downtown, San Francisco"}
-          </span>
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <MapPin size={15} className="text-indigo-600 shrink-0" />
+          <span>{data?.location || "Downtown, San Francisco"}</span>
         </div>
       </div>
 
-      {/* About */}
-      <div className="mt-10 border-t pt-8">
-        <h2 className="text-xl font-bold mb-4">About this product</h2>
+      {/* Description & Key Points */}
+      <div className="space-y-4 border-b border-slate-200/60 pb-8">
+        <h2 className="text-lg font-bold text-slate-900">About this equipment</h2>
 
-        <p className="text-gray-600 leading-7">
+        <p className="text-sm text-slate-600 leading-relaxed">
           {data?.description ||
-            "Perfect condition Sony A7 IV full-frame mirrorless camera paired with the versatile Sony FE 24-70mm f/2.8 GM lens. This setup is perfect for both professional photography and high-end video work."}
+            "No description provided for this equipment listing."}
         </p>
 
-        <ul className="mt-6 space-y-2">
-          {feature.map((feature, index) => (
-            <div key={index} className="flex gap-3">
-              <CheckCircle2 className="w-5 h-5 text-green-500 mt-1" />
-              <p className="text-gray-600">{feature}</p>
-            </div>
-          ))}
-        </ul>
+        {features.length > 0 && (
+          <ul className="space-y-2 pt-2">
+            {features.map((featureItem, idx) => (
+              <li key={idx} className="flex items-start gap-3 text-xs text-slate-700">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <span>{featureItem}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
-      {/* Included */}
-      <div className="mt-12 border-t pt-8">
-        <h2 className="text-xl font-bold mb-6">What's included</h2>
+      {/* Included Specifications */}
+      <div className="space-y-4">
+        <h2 className="text-lg font-bold text-slate-900">What's included in the box</h2>
 
-        <div className="grid md:grid-cols-2 gap-y-4">
-          {includedItems.map((item, index) => (
-            <div key={index} className="flex items-center gap-3">
-              <CheckCircle2 className="w-5 h-5 text-green-500" />
-
-              <span className="text-gray-700">{item}</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {includedItems.map((item, idx) => (
+            <div
+              key={idx}
+              className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100/80 text-xs font-medium text-slate-700"
+            >
+              <CheckCircle2 className="w-4 h-4 text-indigo-600 shrink-0" />
+              <span>{item}</span>
             </div>
           ))}
         </div>
       </div>
+
     </div>
   );
 };
