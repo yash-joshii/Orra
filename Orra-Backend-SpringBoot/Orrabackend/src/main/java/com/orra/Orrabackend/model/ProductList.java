@@ -1,5 +1,6 @@
 package com.orra.Orrabackend.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.orra.Orrabackend.enums.Category;
 import com.orra.Orrabackend.enums.ListingStatus;
 //import com.orra.Orrabackend.enums.ProductCondition;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.Type;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -101,6 +103,28 @@ public class ProductList {
 
     @Column(name = "is_available", nullable = false)
     private Boolean isAvailable = true;
+
+    // 1. Calculate rental days between availableFrom and availableTo
+    @Transient
+    @JsonProperty("rentals")
+    public Long getRentals() {
+        if (availableFrom != null && availableTo != null) {
+            long days = ChronoUnit.DAYS.between(availableFrom, availableTo) + 1; // +1 to include start day
+            return days >= 0 ? days : 0L;
+        }
+        return 0L;
+    }
+
+    // 2. Calculate earnings = (rentals * dailyRate)
+    @Transient
+    @JsonProperty("earnings")
+    public BigDecimal getEarnings() {
+        Long totalRentals = getRentals();
+        if (dailyRate != null && totalRentals > 0) {
+            return dailyRate.multiply(BigDecimal.valueOf(totalRentals));
+        }
+        return BigDecimal.ZERO;
+    }
 }
 
 

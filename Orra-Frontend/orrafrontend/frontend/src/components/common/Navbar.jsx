@@ -314,12 +314,18 @@ const Navbar = () => {
                   <span>Profile</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem className="rounded-xl cursor-pointer py-2 hover:bg-indigo-50/60 hover:text-indigo-600 transition-colors">
+                <DropdownMenuItem
+                  onClick={() => navigate("/my-listings")}
+                  className="cursor-pointer"
+                >
                   <Package className="mr-2 h-4 w-4" />
-                  <span>My Products</span>
+                  My Listings
                 </DropdownMenuItem>
 
-                <DropdownMenuItem className="rounded-xl cursor-pointer py-2 hover:bg-indigo-50/60 hover:text-indigo-600 transition-colors">
+                <DropdownMenuItem
+                  onClick={() => navigate("/mybookings")}
+                  className="cursor-pointer"
+                >
                   <LayoutDashboardIcon className="mr-2 h-4 w-4" />
                   <span>My Bookings</span>
                 </DropdownMenuItem>
