@@ -163,10 +163,8 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        
         {/* Brand & Nav */}
         <div className="flex items-center gap-6 lg:gap-8 shrink-0">
-          
           {/* ORIGINAL LOGO (UNTOUCHED) */}
           <Link
             to="/"
@@ -211,7 +209,6 @@ const Navbar = () => {
 
         {/* Search & Actions */}
         <div className="flex items-center gap-3 lg:gap-4 shrink-0">
-          
           {/* Search Input */}
           <div className="relative hidden lg:block w-[200px] xl:w-[260px]">
             <div className="group flex items-center bg-slate-100/80 hover:bg-slate-100 border border-slate-200/80 rounded-full px-3.5 py-1.5 focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all shadow-inner">
@@ -273,8 +270,7 @@ const Navbar = () => {
             </button>
           </Link>
 
-         
-  {user ? (
+          {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button className="flex  items-center gap-2 p-0 bg-transparent border-none hover:rounded-[40px] hover:border-gray-300 hover:border hover:bg-gray-100 transition duration-200 focus:bg-background focus:border-none">
@@ -330,9 +326,9 @@ const Navbar = () => {
                   <span>My Bookings</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuItem className="rounded-xl cursor-pointer py-2 hover:bg-indigo-50/60 hover:text-indigo-600 transition-colors">
+                <DropdownMenuItem onClick={() => navigate("/wishlist")}>
                   <Heart className="mr-2 h-4 w-4" />
-                  <span>Wishlist</span>
+                  Wishlist
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator className="my-1 bg-slate-100" />
@@ -374,7 +370,6 @@ const Navbar = () => {
             </div>
           )}
         </div>
-
       </div>
     </header>
   );
