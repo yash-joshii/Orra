@@ -6,7 +6,6 @@ import com.orra.Orrabackend.enums.UserRole;
 import com.orra.Orrabackend.exception.UserNotFoundException;
 import com.orra.Orrabackend.model.User;
 import com.orra.Orrabackend.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -20,11 +19,9 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository repo;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository repo, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository repo) {
         this.repo = repo;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public List<User> getAll() {

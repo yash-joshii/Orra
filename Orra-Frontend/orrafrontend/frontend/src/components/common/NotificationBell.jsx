@@ -58,7 +58,7 @@ const NotificationBell = () => {
             const response = await getUnreadCount(user.userId);
             setUnreadCount((prevCount) => {
                 if (response.data.count > prevCount) {
-                    toast("You have a new notification");
+                
                 }
                 return response.data.count;
             });

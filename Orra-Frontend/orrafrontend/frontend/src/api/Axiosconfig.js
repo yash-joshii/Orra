@@ -3,18 +3,25 @@ import axios from "axios";
 
 
 const axiosinstance = axios.create({
-
-  baseURL:
-    import.meta.env.VITE_SPRINGBOOT_API_URL,
-
-  withCredentials: true,
-
+  baseURL: import.meta.env.VITE_SPRINGBOOT_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
-
 });
 
+axiosinstance.interceptors.request.use(async (config) => {
+
+  const { data } = await supabase.auth.getSession();
+
+  const token = data.session?.access_token;
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+
+});
 
 const paymentAxios = axios.create({
 
