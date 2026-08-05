@@ -1,9 +1,11 @@
 import React from "react";
-import { Button } from "../ui/button";
+import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import laptop from "../../assets/images/laptop.avif";
+
+import { Button } from "../ui/button";
 import SearchBar from "../common/SearchBar";
-import { Navigate, useNavigate } from "react-router-dom";
+import laptop from "../../assets/images/laptop.avif";
+
 const Landintro = () => {
   const navigate = useNavigate();
 

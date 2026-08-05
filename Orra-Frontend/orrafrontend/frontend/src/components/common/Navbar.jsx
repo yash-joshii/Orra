@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { searchProducts } from "@/api/listingApi";
+import { getWishlist } from "@/api/wishlist";
 import { NavLink, useNavigate, Link } from "react-router-dom";
 import { searchProducts } from "@/api/listingApi";
 import { logout } from "@/redux/slices/authslices";
@@ -31,7 +33,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import logo from "../../assets/logo/orralogo.svg";
+import { setLoading, setUser } from "@/redux/slices/userprofileSlice";
+import { getUser } from "@/api/userApi";
+import { setError } from "@/redux/slices/productslices";
+import { setWishlistCount } from "@/redux/slices/wishlistSlice";
 import NotificationBell from "./NotificationBell";
+
+const API_BASE_URL = import.meta.env.VITE_SPRINGBOOT_API_URL;
+
+const getAvatarSrc = (avatarPath) => {
+  if (!avatarPath) return null;
+  if (avatarPath.startsWith("http://") || avatarPath.startsWith("https://")) {
+    return avatarPath;
+  }
+  return `${API_BASE_URL}${avatarPath}`;
+};
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -61,6 +77,8 @@ const Navbar = () => {
   const user = useSelector((state) => state.auth.user);
   const userprofile = useSelector((state) => state.userProfile.user);
   const isOwner = userprofile?.roles?.includes("OWNER");
+  const currentUserId = user?.userId ?? user?.id;
+  const wishlistCount = useSelector((state) => state.wishlist.count);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -98,6 +116,23 @@ const Navbar = () => {
       dispatch(setError(err.message));
     }
   };
+
+  useEffect(() => {
+    const fetchWishlistCount = async () => {
+      try {
+        const response = await getWishlist(currentUserId);
+        dispatch(setWishlistCount(response.data?.length ?? 0));
+      } catch (err) {
+        console.error("Failed to fetch wishlist count:", err);
+      }
+    };
+
+    if (currentUserId) {
+      fetchWishlistCount();
+    } else {
+      dispatch(setWishlistCount(0));
+    }
+  }, [currentUserId, dispatch]);
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -164,6 +199,11 @@ const Navbar = () => {
                 }
               >
                 {item.name}
+                {item.name === "Wishlist" && wishlistCount > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[11px] font-bold leading-none">
+                    {wishlistCount}
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>
@@ -233,14 +273,14 @@ const Navbar = () => {
             </button>
           </Link>
 
-          {/* User Profile / Auth Action */}
-          {user ? (
+         
+  {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 p-1 pl-1 pr-2.5 h-auto bg-white hover:bg-slate-50 border border-slate-200/80 rounded-full transition-all duration-200 active:scale-95 cursor-pointer shadow-xs focus:outline-none">
-                  {userprofile?.avatarUrl ? (
+                <Button className="flex  items-center gap-2 p-0 bg-transparent border-none hover:rounded-[40px] hover:border-gray-300 hover:border hover:bg-gray-100 transition duration-200 focus:bg-background focus:border-none">
+                  {userprofile?.avatar ? (
                     <img
-                      src={userprofile.avatarUrl}
+                      src={getAvatarSrc(userprofile.avatar)}
                       alt="profile"
                       className="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/20"
                     />
@@ -269,7 +309,7 @@ const Navbar = () => {
 
                 <DropdownMenuSeparator className="my-1 bg-slate-100" />
 
-                <DropdownMenuItem className="rounded-xl cursor-pointer py-2 hover:bg-indigo-50/60 hover:text-indigo-600 transition-colors">
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
                   <UserIcon className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
@@ -333,5 +373,4 @@ const Navbar = () => {
     </header>
   );
 };
-
 export default Navbar;
