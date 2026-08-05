@@ -35,7 +35,6 @@ export const SignInWithGoogle = async () => {
 };
 
 export const SignIn = async (data) => {
-  console.log("Sign In:", data);
 
   // Step 1 — authenticate with Supabase
   const { data: authData, error } = await supabase.auth.signInWithPassword({
