@@ -29,6 +29,7 @@ import {
 import { useSearchParams } from "react-router-dom";
 import useProduct from "@/hooks/useProduct";
 import ProductCardSkeleton from "@/components/common/ProductCardSkeleton";
+import { PackageSearch } from "lucide-react";
 
 const BrowseDevices = () => {
   const { products, loading, error } = useProduct();
@@ -161,14 +162,26 @@ const BrowseDevices = () => {
         </div>
 
         <div className="w-[75%]">
-          <div className="flex flex-wrap gap-[30px]">
-            {paginatedProducts.map((item, index) => (
-              <ProductCard
-                key={item.productId ?? `product-${startIndex + index}`}
-                data={item}
-              />
-            ))}
-          </div>
+          {paginatedProducts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center bg-white rounded-xl">
+              <PackageSearch size={48} className="text-gray-300 mb-4" />
+              <p className="text-lg font-semibold text-gray-700">
+                No devices available
+              </p>
+              <p className="text-sm text-gray-400 mt-1">
+                Try a different category or search term.
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-[30px]">
+              {paginatedProducts.map((item, index) => (
+                <ProductCard
+                  key={item.productId ?? `product-${startIndex + index}`}
+                  data={item}
+                />
+              ))}
+            </div>
+          )}
 
           {totalPages > 1 && (
             <Pagination className="mt-10">

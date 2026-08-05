@@ -1,5 +1,4 @@
 import React from "react";
-// import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 
@@ -9,8 +8,12 @@ import {
   removeFromWishlist,
   checkWishlist,
 } from "@/api/wishlist";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setSelectedProduct } from "@/redux/slices/productslices";
+import {
+  incrementWishlistCount,
+  decrementWishlistCount,
+} from "@/redux/slices/wishlistSlice";
 import {
   Card,
   CardAction,
@@ -32,7 +35,6 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import LazyImage from "./LazyImage";
-import { useSelector } from "react-redux";
 
 const ProductCard = ({ data }) => {
   const navigate = useNavigate();
@@ -43,41 +45,48 @@ const ProductCard = ({ data }) => {
   const currentUserId = useSelector((state) => state.auth.user?.userId);
   const isOwner = currentUserId === data.owner?.userId;
 
-  // Temporary userId
-  const userId = 1;
   useEffect(() => {
     const fetchWishlistStatus = async () => {
       try {
-        const response = await checkWishlist(userId, data.productId);
+        const response = await checkWishlist(currentUserId, data.productId);
         setLiked(response.data);
       } catch (error) {
         console.error(error);
       }
     };
 
-    if (data?.productId) {
+    if (data?.productId && currentUserId) {
       fetchWishlistStatus();
     }
-  }, [data]);
-const imageUrl =
-  data.images && data.images.length > 0
-    ? data.images[0].imageUrl
-    : "https://placehold.co/400x200?text=No+Image";
+  }, [data, currentUserId]);
+
+  const imageUrl =
+    data.images && data.images.length > 0
+      ? data.images[0].imageUrl
+      : "https://placehold.co/400x200?text=No+Image";
 
   const handleWishlist = async (e) => {
     e.stopPropagation();
+
+    if (!currentUserId) {
+      console.warn("No logged-in user, cannot update wishlist");
+      navigate("/login");
+      return;
+    }
 
     console.log("Heart clicked");
     console.log("Product ID:", data.productId);
 
     try {
       if (liked) {
-        await removeFromWishlist(userId, data.productId);
+        await removeFromWishlist(currentUserId, data.productId);
         setLiked(false);
+        dispatch(decrementWishlistCount());
         console.log("Removed from wishlist");
       } else {
-        await addToWishlist(userId, data.productId);
+        await addToWishlist(currentUserId, data.productId);
         setLiked(true);
+        dispatch(incrementWishlistCount());
         console.log("Added to wishlist");
       }
     } catch (error) {
@@ -151,7 +160,7 @@ const imageUrl =
             <span className="text-[10px] text-gray-300 mt-[16%]"> /day</span>
           </span>
         </div>
-        
+
         {!isOwner && (
           <div className="bookbtn mr-[2%]">
             <button
