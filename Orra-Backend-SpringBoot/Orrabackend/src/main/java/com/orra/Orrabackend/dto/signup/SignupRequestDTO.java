@@ -18,7 +18,7 @@ public class SignupRequestDTO {
     @Email
     private String email;
 
-    @NotBlank
+    // Optional for OAuth providers (Google/Apple) which don't supply a phone number
     private String phone;
 
     @NotBlank

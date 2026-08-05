@@ -6,6 +6,7 @@ import com.orra.Orrabackend.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/profile")
@@ -36,5 +37,18 @@ public class UserProfileController {
 
         Long userId = (Long) authentication.getPrincipal();
         return userProfileService.updateProfile(userId, dto);
+    }
+
+    @PostMapping("/avatar")
+    public UserProfileResponseDTO uploadAvatar(
+            @RequestParam("avatar") MultipartFile file,
+            Authentication authentication) {
+
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new RuntimeException("User not logged in");
+        }
+
+        Long userId = (Long) authentication.getPrincipal();
+        return userProfileService.updateAvatar(userId, file);
     }
 }

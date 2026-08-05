@@ -37,8 +37,8 @@ public class User {
 //    @Column(nullable = false)
 //    private String password;
 
-//    @Column(name = "profile_pic")
-//    private String profilePic;
+    @Column(name = "avatar")
+    private String avatar;
 
     private String address;
 
