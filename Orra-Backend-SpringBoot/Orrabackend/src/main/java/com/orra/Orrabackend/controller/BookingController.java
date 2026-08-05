@@ -2,7 +2,7 @@ package com.orra.Orrabackend.controller;
 
 import com.orra.Orrabackend.dto.booking.BookingRequestDTO;
 import com.orra.Orrabackend.dto.booking.BookingResponseDTO;
-import com.orra.Orrabackend.service.bookingService;
+import com.orra.Orrabackend.service.BookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/api/booking")
 @RequiredArgsConstructor
 public class BookingController {
-    private final bookingService bookingService;
+    private final BookingService bookingService;
 
     @PostMapping
     public ResponseEntity<BookingResponseDTO> createBooking(@RequestBody BookingRequestDTO request){

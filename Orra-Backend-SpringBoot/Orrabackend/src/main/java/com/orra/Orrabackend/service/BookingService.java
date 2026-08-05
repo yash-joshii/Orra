@@ -24,11 +24,11 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class bookingService {
+public class BookingService {
     private final BookingRepository bookingRepository;
     private final ProductListRepository productListRepository;
     private final UserRepository userRepository;
-//    private final TransactionService transactionService;
+    //    private final TransactionService transactionService;
     private final NotificationService notificationService;
 
     private static final long ACCEPT_TO_PAY_TIMEOUT_DAYS = 1;
@@ -81,9 +81,6 @@ public class bookingService {
                 request.getEndDateTime()
         );
 
-        if (rentalDays == 0) {
-            rentalDays = 1;
-        }
         // Prevent 0 days if dates are on the same day
         if (rentalDays == 0) {
             rentalDays = 1;
@@ -139,7 +136,6 @@ public class bookingService {
     }
 
     @Transactional
-
     public BookingResponseDTO acceptBooking(Long bookingId) {
 
         Booking booking = bookingRepository.findById(bookingId)
@@ -170,7 +166,7 @@ public class bookingService {
 
                 notificationService.createNotification(
                         otherBooking.getRenter(),
-                        otherBooking,
+                        null,
                         "Your booking request was not selected by the owner.",
                         "BOOKING_REJECTED"
                 );
@@ -228,6 +224,7 @@ public class bookingService {
         return toResponseDTO(savedBooking);
     }
 
+    @Transactional
     public BookingResponseDTO rejectBooking(Long bookingId){
         Booking booking = getBookingOrThrow(bookingId);
         if(booking.getStatus() != BookingStatus.PENDING && booking.getStatus() != BookingStatus.ACCEPTED){
@@ -238,6 +235,7 @@ public class bookingService {
         return responseDTO;
     }
 
+    @Transactional(readOnly = true)
     public List<BookingResponseDTO> getMyBookings(Long renterId){
         return bookingRepository.findByRenter_Id(renterId)
                 .stream()
@@ -245,6 +243,7 @@ public class bookingService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<BookingResponseDTO> getIncomingRequests(Long ownerId){
         return bookingRepository.findByListing_OwnerIdAndStatus(ownerId, BookingStatus.PENDING)
                 .stream()
@@ -252,6 +251,7 @@ public class bookingService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<BookingResponseDTO> getOwnerBookings(Long ownerId){
         return bookingRepository.findByListing_OwnerId(ownerId)
                 .stream()
@@ -259,11 +259,13 @@ public class bookingService {
                 .collect((Collectors.toList()));
     }
 
+    @Transactional(readOnly = true)
     public BookingResponseDTO getBookingById(Long bookingId){
         Booking booking = getBookingOrThrow(bookingId);
         return toResponseDTO(booking);
     }
 
+    @Transactional
     public BookingResponseDTO cancelBooking(Long bookingId, Long renterId){
         Booking booking = getBookingOrThrow(bookingId);
 
@@ -297,7 +299,7 @@ public class bookingService {
 
                 notificationService.createNotification(
                         booking.getRenter(),
-                        booking,
+                        null,
                         "Booking expired because payment was not completed.",
                         "PAYMENT_EXPIRED"
                 );
@@ -312,39 +314,32 @@ public class bookingService {
                 .orElseThrow(() -> new RuntimeException("Exception not Found"));
     }
 
-    public void requireStatus(Booking booking, BookingStatus expectedStatus){
-        if(booking.getStatus() != expectedStatus){
-            throw new IllegalStateException("Expected status '"
-                    + expectedStatus + "' but booking is '"
-                    + booking.getStatus() + "'");
+    private BookingStatus effectiveStatus(Booking booking) {
+        if (booking.getStatus() == BookingStatus.ACCEPTED
+                && booking.getAcceptedAt() != null
+                && Duration.between(booking.getAcceptedAt(), Instant.now())
+                .toDays() >= ACCEPT_TO_PAY_TIMEOUT_DAYS) {
+            return BookingStatus.REJECTED; // expired, display-only — scheduled job will actually delete/update it
         }
+        return booking.getStatus();
     }
 
-    private void applyExpiryIfNeeded(Booking booking){
-        Instant now = Instant.now();
-
-        if(booking.getStatus() == BookingStatus.ACCEPTED && booking.getAcceptedAt() != null){
-            long daysSinceAccepted = Duration.between(booking.getAcceptedAt(), now).toDays();
-            if(daysSinceAccepted >= ACCEPT_TO_PAY_TIMEOUT_DAYS){
-                booking.setStatus(BookingStatus.REJECTED);
-                bookingRepository.save(booking);
-            }
-        }
+    private BookingResponseDTO toResponseDTO(Booking booking) {
+        return buildResponseDTO(booking, null);
     }
 
-    private BookingResponseDTO toResponseDTO(Booking booking){
-        applyExpiryIfNeeded(booking);
+    private BookingResponseDTO toResponseDTOWithOverride(Booking booking, BookingStatus overrideStatus) {
+        return buildResponseDTO(booking, overrideStatus);
+    }
+
+    private BookingResponseDTO buildResponseDTO(Booking booking, BookingStatus overrideStatus) {
+        BookingStatus status = overrideStatus != null ? overrideStatus : booking.getStatus();
 
         return BookingResponseDTO.builder()
                 .bookingId(booking.getId())
                 .listingId(booking.getListing().getProductId())
                 .listingTitle(booking.getListing().getProductName())
-                .listingImage(
-                        booking.getListing().getImages() != null &&
-                                !booking.getListing().getImages().isEmpty()
-                                ? booking.getListing().getImages().get(0).getImageUrl()
-                                : null
-                )
+                .listingImage(null)
                 .dailyRate(booking.getListing().getDailyRate())
                 .ownerId(booking.getListing().getOwner().getId())
                 .ownerName(booking.getListing().getOwner().getName())
@@ -354,32 +349,8 @@ public class bookingService {
                 .endDateTime(booking.getEndDateTime())
                 .totalPrice(booking.getTotalPrice())
                 .depositAmount(booking.getDepositAmount())
-                .status(booking.getStatus())
-                .createdAt(booking.getCreatedAt())
-                .build();
-    }
-
-    private BookingResponseDTO toResponseDTOWithOverride(Booking booking, BookingStatus overrideStatus){
-        return BookingResponseDTO.builder()
-                .bookingId(booking.getId())
-                .listingId(booking.getListing().getProductId())
-                .listingTitle(booking.getListing().getProductName())
-                .listingImage(
-                        booking.getListing().getImages() != null &&
-                                !booking.getListing().getImages().isEmpty()
-                                ? booking.getListing().getImages().get(0).getImageUrl()
-                                : null
-                )
-                .dailyRate(booking.getListing().getDailyRate())
-                .ownerId(booking.getListing().getOwner().getId())
-                .ownerName(booking.getListing().getOwner().getName())
-                .renterId(booking.getRenter().getId())
-                .renterName(booking.getRenter().getName())
-                .startDateTime(booking.getStartDateTime())
-                .endDateTime(booking.getEndDateTime())
-                .totalPrice(booking.getTotalPrice())
-                .depositAmount(booking.getDepositAmount())
-                .status(overrideStatus)
+                .status(status)
+                .displayStatus(overrideStatus != null ? overrideStatus : effectiveStatus(booking))
                 .createdAt(booking.getCreatedAt())
                 .build();
     }
