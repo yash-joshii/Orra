@@ -1,4 +1,3 @@
-
 package com.orra.Orrabackend.service;
 
 import com.orra.Orrabackend.enums.BookingStatus;
@@ -9,6 +8,7 @@ import com.orra.Orrabackend.repository.CategoryCountProjection;
 import com.orra.Orrabackend.repository.ProductListImageRepository;
 import com.orra.Orrabackend.repository.ProductListRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +19,7 @@ import com.orra.Orrabackend.repository.BookingRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @AllArgsConstructor
 @Service
 public class ProductListService {
@@ -122,6 +123,15 @@ public class ProductListService {
 
     @Transactional
     public ProductList CreateWithImage(ProductList product, List<String> images, Long userId) {
+        // Check duplicate serial before doing anything else
+        if (product.getSerialOrImei() != null &&
+                repo.existsBySerialOrImei(product.getSerialOrImei())) {
+            throw new IllegalStateException(
+                    "A listing with serial number '" + product.getSerialOrImei() + "' already exists."
+            );
+        }
+
+
         userService.grantOwnerRole(userId);
 
         User owner = userService.getById(userId);
@@ -152,14 +162,23 @@ public class ProductListService {
             saved.setImages(imagelist);
         }
 
-        List<User> subscribers = userRepository.findBySubscribedTrue();
+        // Send notification emails — don't let failures block listing creation
+        try {
+            List<User> subscribers = userRepository.findBySubscribedTrue();
 
-        for (User subscriber : subscribers) {
-
-            emailService.sendNewListingEmail(
-                    subscriber.getEmail(),
-                    saved.getProductName()
-            );
+            for (User subscriber : subscribers) {
+                try {
+                    emailService.sendNewListingEmail(
+                            subscriber.getEmail(),
+                            saved.getProductName()
+                    );
+                } catch (Exception e) {
+                    log.warn("Failed to send listing email to {}: {}",
+                            subscriber.getEmail(), e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to fetch subscribers or send listing emails", e);
         }
 
         return saved;
