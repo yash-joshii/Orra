@@ -3,6 +3,7 @@ package com.orra.Orrabackend.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,7 +30,7 @@ public class EmailService {
 
         mailSender.send(message);
     }
-
+@Async
     public void sendNewListingEmail(String toEmail, String productName) {
 
         SimpleMailMessage message = new SimpleMailMessage();
