@@ -85,10 +85,15 @@ namespace Paymentapi
             {
                 options.AddPolicy("AllowReactApp", policy =>
                 {
-                    policy.WithOrigins("http://localhost:5173")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials();
+                    policy.WithOrigins(
+                            "http://localhost:5173",
+                            "https://orraa.netlify.app",
+                            "https://orra.live",
+                            "https://www.orra.live"
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                 });
             });
             builder.Services.AddScoped<RabbitMqPublisher>();
