@@ -1,22 +1,28 @@
-# ---- Build stage ----
-FROM maven:3.9-eclipse-temurin-17 AS build
+# ---------- Stage 1 : Build ----------
+FROM maven:3.9.11-eclipse-temurin-17 AS builder
+
 WORKDIR /app
 
-# Copy pom.xml first and download dependencies (layer caching)
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
+RUN mvn dependency:go-offline
 
-# Copy source and build
-COPY src ./src
+COPY src src
+
 RUN mvn clean package -DskipTests
 
-# ---- Runtime stage ----
-FROM eclipse-temurin:17-jre-alpine AS runtime
+# ---------- Stage 2 : Runtime ----------
+FROM eclipse-temurin:17-jre-alpine
+
 WORKDIR /app
 
-# Copy the built jar from the build stage
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE 8081
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Install wget (needed for the health check)
+RUN apk add --no-cache wget
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD wget -qO- http://localhost:8081/actuator/health > /dev/null || exit 1
+
+ENTRYPOINT ["java","-XX:+UseContainerSupport","-jar","app.jar"]
