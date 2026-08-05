@@ -1,35 +1,28 @@
 package com.orra.Orrabackend.config;
 
-import com.auth0.jwk.Jwk;                                    // CHANGED — new import
-import com.auth0.jwk.JwkProvider;                             // CHANGED — new import
-import com.auth0.jwk.JwkProviderBuilder;                      // CHANGED — new import
-import com.auth0.jwt.JWT;                                     // CHANGED — new import
-import com.auth0.jwt.algorithms.Algorithm;                    // CHANGED — new import
-import com.auth0.jwt.interfaces.DecodedJWT;                   // CHANGED — new import
+import com.auth0.jwk.Jwk;
+import com.auth0.jwk.JwkProvider;
+import com.auth0.jwk.JwkProviderBuilder;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.orra.Orrabackend.model.User;
 import com.orra.Orrabackend.repository.UserRepository;
-// REMOVED — import io.jsonwebtoken.Claims;
-// REMOVED — import io.jsonwebtoken.JwtException;
-// REMOVED — import io.jsonwebtoken.Jwts;
-// REMOVED — import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-// REMOVED — import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-// REMOVED — import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.net.MalformedURLException;                       // CHANGED — new import
-import java.net.URL;                                          // CHANGED — new import
-import java.security.interfaces.ECPublicKey;                  // CHANGED — new import
-import java.util.Arrays;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.interfaces.ECPublicKey;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,63 +30,98 @@ import java.util.stream.Collectors;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    // REMOVED — @Value("${supabase.jwt-secret}")
-    // REMOVED — private String jwtSecret;
-
     private final UserRepository userRepository;
-    private final JwkProvider jwkProvider;                    // CHANGED — new field
+    private final JwkProvider jwkProvider;
 
-    public JwtAuthFilter(UserRepository userRepository) throws MalformedURLException { // CHANGED — throws clause added
+    public JwtAuthFilter(UserRepository userRepository) throws MalformedURLException {
         this.userRepository = userRepository;
-        this.jwkProvider = new JwkProviderBuilder(            // CHANGED — new initialization
+
+        this.jwkProvider = new JwkProviderBuilder(
                 new URL("https://jnizlhfupndwxuujpgku.supabase.co/auth/v1/.well-known/jwks.json")
         ).build();
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
-        String token = extracToken(request);
+
+        String token = extractToken(request);
 
         if (token != null) {
             try {
-                // CHANGED — replaced HMAC secret-key parsing block below
+
                 DecodedJWT jwt = JWT.decode(token);
+
                 Jwk jwk = jwkProvider.get(jwt.getKeyId());
-                Algorithm algorithm = Algorithm.ECDSA256((ECPublicKey) jwk.getPublicKey(), null);
+
+                Algorithm algorithm = Algorithm.ECDSA256(
+                        (ECPublicKey) jwk.getPublicKey(),
+                        null
+                );
+
                 algorithm.verify(jwt);
 
-                UUID supabaseId = UUID.fromString(jwt.getSubject()); // CHANGED — was claims.getSubject()
+                UUID supabaseId = UUID.fromString(jwt.getSubject());
 
-                User user = userRepository.findBySupabaseId(supabaseId).orElse(null);
+                User user = userRepository.findBySupabaseId(supabaseId)
+                        .orElse(null);
 
-                List<SimpleGrantedAuthority> authorities = user == null
-                        ? List.of()
-                        : user.getRoles().stream()
-                        .map(r -> new SimpleGrantedAuthority("ROLE_" + r.name()))
-                        .collect(Collectors.toList());
+                List<SimpleGrantedAuthority> authorities =
+                        user == null
+                                ? List.of()
+                                : user.getRoles()
+                                .stream()
+                                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                                .collect(Collectors.toList());
 
+                Long principal = user == null ? null : user.getId();
 
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                principal,
+                                null,
+                                authorities
+                        );
 
-                Long principal = (user == null) ? null : user.getId();
+                SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                var auth = new UsernamePasswordAuthenticationToken(principal, null, authorities);
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            } catch (
-                    Exception e) {                            // CHANGED — was catch (JwtException | IllegalArgumentException e)
-//                System.out.println("JWT validation failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            } catch (Exception e) {
+
+                System.out.println("JWT Validation Failed");
+                System.out.println(e.getMessage());
+
                 SecurityContextHolder.clearContext();
             }
         }
-        chain.doFilter(request, response);
+
+        filterChain.doFilter(request, response);
     }
 
-    private String extracToken(HttpServletRequest request) {
-        if (request.getCookies() == null) return null;
-        return Arrays.stream(request.getCookies())
-                .filter(c -> c.getName().equals("sb-access-token"))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElse(null);
+    /**
+     * First check Authorization header.
+     * If not found, check HttpOnly cookie.
+     */
+    private String extractToken(HttpServletRequest request) {
+
+        String authorization = request.getHeader("Authorization");
+
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            return authorization.substring(7);
+        }
+
+        if (request.getCookies() != null) {
+
+            for (Cookie cookie : request.getCookies()) {
+
+                if ("sb-access-token".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+
+            }
+        }
+
+        return null;
     }
 }
