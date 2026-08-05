@@ -1,8 +1,10 @@
 import React from "react";
 import { Info, ArrowLeft, ArrowRight, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Availability = ({ prev, next, formData, setFormData }) => {
   const today = new Date().toISOString().split("T")[0];
+  const navigation = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -16,7 +18,41 @@ const Availability = ({ prev, next, formData, setFormData }) => {
     }));
   };
 
-  const isNextDisabled = !formData.availability?.availableFrom;
+  // Comprehensive validation to enable/disable the Submit button
+  const validateForm = () => {
+    const {
+      availableFrom,
+      availableTo,
+      minimumRentalDays,
+      maximumRentalDays,
+    } = formData.availability || {};
+
+    // 1. 'Available From' is strictly required
+    if (!availableFrom) return false;
+
+    // 2. If 'Available To' is provided, it cannot be before 'Available From'
+    if (availableTo && new Date(availableTo) < new Date(availableFrom)) {
+      return false;
+    }
+
+    const minDays = minimumRentalDays ? parseInt(minimumRentalDays, 10) : null;
+    const maxDays = maximumRentalDays ? parseInt(maximumRentalDays, 10) : null;
+
+    // 3. Minimum days must be at least 1 (if provided)
+    if (minDays !== null && minDays < 1) return false;
+
+    // 4. Maximum days must be at least 1 (if provided)
+    if (maxDays !== null && maxDays < 1) return false;
+
+    // 5. Max days cannot be less than Min days (if both are provided)
+    if (minDays !== null && maxDays !== null && maxDays < minDays) {
+      return false;
+    }
+
+    return true; // Form is valid
+  };
+
+  const isNextDisabled = !validateForm();
 
   return (
     <div className="bg-white rounded-3xl shadow-xs border border-slate-200/80 p-6 sm:p-8 space-y-6">
@@ -105,7 +141,7 @@ const Availability = ({ prev, next, formData, setFormData }) => {
                 type="number"
                 name="maximumRentalDays"
                 placeholder="30"
-                min="1"
+                min={formData.availability?.minimumRentalDays || "1"}
                 value={formData.availability?.maximumRentalDays || ""}
                 onChange={handleChange}
                 className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50/50 pl-11 pr-4 text-slate-800 text-sm outline-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium placeholder:text-slate-400"

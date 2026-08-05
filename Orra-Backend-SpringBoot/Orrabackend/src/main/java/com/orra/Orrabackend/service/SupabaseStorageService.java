@@ -30,11 +30,11 @@ public class SupabaseStorageService {
     }
     @PostConstruct
     public void checkConfig() {
-        System.out.println("================================");
-        System.out.println("URL = " + supabaseUrl);
-        System.out.println("Bucket = " + bucketName);
-        System.out.println("Secret = " + secretKey);
-        System.out.println("================================");
+//        System.out.println("================================");
+//        System.out.println("URL = " + supabaseUrl);
+//        System.out.println("Bucket = " + bucketName);
+//        System.out.println("Secret = " + secretKey);
+//        System.out.println("================================");
     }
     public String uploadBase64Image(String base64Image) {
 
@@ -82,15 +82,15 @@ public class SupabaseStorageService {
         String uploadUrl = supabaseUrl + "/storage/v1/object/" + bucketName + "/" + fileName;
 
         try {
-            System.out.println("Upload URL = " + uploadUrl);
-            System.out.println("Authorization = Bearer " + secretKey);
-            System.out.println("apikey = " + secretKey);
-            System.out.println("Content-Type = " + headers.getContentType());
-            System.out.println("Image Bytes = " + imageBytes.length);
+//            System.out.println("Upload URL = " + uploadUrl);
+//            System.out.println("Authorization = Bearer " + secretKey);
+//            System.out.println("apikey = " + secretKey);
+//            System.out.println("Content-Type = " + headers.getContentType());
+//            System.out.println("Image Bytes = " + imageBytes.length);
             ResponseEntity<String> response = restTemplate.exchange(uploadUrl, HttpMethod.POST, requestEntity, String.class);
-            System.out.println("Uploading to: " + uploadUrl);
-            System.out.println(response.getStatusCode());
-            System.out.println(response.getBody());
+//            System.out.println("Uploading to: " + uploadUrl);
+//            System.out.println(response.getStatusCode());
+//            System.out.println(response.getBody());
             if (response.getStatusCode().is2xxSuccessful()) {
 
                 return supabaseUrl + "/storage/v1/object/public/" + bucketName + "/" + fileName;

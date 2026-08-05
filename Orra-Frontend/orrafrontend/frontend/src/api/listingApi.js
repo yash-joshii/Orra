@@ -23,3 +23,7 @@ export const getMyListings = () => {
 export const updateProduct = (productId, payload) => {
   return axiosinstance.patch(`/api/product/${productId}`, payload);
 };
+
+export const deleteProduct = (productId) => {
+  return axiosinstance.delete(`/api/product/${productId}`);
+};

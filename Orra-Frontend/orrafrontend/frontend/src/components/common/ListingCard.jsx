@@ -87,7 +87,7 @@ const ListingCard = ({ listing, activeBookings = [], onEdit, onDelete }) => {
             {displayCategory}
           </span>
           <div className="text-right">
-            <span className="font-bold text-slate-900 text-base">${displayPrice}</span>
+            <span className="font-bold text-slate-900 text-base">Rs {displayPrice}</span>
             <span className="text-xs text-slate-400 font-medium">/day</span>
           </div>
         </div>

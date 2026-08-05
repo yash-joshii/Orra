@@ -33,3 +33,5 @@ build/
 ### VS Code ###
 .vscode/
 .env
+application-local.properties
+.env.docker

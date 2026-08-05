@@ -18,6 +18,7 @@ import SpeacificationInForm from "@/components/StepperFormForListing/Speacificat
 import UploadPhoto from "@/components/StepperFormForListing/UploadPhoto";
 import PricingDetails from "@/components/StepperFormForListing/PricingDetails";
 import Availability from "@/components/StepperFormForListing/Availability";
+import { useNavigate } from "react-router-dom";
 
 const STEPS = [
   { id: 1, label: "Basic Info", icon: Layers },
@@ -31,6 +32,7 @@ const STEPS = [
 const ListingDevice = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const today = new Date().toISOString().split("T")[0];
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     basicDetails: {
@@ -176,7 +178,9 @@ const ListingDevice = () => {
   };
 
   const handleSubmit = async (e) => {
-    if (e && e.preventDefault) e.preventDefault();
+       if (e?.preventDefault) {
+      e.preventDefault();
+    }
 
     if (!validateStep(6)) return;
 
@@ -219,6 +223,7 @@ const ListingDevice = () => {
       console.log("API RESPONSE:", response);
 
       toast.success("Device successfully listed for rent!");
+      navigate("/my-listings");
     } catch (error) {
       console.error("SUBMIT ERROR:", error);
       toast.error("Failed to add product. Please check your data.");
