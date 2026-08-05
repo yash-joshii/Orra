@@ -3,7 +3,6 @@ import { GetCurrentUser, SignIn, SignInWithGoogle } from "@/api/authApi";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-<<<<<<< HEAD
 import { toast } from "react-toastify";
 // import { GetCurrentUser, SignIn } from "@/api/authApi";
 import {
@@ -13,11 +12,9 @@ import {
 } from "@/redux/slices/authslices";
 // import { toast } from "sonner";
 const ADMIN_EMAIL = "yashjoshi.yj989@gmail.com";
-=======
-import { toast } from 'react-toastify';
-import { setError, setLoading, setCredentials } from "@/redux/slices/authslices";
+// import { toast } from 'react-toastify';
+// import { setError, setLoading, setCredentials } from "@/redux/slices/authslices";
 
->>>>>>> 7daaa1bbeba8c2e959a5e1353970ff12b883504e
 const Login = () => {
   const [formData, setFormdata] = useState({
     email: "",
@@ -196,7 +193,4 @@ const Login = () => {
 };
 
 export default Login;
-<<<<<<< HEAD
-=======
 
->>>>>>> 7daaa1bbeba8c2e959a5e1353970ff12b883504e

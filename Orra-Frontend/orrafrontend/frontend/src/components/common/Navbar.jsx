@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { searchProducts } from "@/api/listingApi";
 import { getWishlist } from "@/api/wishlist";
 import { NavLink, useNavigate, Link } from "react-router-dom";
-import { searchProducts } from "@/api/listingApi";
+// import { searchProducts } from "@/api/listingApi";
 import { logout } from "@/redux/slices/authslices";
 import { Logout } from "@/api/authApi";
 import { setLoading, setUser } from "@/redux/slices/userprofileSlice";
@@ -33,9 +33,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import logo from "../../assets/logo/orralogo.svg";
-import { setLoading, setUser } from "@/redux/slices/userprofileSlice";
-import { getUser } from "@/api/userApi";
-import { setError } from "@/redux/slices/productslices";
+// import { setLoading, setUser } from "@/redux/slices/userprofileSlice";
+// import { getUser } from "@/api/userApi";
+// import { setError } from "@/redux/slices/productslices";
 import { setWishlistCount } from "@/redux/slices/wishlistSlice";
 import NotificationBell from "./NotificationBell";
 
@@ -291,7 +291,7 @@ const Navbar = () => {
                     </div>
                   )}
                   <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-                </button>
+                </Button>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
