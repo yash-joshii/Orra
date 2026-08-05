@@ -5,8 +5,9 @@ import EditListingModal from "../components/common/EditListingModal";
 // import { getMyListings, updateProduct } from "./apiService"; // update path as needed
 // import { setProducts, setLoading, setError } from "./productSlice"; // update path as needed
 import { Loader2, AlertCircle, PackageX } from "lucide-react";
-import { getMyListings, updateProduct } from "@/api/listingApi";
+import { deleteProduct, getMyListings, updateProduct } from "@/api/listingApi";
 import { setError, setLoading, setProducts } from "@/redux/slices/productslices";
+import LogoLoader from "@/components/common/LogoLoader";
 
 const MyListings = ({ activeBookings = [] }) => {
   const dispatch = useDispatch();
@@ -65,7 +66,7 @@ const MyListings = ({ activeBookings = [] }) => {
     const productId = listing.productId || listing.id;
     if (window.confirm(`Are you sure you want to delete "${listing.productName || listing.title}"?`)) {
       try {
-        // await deleteProductApi(productId);
+         await deleteProduct(productId);
         const filteredList = products.filter(
           (item) => (item.productId || item.id) !== productId
         );
@@ -80,7 +81,7 @@ const MyListings = ({ activeBookings = [] }) => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] text-slate-500">
         <Loader2 size={32} className="animate-spin text-indigo-600 mb-2" />
-        <p className="text-xs font-semibold">Loading your listings...</p>
+        <p className="text-xs font-semibold"><LogoLoader/></p>
       </div>
     );
   }
