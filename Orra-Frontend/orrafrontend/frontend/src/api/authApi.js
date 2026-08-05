@@ -1,3 +1,4 @@
+
 import { supabase } from "@/lib/supabaseclient";
 import axiosinstance from "./Axiosconfig";
 
@@ -22,6 +23,17 @@ export const Logout = async () => {
   return await axiosinstance.post("/api/auth/logout", {}, { withCredentials: true });
 };
 
+// Initiates Google OAuth — Supabase redirects to Google, then back to /auth/callback
+export const SignInWithGoogle = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    },
+  });
+  if (error) throw error;
+};
+
 export const SignIn = async (data) => {
   console.log("Sign In:", data);
 
@@ -37,3 +49,4 @@ export const SignIn = async (data) => {
 
   return authData;
 };
+

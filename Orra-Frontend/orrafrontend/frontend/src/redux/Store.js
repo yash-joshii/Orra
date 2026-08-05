@@ -1,4 +1,4 @@
-
+import wishlistReducer from "./slices/wishlistSlice";
 import { configureStore } from "@reduxjs/toolkit";
 
 import authReducer from "./slices/authslices";
@@ -14,5 +14,6 @@ export const store = configureStore({
     userProfile: userProfileReducer,
     booking: bookingreducer,
     categories: categoryReducer,
+    wishlist: wishlistReducer,
   },
 });

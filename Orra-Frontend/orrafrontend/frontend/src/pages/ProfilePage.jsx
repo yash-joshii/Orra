@@ -19,6 +19,16 @@ import {
 
 const DEFAULT_AVATAR = "https://ui-avatars.com/api/?name=User&background=e5e7eb&color=555";
 
+const API_BASE_URL = import.meta.env.VITE_SPRINGBOOT_API_URL;
+
+const getAvatarSrc = (avatarPath) => {
+  if (!avatarPath) return null;
+  if (avatarPath.startsWith("http://") || avatarPath.startsWith("https://")) {
+    return avatarPath;
+  }
+  return `${API_BASE_URL}${avatarPath}`;
+};
+
 const ProfilePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -104,7 +114,7 @@ const ProfilePage = () => {
               onClick={handleAvatarClick}
             >
               <img
-                src={avatarPreview || user.avatar || DEFAULT_AVATAR}
+                src={avatarPreview || getAvatarSrc(user.avatar) || DEFAULT_AVATAR}
                 alt="avatar"
                 className={`w-24 h-24 rounded-full object-cover border-4 border-gray-100 ${
                   uploading ? "opacity-60" : ""

@@ -1,26 +1,18 @@
 import React, { lazy, Suspense, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import ProfilePage from "@/pages/ProfilePage";
+import { clearCredentials, setCredentials } from "@/redux/slices/authslices";
+import { GetCurrentUser } from "@/api/authApi"; // add this import temporarily
 
-import {
-  clearCredentials,
-  setCredentials,
-} from "@/redux/slices/authslices";
-
-import { GetCurrentUser } from "@/api/authApi";
-
-// Layout & Components
+// Layout & Pages
 import Mainlayout from "@/layout/Mainlayout";
+import ProductCard from "@/components/common/ProductCard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LogoLoader from "@/components/common/LogoLoader";
-
-// Routes
 import AdminRoutes from "./AdminRoutes";
-
-// Pages
 import Cart from "@/pages/Cart";
 
-// Lazy-loaded pages
 const LandingPage = lazy(() => import("@/pages/LandingPage"));
 const BrowseDevices = lazy(() => import("@/pages/BrowseDevices"));
 const ListingDevice = lazy(() => import("@/pages/ListingDevice"));
@@ -31,78 +23,46 @@ const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const SettingPage = lazy(() => import("@/pages/SettingPage"));
 const Signup = lazy(() => import("@/pages/Signup"));
 const Login = lazy(() => import("@/pages/Login"));
+const AuthCallback = lazy(() => import("@/pages/AuthCallback"));
 const Bookings = lazy(() => import("@/pages/Bookings"));
 const MyBookings = lazy(() => import("@/pages/MyBookings"));
+const SearchResults = lazy(() => import("@/pages/SearchResults"));
 
 const AppRoutes = () => {
   const dispatch = useDispatch();
 
-  // Restore logged-in user when app starts
   useEffect(() => {
     const rehydrateAuth = async () => {
       try {
         const response = await GetCurrentUser();
-
         console.log("GetCurrentUser response:", response.data);
-
-        dispatch(
-          setCredentials({
-            user: {
-              userId: response.data.userId,
-              roles: response.data.roles,
-            },
-          })
-        );
-      } catch (error) {
-        console.error("Authentication failed:", error);
+        dispatch(setCredentials({
+          user: { userId: response.data.userId, roles: response.data.roles },
+        }));
+      } catch (err) {
         dispatch(clearCredentials());
       }
     };
-
     rehydrateAuth();
   }, [dispatch]);
 
   return (
     <Suspense fallback={<LogoLoader />}>
       <Routes>
-
-        {/* =========================
-            MAIN LAYOUT ROUTES
-        ========================= */}
         <Route element={<Mainlayout />}>
-
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
+          <Route path="/browserdevices" element={<BrowseDevices />} />
+          <Route path="/listingdevice" element={<ListingDevice />} />
+          <Route path="/settings" element={<SettingPage />} />
+          <Route path="/product/:id" element={<Productpage />} />
+          <Route path="/categories" element={<Categories />} />
+          <Route path="/profile" element={<ProfilePage />} />
 
-          <Route
-            path="/browserdevices"
-            element={<BrowseDevices />}
-          />
+          {/* Cart Page Route */}
+          <Route path="/cart" element={<Cart />} />
 
-          <Route
-            path="/listingdevice"
-            element={<ListingDevice />}
-          />
-
-          <Route
-            path="/product/:id"
-            element={<Productpage />}
-          />
-
-          <Route
-            path="/categories"
-            element={<Categories />}
-          />
-
-          <Route
-            path="/cart"
-            element={<Cart />}
-          />
-
-          {/* =========================
-              PROTECTED ROUTES
-          ========================= */}
-
+          {/* Protected User Routes */}
           <Route
             path="/wishlist"
             element={
@@ -111,7 +71,6 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/settings"
             element={
@@ -120,7 +79,6 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/booking/:id"
             element={
@@ -129,7 +87,6 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/mybookings"
             element={
@@ -138,7 +95,6 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/dashboard"
             element={
@@ -147,28 +103,19 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
-
         </Route>
-
-        {/* =========================
-            ADMIN ROUTES
-        ========================= */}
         {AdminRoutes}
+        <Route path="/mybookings" element={
+          <ProtectedRoute>
+            <MyBookings />
+          </ProtectedRoute>
+        } />
 
-        {/* =========================
-            AUTH ROUTES
-        ========================= */}
-
-        <Route
-          path="/signup"
-          element={<Signup />}
-        />
-
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-
+        {/* Auth Routes outside MainLayout */}
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/product" element={<ProductCard />} />
       </Routes>
     </Suspense>
   );

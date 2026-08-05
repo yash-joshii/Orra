@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getWishlist, removeFromWishlist } from "@/api/wishlist";
 import { getProductById } from "@/api/listingApi";
 import WishlistCard from "@/components/common/WishlistCard";
@@ -7,11 +7,13 @@ import {
   getGuestWishlist,
   removeGuestWishlistItem,
 } from "@/utils/guestWishlist";
+import { setWishlistCount, decrementWishlistCount } from "@/redux/slices/wishlistSlice";
 
 const Wishlist = () => {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth) || {};
   const userId = user?.userId ?? user?.id;
   const isLoggedIn = Boolean(userId);
@@ -26,7 +28,9 @@ const Wishlist = () => {
     try {
       if (isLoggedIn) {
         const response = await getWishlist(userId);
-        setWishlist(response.data ?? []);
+        const items = response.data ?? [];
+        setWishlist(items);
+        dispatch(setWishlistCount(items.length));
       } else {
         // Guest: localStorage only has productIds, so fetch full product
         // details for each one to reuse WishlistCard.
@@ -48,6 +52,7 @@ const Wishlist = () => {
           }));
 
         setWishlist(items);
+        dispatch(setWishlistCount(items.length));
       }
     } catch (err) {
       console.log(err);
@@ -63,6 +68,7 @@ const Wishlist = () => {
         setWishlist((prev) =>
           prev.filter((item) => item.productList.productId !== productId),
         );
+        dispatch(decrementWishlistCount());
       } catch (err) {
         console.log(err);
       }
@@ -71,6 +77,7 @@ const Wishlist = () => {
       setWishlist((prev) =>
         prev.filter((item) => item.productList.productId !== productId),
       );
+      dispatch(decrementWishlistCount());
     }
   };
 

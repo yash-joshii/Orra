@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import React, { useEffect, useState } from "react";
 import { searchProducts } from "@/api/listingApi";
+import { getWishlist } from "@/api/wishlist";
 import { NavLink, useNavigate, Link } from "react-router-dom";
 
 import { useDispatch } from "react-redux";
@@ -35,7 +36,18 @@ import logo from "../../assets/logo/orralogo.svg";
 import { setLoading, setUser } from "@/redux/slices/userprofileSlice";
 import { getUser } from "@/api/userApi";
 import { setError } from "@/redux/slices/productslices";
+import { setWishlistCount } from "@/redux/slices/wishlistSlice";
 import NotificationBell from "./NotificationBell";
+
+const API_BASE_URL = import.meta.env.VITE_SPRINGBOOT_API_URL;
+
+const getAvatarSrc = (avatarPath) => {
+  if (!avatarPath) return null;
+  if (avatarPath.startsWith("http://") || avatarPath.startsWith("https://")) {
+    return avatarPath;
+  }
+  return `${API_BASE_URL}${avatarPath}`;
+};
 
 const Navbar = () => {
 
@@ -70,6 +82,9 @@ const Navbar = () => {
   const user = useSelector((state) => state.auth.user);
   const userprofile = useSelector((state) => state.userProfile.user);
   const isOwner = userprofile?.roles?.includes("OWNER");
+  const currentUserId = user?.userId ?? user?.id;
+  const wishlistCount = useSelector((state) => state.wishlist.count);
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -110,12 +125,30 @@ const Navbar = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchWishlistCount = async () => {
+      try {
+        const response = await getWishlist(currentUserId);
+        dispatch(setWishlistCount(response.data?.length ?? 0));
+      } catch (err) {
+        console.error("Failed to fetch wishlist count:", err);
+      }
+    };
+
+    if (currentUserId) {
+      fetchWishlistCount();
+    } else {
+      dispatch(setWishlistCount(0));
+    }
+  }, [currentUserId, dispatch]);
+
   const navItems = [
     { name: "Home", path: "/" },
     { name: "Browse Devices", path: "/browserdevices" },
     { name: "Categories", path: "/categories" },
     { name: "My Bookings", path: "/mybookings" },
     { name: "Wishlist", path: "/wishlist" },
+    
 
     ...(isOwner
       ? [{ name: "Dashboard", path: "/dashboard" }]
@@ -158,12 +191,19 @@ const Navbar = () => {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  isActive
-                    ? "text-indigo-600 font-bold"
-                    : "hover:text-black transition-colors"
+                  `relative flex items-center gap-1.5 ${
+                    isActive
+                      ? "text-indigo-600 font-bold"
+                      : "hover:text-black transition-colors"
+                  }`
                 }
               >
                 {item.name}
+                {item.name === "Wishlist" && wishlistCount > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[11px] font-bold leading-none">
+                    {wishlistCount}
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>
@@ -234,65 +274,84 @@ const Navbar = () => {
             </button>
           </Link>
 
-          {user ? (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button className="flex items-center gap-2 p-6 bg-transparent border-none hover:rounded-[40px] hover:border-gray-300 hover:border hover:bg-gray-100 transition duration-200 focus:bg-background focus:border-none">
-        <img
-          src="https://i.pravatar.cc/40"
-          alt="profile"
-          className="w-8 h-8 rounded-full"
-        />
+         
+  {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="flex  items-center gap-2 p-0 bg-transparent border-none hover:rounded-[40px] hover:border-gray-300 hover:border hover:bg-gray-100 transition duration-200 focus:bg-background focus:border-none">
+                  {userprofile?.avatar ? (
+                    <img
+                      src={getAvatarSrc(userprofile.avatar)}
+                      alt="profile"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-semibold text-indigo-600">
+                      {(userprofile?.firstName?.[0] || "") +
+                        (userprofile?.lastName?.[0] || "") || "U"}
+                    </div>
+                  )}
+                  <ChevronDown className="w-4 h-4 text-gray-600" />
+                </Button>
+              </DropdownMenuTrigger>
 
-        <ChevronDown className="w-4 h-4 text-gray-600" />
-      </Button>
-    </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-50 p-3 absolute -right-40  top-2.5">
+                <div className="flex flex-col space-y-1 m-2 mb-3">
+                  <p className="text-sm font-semibold leading-none mb-2 ">
+                    Hello, {userprofile?.firstName || "there"}!
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {userprofile?.email}
+                  </p>
+                </div>
 
-    <DropdownMenuContent className="w-[220px] p-3">
-      <DropdownMenuSeparator />
+                <DropdownMenuSeparator />
 
-     <DropdownMenuItem onClick={() => navigate("/profile")}>
-  <UserIcon className="mr-2 h-4 w-4" />
-  Profile
-</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  <UserIcon className="mr-2 h-4 w-4" />
+                  Profile
+                </DropdownMenuItem>
 
-      <DropdownMenuItem>
-        <Package className="mr-2 h-4 w-4" />
-        My Products
-      </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Package className="mr-2 h-4 w-4" />
+                  My Products
+                </DropdownMenuItem>
 
-      <DropdownMenuItem>
-        <LayoutDashboardIcon className="mr-2 h-4 w-4" />
-        My Bookings
-      </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <LayoutDashboardIcon className="mr-2 h-4 w-4" />
+                  My Bookings
+                </DropdownMenuItem>
 
-      <DropdownMenuItem>
-        <Heart className="mr-2 h-4 w-4" />
-        Wishlist
-      </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Heart className="mr-2 h-4 w-4" />
+                  Wishlist
+                </DropdownMenuItem>
 
-      <DropdownMenuSeparator />
+                <DropdownMenuSeparator />
 
-      <DropdownMenuItem onClick={() => navigate("/settings")}>
-        <SettingsIcon className="mr-2 h-4 w-4" />
-        Settings
-      </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/settings")}>
+                  <SettingsIcon className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
 
-      <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
-        <LogOutIcon className="mr-2 h-4 w-4" />
-        Log out
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-) : (
-  <div className="flex items-center gap-3">
-    <Button
-      variant="outline"
-      className="rounded-full px-6"
-      onClick={() => navigate("/login")}
-    >
-      Login
-    </Button>
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onClick={handleLogout}
+                >
+                  <LogOutIcon className="mr-2 h-4 w-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                className="rounded-full px-6"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Button>
 
               <Button
                 className="rounded-full px-6 bg-indigo-600 hover:bg-indigo-700"

@@ -1,8 +1,7 @@
-
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { getUser, updateUserProfile } from "@/api/userApi";
+import { getUser, updateUserProfile, uploadAvatar } from "@/api/userApi";
 
 import {
   setError,
@@ -18,6 +17,17 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import LazyImage from "../common/LazyImage";
 
+const API_BASE_URL = import.meta.env.VITE_SPRINGBOOT_API_URL;
+
+const getAvatarSrc = (avatarPath) => {
+  if (!avatarPath) return null;
+  // If backend ever returns a full URL, don't double-prefix it
+  if (avatarPath.startsWith("http://") || avatarPath.startsWith("https://")) {
+    return avatarPath;
+  }
+  return `${API_BASE_URL}${avatarPath}`;
+};
+
 function PersonalInfo() {
   const dispatch = useDispatch();
 
@@ -26,6 +36,10 @@ function PersonalInfo() {
   const error = useSelector((state) => state.userProfile.error);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchUser();
@@ -71,6 +85,36 @@ function PersonalInfo() {
       dispatch(setError(err.message));
 
       alert("Failed to update profile");
+    }
+  };
+
+  const handleChangePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const response = await uploadAvatar(formData);
+
+      dispatch(setUser(response.data));
+      setAvatarPreview(null);
+    } catch (err) {
+      console.error("Avatar upload failed:", err);
+      dispatch(setError(err.message));
+      setAvatarPreview(null);
+    } finally {
+      setUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -143,17 +187,23 @@ function PersonalInfo() {
         {/* Profile Photo */}
         <div className="flex items-center gap-4 mb-8">
           <div className="relative h-16 w-16 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0">
-            {user.avatarUrl ? (
+            {avatarPreview || user.avatar ? (
               <LazyImage
-                src={user.avatarUrl}
+                src={avatarPreview || getAvatarSrc(user.avatar)}
                 alt="Profile"
-                className="h-full w-full object-cover"
+                className={`h-full w-full object-cover ${uploading ? "opacity-60" : ""}`}
               />
             ) : (
               <span className="text-lg font-semibold text-muted-foreground">
                 {(user.firstName?.[0] || "") +
                   (user.lastName?.[0] || "")}
               </span>
+            )}
+
+            {uploading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
             )}
           </div>
 
@@ -170,9 +220,19 @@ function PersonalInfo() {
               type="button"
               variant="outline"
               size="sm"
+              onClick={handleChangePhotoClick}
+              disabled={uploading}
             >
-              Change Photo
+              {uploading ? "Uploading..." : "Change Photo"}
             </Button>
+
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={handleAvatarFileChange}
+              className="hidden"
+            />
           </div>
         </div>
 
