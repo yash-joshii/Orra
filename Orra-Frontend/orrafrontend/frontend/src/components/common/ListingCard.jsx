@@ -22,8 +22,10 @@ const ListingCard = ({ listing, activeBookings = [], onEdit, onDelete }) => {
 
   // Extract display variables
   const displayTitle = title || productName || "Untitled Product";
+  
   const displayImage =
-    imageUrl || (images && images.length > 0 ? images[0] : "") || "/placeholder.jpg";
+    imageUrl || (images && images.length > 0 ? images[0].imageUrl : "") || "/placeholder.jpg";
+
   const displayCategory = categoryName || listing?.category?.name || "CAMERAS";
   const displayPrice = pricePerDay || rentalPrice || dailyRate || 0;
 
