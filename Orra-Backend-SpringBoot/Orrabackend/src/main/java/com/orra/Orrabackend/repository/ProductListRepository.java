@@ -34,4 +34,6 @@ public interface ProductListRepository extends JpaRepository<ProductList, Long> 
     List<ProductList> searchProducts(@Param("keyword") String keyword);
     List<ProductList> findByIsAvailableTrueAndIsActiveTrue();
 //    List<ProductList> findByOwnerId(Long ownerId);
+@Query("SELECT COUNT(p) > 0 FROM ProductList p WHERE p.serialOrImei = :serial")
+boolean existsBySerialOrImei(@Param("serial") String serial);
 }
