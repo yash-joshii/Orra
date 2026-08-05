@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabaseclient";
 import axios from "axios";
 
-
+// Spring Boot Axios Instance
 const axiosinstance = axios.create({
   baseURL: import.meta.env.VITE_SPRINGBOOT_API_URL,
   headers: {
@@ -9,63 +9,44 @@ const axiosinstance = axios.create({
   },
 });
 
-axiosinstance.interceptors.request.use(async (config) => {
-
-  const { data } = await supabase.auth.getSession();
-
-  const token = data.session?.access_token;
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-
-});
-
-const paymentAxios = axios.create({
-
-  baseURL:
-    import.meta.env.VITE_DOTNET_API_URL,
-
-});
-
-
-// Supabase token for .NET API
-paymentAxios.interceptors.request.use(
+axiosinstance.interceptors.request.use(
   async (config) => {
-
-    const {
-      data,
-    } = await supabase.auth.getSession();
-
-
-    const token =
-      data?.session?.access_token;
-
+    const { data } = await supabase.auth.getSession();
+    const token = data?.session?.access_token;
 
     if (token) {
-
-      config.headers.Authorization =
-        `Bearer ${token}`;
-
+      // Safe header assignment across all Axios versions
+      config.headers = config.headers || {};
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
 
-
     return config;
-
   },
-  (error) => {
-
-    return Promise.reject(error);
-
-  }
+  (error) => Promise.reject(error)
 );
 
+// .NET Axios Instance
+const paymentAxios = axios.create({
+  baseURL: import.meta.env.VITE_DOTNET_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-export {
-  paymentAxios
-};
+paymentAxios.interceptors.request.use(
+  async (config) => {
+    const { data } = await supabase.auth.getSession();
+    const token = data?.session?.access_token;
 
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
 
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+export { paymentAxios };
 export default axiosinstance;
