@@ -1,36 +1,21 @@
+import React from "react";
 import { useSearchParams } from "react-router-dom";
-import { SlidersHorizontal, Star } from "lucide-react";
-import { useState } from "react";
+import { SlidersHorizontal } from "lucide-react";
 
 const categories = [
   "ALL",
-  "LAPTOPS",
+  "LAPTOP",
   "CAMERA",
-  "GAMING_CONSOLES",
-  "DRONES",
-  "SMARTPHONES",
-  "SMART_WATCHES",
-  "AUDIO_DEVICES",
-  "MONITORS",
-  "VR_AR",
-  "LENSES",
-  "LIGHTING",
-  "ACTION_CAMERAS",
-  "PROJECTORS",
-  "MICROPHONES",
-  "TABLETS",
-  "ACCESSORIES",
+  "MOBILE",
   "REFRIGERATOR",
   "TV"
 ];
 
 const FilterationSidebar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  
   const selectedCategory = searchParams.get("category") || "ALL";
-
-  const [maxPrice, setMaxPrice] = useState(150);
-  const [minRating, setMinRating] = useState(null);
-  const [showOnlyAvailable, setShowOnlyAvailable] = useState(true);
+  const maxPrice = Number(searchParams.get("maxPrice")) || 150;
 
   const handleCategoryClick = (cat) => {
     if (cat === "ALL") {
@@ -41,139 +26,124 @@ const FilterationSidebar = () => {
     setSearchParams(searchParams);
   };
 
+  const handleMaxPriceChange = (value) => {
+    const numValue = Number(value);
+    if (numValue >= 200) {
+      searchParams.delete("maxPrice");
+    } else {
+      searchParams.set("maxPrice", numValue);
+    }
+    setSearchParams(searchParams, { replace: true });
+  };
+
+  const handleReset = () => {
+    searchParams.delete("category");
+    searchParams.delete("maxPrice");
+    setSearchParams(searchParams);
+  };
+
+  const isFiltered = selectedCategory !== "ALL" || searchParams.has("maxPrice");
+
   return (
-    <div className="w-[300px] bg-white rounded-2xl border border-[#EEF0F3] shadow-sm p-6 ml-auto">
+    <div className="w-full bg-white rounded-[24px] border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 sm:p-7">
+      
       {/* Header */}
-      <div className="flex items-center gap-2 mb-8">
-        <SlidersHorizontal className="w-5 h-5 text-[#5046E5]" strokeWidth={2} />
-        <h3 className="text-[17px] font-bold text-[#111827]">Filters</h3>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 bg-[#f0f0ff] rounded-lg text-[#544be9]">
+            <SlidersHorizontal className="w-5 h-5" strokeWidth={2.5} />
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 tracking-tight">Filters</h3>
+        </div>
+        
+        {isFiltered && (
+          <button
+            onClick={handleReset}
+            className="text-sm font-bold text-[#544be9] hover:text-indigo-700 transition-colors bg-transparent border-none cursor-pointer"
+          >
+            Reset
+          </button>
+        )}
       </div>
 
-      {/* Category */}
-      <div className="mb-6">
-        <p className="text-[12px] font-bold tracking-wide text-[#111827] mb-4">
-          CATEGORY
+      {/* Category Section */}
+      <div className="mb-8">
+        <p className="text-xs font-bold tracking-widest text-gray-400 uppercase mb-4 pl-2">
+          Category
         </p>
-        <div className="flex flex-col gap-3">
-          {categories.map((cat) => (
-            <label
-              key={cat}
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={() => handleCategoryClick(cat)}
-            >
-              <span
-                className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                  selectedCategory === cat
-                    ? "border-[#5046E5] bg-white"
-                    : "border-[#D1D5DB] bg-[#374151]"
+        <div className="flex flex-col gap-1">
+          {categories.map((cat) => {
+            const isActive = selectedCategory === cat;
+            return (
+              <label
+                key={cat}
+                className={`flex items-center gap-3 cursor-pointer py-2.5 px-3 rounded-xl transition-all duration-200 group ${
+                  isActive ? "bg-[#f0f0ff]" : "hover:bg-gray-50"
                 }`}
+                onClick={() => handleCategoryClick(cat)}
               >
-                {selectedCategory === cat && (
-                  <span className="w-2 h-2 rounded-full bg-[#5046E5]" />
-                )}
-              </span>
-              <span
-                className={`text-[14px] ${
-                  selectedCategory === cat
-                    ? "text-[#5046E5] font-semibold"
-                    : "text-[#6B7280]"
-                }`}
-              >
-                {cat}
-              </span>
-            </label>
-          ))}
+                {/* Custom Radio Button */}
+                <div
+                  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors duration-200 ${
+                    isActive
+                      ? "border-[#544be9] bg-white"
+                      : "border-gray-300 bg-transparent group-hover:border-[#544be9]"
+                  }`}
+                >
+                  <div 
+                    className={`w-2 h-2 rounded-full bg-[#544be9] transition-transform duration-200 ${
+                      isActive ? "scale-100" : "scale-0"
+                    }`} 
+                  />
+                </div>
+                
+                {/* Label Text */}
+                <span
+                  className={`text-[14px] transition-colors duration-200 ${
+                    isActive
+                      ? "text-[#544be9] font-bold"
+                      : "text-gray-600 font-medium group-hover:text-gray-900"
+                  }`}
+                >
+                  {cat === "ALL" ? "All Categories" : cat}
+                </span>
+              </label>
+            );
+          })}
         </div>
       </div>
 
-      <div className="h-[1px] bg-[#F3F4F6] my-6" />
+      <div className="h-px w-full bg-gray-100 my-8" />
 
-      {/* Max Price */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-[12px] font-bold tracking-wide text-[#111827]">
-            MAX PRICE
+      {/* Max Price Section */}
+      <div>
+        <div className="flex items-center justify-between mb-6 pl-2">
+          <p className="text-xs font-bold tracking-widest text-gray-400 uppercase">
+            Max Price
           </p>
-          <span className="text-[12px] font-bold text-[#5046E5] bg-[#EEF0FF] px-2 py-1 rounded-md">
+          <span className="text-xs font-bold text-[#544be9] bg-[#f0f0ff] px-2.5 py-1 rounded-md">
             ${maxPrice}/day
           </span>
         </div>
-        <input
-          type="range"
-          min={10}
-          max={200}
-          value={maxPrice}
-          onChange={(e) => setMaxPrice(Number(e.target.value))}
-          className="w-full accent-[#5046E5] cursor-pointer"
-        />
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-[12px] text-[#9CA3AF]">$10</span>
-          <span className="text-[12px] text-[#9CA3AF]">$200+</span>
+        
+        <div className="px-2">
+          <input
+            type="range"
+            min={10}
+            max={200}
+            value={maxPrice}
+            onChange={(e) => handleMaxPriceChange(e.target.value)}
+            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#544be9]"
+          />
+          <div className="flex items-center justify-between mt-3">
+            <span className="text-xs font-medium text-gray-400">$10</span>
+            <span className="text-xs font-medium text-gray-400">$200+</span>
+          </div>
         </div>
       </div>
 
-      {/* <div className="h-[1px] bg-[#F3F4F6] my-6" /> */}
-
-      {/* Minimum Rating */}
-      {/* <div className="mb-6">
-        <p className="text-[12px] font-bold tracking-wide text-[#111827] mb-4">
-          MINIMUM RATING
-        </p>
-        <div className="flex flex-col gap-3">
-          {[4, 3, 2, 1].map((rating) => (
-            <label
-              key={rating}
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={() => setMinRating(rating)}
-            >
-              <span
-                className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                  minRating === rating
-                    ? "border-[#5046E5] bg-white"
-                    : "border-[#D1D5DB] bg-[#374151]"
-                }`}
-              >
-                {minRating === rating && (
-                  <span className="w-2 h-2 rounded-full bg-[#5046E5]" />
-                )}
-              </span>
-              <span className="flex items-center gap-0.5">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`w-4 h-4 ${
-                      star <= rating
-                        ? "fill-[#FBBF24] text-[#FBBF24]"
-                        : "fill-[#E5E7EB] text-[#E5E7EB]"
-                    }`}
-                  />
-                ))}
-              </span>
-              <span className="text-[13px] text-[#6B7280]">& Up</span>
-            </label>
-          ))}
-        </div>
-      </div> */}
-
-      {/* <div className="h-[1px] bg-[#F3F4F6] my-6" /> */}
-
-      {/* Availability */}
-      {/* <div>
-        <p className="text-[12px] font-bold tracking-wide text-[#111827] mb-4">
-          AVAILABILITY
-        </p>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={showOnlyAvailable}
-            onChange={(e) => setShowOnlyAvailable(e.target.checked)}
-            className="w-4 h-4 rounded accent-[#5046E5] cursor-pointer"
-          />
-          <span className="text-[14px] text-[#374151]">Show only available</span>
-        </label>
-      </div> */}
     </div>
   );
-}
+};
 
-export default FilterationSidebar
+export default FilterationSidebar;

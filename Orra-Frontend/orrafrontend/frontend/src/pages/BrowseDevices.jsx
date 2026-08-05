@@ -35,14 +35,16 @@ const BrowseDevices = () => {
   const { products, loading, error } = useProduct();
 
   const [search, setSearch] = useState("");
-
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState("recent"); // "recent" | "price-asc" | "price-desc" | "rating"
 
   const [searchParams] = useSearchParams();
 
   const categoryFilter = searchParams.get("category");
+  const maxPriceParam = searchParams.get("maxPrice");
+  const maxPriceFilter = maxPriceParam ? Number(maxPriceParam) : null;
 
-  // Category Filter
+  // 1. Category Filter
   const filteredProducts = categoryFilter
     ? products.filter(
         (item) =>
@@ -50,22 +52,43 @@ const BrowseDevices = () => {
       )
     : products;
 
-    // Sort by most recent first
-const sortedProducts = [...filteredProducts].sort(
-  (a, b) => b.productId - a.productId
-);
+  // 2. Price Filter
+  const priceFilteredProducts = maxPriceFilter
+    ? filteredProducts.filter((item) => {
+        const price =
+          item.dailyRate ?? item.pricePerDay ?? item.rentalPrice ?? 0;
+        return price <= maxPriceFilter;
+      })
+    : filteredProducts;
 
-
-  // Search Filter
-  const displayProducts = sortedProducts.filter((item) =>
+  // 3. Search Filter
+  const searchFilteredProducts = priceFilteredProducts.filter((item) =>
     item.productName?.toLowerCase().includes(search.toLowerCase())
   );
 
+  // 4. Sort Products
+  const displayProducts = [...searchFilteredProducts].sort((a, b) => {
+    const getPrice = (item) =>
+      item.dailyRate ?? item.pricePerDay ?? item.rentalPrice ?? 0;
 
-// Search Filter
+    switch (sortBy) {
+      case "price-asc":
+        return getPrice(a) - getPrice(b);
+      case "price-desc":
+        return getPrice(b) - getPrice(a);
+      case "rating":
+        return (b.rating ?? 0) - (a.rating ?? 0);
+      case "recent":
+      default:
+        // Sort by productId descending for most recent
+        return (b.productId ?? 0) - (a.productId ?? 0);
+    }
+  });
+
+  // Reset pagination when any filter or sort option changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [categoryFilter, search]);
+  }, [categoryFilter, maxPriceFilter, search, sortBy]);
 
   // Pagination
   const ITEMS_PER_PAGE = 6;
@@ -108,20 +131,33 @@ const sortedProducts = [...filteredProducts].sort(
     return pages;
   };
 
-  if (loading)   return (
-    <div className="bg-gray-200 py-8 px-6">
-      <div className="flex flex-wrap gap-[30px] justify-center">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <ProductCardSkeleton key={index} />
-        ))}
+  const getSortLabel = () => {
+    switch (sortBy) {
+      case "price-asc":
+        return "Price : Low to High";
+      case "price-desc":
+        return "Price : High to Low";
+      case "rating":
+        return "Highest Rated";
+      case "recent":
+      default:
+        return "Most Recent";
+    }
+  };
+
+  if (loading)
+    return (
+      <div className="bg-gray-200 py-8 px-6">
+        <div className="flex flex-wrap gap-[30px] justify-center">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <ProductCardSkeleton key={index} />
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
 
   if (error)
-    return (
-      <div className="text-center text-red-500 py-10">{error}</div>
-    );
+    return <div className="text-center text-red-500 py-10">{error}</div>;
 
   return (
     <div className="w-full">
@@ -130,7 +166,7 @@ const sortedProducts = [...filteredProducts].sort(
         <h2 className="text-[40px] font-extrabold">Browse Devices</h2>
 
         <div className="flex gap-4 mt-5">
-          <div className="w-[70%]">
+          <div className="w-[100%]">
             <SearchBar
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -139,27 +175,6 @@ const sortedProducts = [...filteredProducts].sort(
             />
           </div>
 
-          <div className="w-[30%]">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full p-6">
-                  Sort By : Recommended
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent>
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel>Sort Options</DropdownMenuLabel>
-
-                  <DropdownMenuItem>Price : Low to High</DropdownMenuItem>
-
-                  <DropdownMenuItem>Price : High to Low</DropdownMenuItem>
-
-                  <DropdownMenuItem>Highest Rated</DropdownMenuItem>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
         </div>
       </div>
 

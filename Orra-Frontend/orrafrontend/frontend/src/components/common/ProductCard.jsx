@@ -140,11 +140,15 @@ const ProductCard = ({ data }) => {
         <h3 className="ml-[7%] text-[16px] font-bold">{data.productName}</h3>
       </CardTitle>
       <CardContent className="flex flex-row items-start justify-start gap-2.75  ">
-        <img
-          src="https://i.pravatar.cc/40"
-          alt="profile"
-          className="w-6 h-6 rounded-full"
-        />
+      <img
+  src={
+    data.owner?.profileImage ||
+    "https://ui-avatars.com/api/?name=" +
+      encodeURIComponent(data.owner?.name || "User")
+  }
+  alt={data.owner?.name}
+  className="w-6 h-6 rounded-full object-cover"
+/>
         <div className="ownername">
           <span className="flex gap-[7px] text-[13px] text-gray-500 font-medium items-center">
             {data.owner?.name || "Unknown Owner"}
@@ -156,7 +160,7 @@ const ProductCard = ({ data }) => {
       <div className="flex items-start justify-between w-full max-w-[293px]">
         <div className="price  ml-[6%]">
           <span className=" flex justify-between text-[20px] font-bold">
-            {data.dailyRate}
+            Rs {data.dailyRate}
             <span className="text-[10px] text-gray-300 mt-[16%]"> /day</span>
           </span>
         </div>
